@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace Sudokungfu.SudokuGrid
 {
@@ -10,8 +11,12 @@ namespace Sudokungfu.SudokuGrid
     /// <remarks>
     /// Cells are indexed horizontally (e.g. The first row in the grid is indexed 0-8).
     /// </remarks>
-    public class CellViewModel
+    public class CellViewModel : INotifyPropertyChanged
     {
+        private string _value;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
         /// <summary>
         /// The index of the cell. 
         /// </summary>
@@ -20,7 +25,23 @@ namespace Sudokungfu.SudokuGrid
         /// <summary>
         /// The value of the cell.
         /// </summary>
-        public string Value { get; set; }
+        public string Value
+        {
+            get
+            {
+                return _value;
+            }
+
+            set
+            {
+                int i;
+                if (int.TryParse(value, out i) && i >= 1 && i <= 9)
+                {
+                    _value = value;
+                    OnPropertyChanged(nameof(Value));
+                }
+            }
+        }
 
         /// <summary>
         /// Creates a new <see cref="CellViewModel"/>
@@ -34,7 +55,15 @@ namespace Sudokungfu.SudokuGrid
             }
 
             Index = index;
-            Value = index.ToString();
+        }
+
+        /// <summary>
+        /// Notifies listeners of the PropertyChanged event that a property value has changed.
+        /// </summary>
+        /// <param name="propertyName">The name of the property that changed.</param>
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
