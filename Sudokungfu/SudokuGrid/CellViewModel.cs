@@ -20,7 +20,7 @@ namespace Sudokungfu.SudokuGrid
         /// <summary>
         /// The index of the cell. 
         /// </summary>
-        public int Index { get; set; }
+        public int Index { get; private set; }
 
         /// <summary>
         /// The value of the cell.
@@ -35,7 +35,7 @@ namespace Sudokungfu.SudokuGrid
             set
             {
                 int i;
-                if (int.TryParse(value, out i) && i >= 1 && i <= 9)
+                if (string.IsNullOrWhiteSpace(value) || (int.TryParse(value, out i) && i >= 1 && i <= 9))
                 {
                     _value = value;
                     OnPropertyChanged(nameof(Value));

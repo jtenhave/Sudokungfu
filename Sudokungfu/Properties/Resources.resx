@@ -117,6 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ClearMessage" xml:space="preserve">
+    <value>Are you sure you want to clear the Sudoku grid?</value>
+  </data>
+  <data name="ClearTitle" xml:space="preserve">
+    <value>Clear</value>
+  </data>
   <data name="CopyrightMessage" xml:space="preserve">
     <value>Copyright © 2017 Jeff ten Have</value>
   </data>

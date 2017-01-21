@@ -61,6 +61,24 @@ namespace Sudokungfu.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Are you sure you want to clear the Sudoku grid?.
+        /// </summary>
+        public static string ClearMessage {
+            get {
+                return ResourceManager.GetString("ClearMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Clear.
+        /// </summary>
+        public static string ClearTitle {
+            get {
+                return ResourceManager.GetString("ClearTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Copyright © 2017 Jeff ten Have.
         /// </summary>
         public static string CopyrightMessage {

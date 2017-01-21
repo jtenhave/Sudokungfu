@@ -8,7 +8,7 @@
         xmlns:prop="clr-namespace:Sudokungfu.Properties"
         mc:Ignorable="d"
         Title="{x:Static prop:Resources.SudokuWindowTitle}"
-        Height="600" Width="700">
+        Height="600" Width="680" MinHeight="600" MinWidth="680">
     <Grid Background="WhiteSmoke">
         <Grid.RowDefinitions>
             <RowDefinition Height="80"/>
@@ -21,8 +21,8 @@
         </Grid.ColumnDefinitions>
         <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="{x:Static prop:Resources.SudokuWindowTitle}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="45" FontFamily="Arial"/>
         <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Content="{x:Static prop:Resources.CopyrightMessage}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15" FontFamily="Arial"/>
-        <local.grid:SudokuGridView Grid.Row="1" Grid.Column="0" Margin="5 0 5 0"/>
-        <Border BorderThickness="4" BorderBrush="Black" Grid.Row="1" Grid.Column="1" Margin="5 0 5 0">
+        <local.grid:SudokuGridView x:Name="SudokuGrid" Grid.Row="1" Grid.Column="0" Margin="5 0 5 0"/>
+        <Border Height="450" BorderThickness="4" BorderBrush="Black" Grid.Row="1" Grid.Column="1" Margin="5 0 5 0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="40"/>
@@ -38,7 +38,7 @@
                     <Button Content="Enter" Margin="8"/>
                 </Border>
                 <Border BorderThickness="1 0 0 1" BorderBrush="Black" Grid.Row="0" Grid.Column="1">
-                    <Button Content="Clear" Margin="8"/>
+                    <Button Content="Clear" Margin="8" Click="ClearButtonClick"/>
                 </Border>
                 <Border BorderThickness="0 0 0 1" BorderBrush="Black" Grid.Row="1" Grid.Column="0">
                     <Button Content="Previous" Margin="8"/>
