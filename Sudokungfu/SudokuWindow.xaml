@@ -8,8 +8,48 @@
         xmlns:prop="clr-namespace:Sudokungfu.Properties"
         mc:Ignorable="d"
         Title="{x:Static prop:Resources.SudokuWindowTitle}"
-        Height="500" Width="500">
-    <Grid>
-        <local.grid:SudokuGridView/>
+        Height="600" Width="700">
+    <Grid Background="WhiteSmoke">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="200"/>
+        </Grid.ColumnDefinitions>
+        <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="{x:Static prop:Resources.SudokuWindowTitle}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="45" FontFamily="Arial"/>
+        <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Content="{x:Static prop:Resources.CopyrightMessage}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15" FontFamily="Arial"/>
+        <local.grid:SudokuGridView Grid.Row="1" Grid.Column="0" Margin="5 0 5 0"/>
+        <Border BorderThickness="4" BorderBrush="Black" Grid.Row="1" Grid.Column="1" Margin="5 0 5 0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="40"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Border BorderThickness="0 0 0 1" BorderBrush="Black" Grid.Row="0" Grid.Column="0">
+                    <Button Content="Enter" Margin="8"/>
+                </Border>
+                <Border BorderThickness="1 0 0 1" BorderBrush="Black" Grid.Row="0" Grid.Column="1">
+                    <Button Content="Clear" Margin="8"/>
+                </Border>
+                <Border BorderThickness="0 0 0 1" BorderBrush="Black" Grid.Row="1" Grid.Column="0">
+                    <Button Content="Previous" Margin="8"/>
+                </Border>
+                <Border BorderThickness="1 0 0 1" BorderBrush="Black" Grid.Row="1" Grid.Column="1">
+                    <Button Content="Next" Margin="8"/>
+                </Border>
+                <Border BorderThickness="1 0 0 1" BorderBrush="Black" Grid.Row="2" Grid.Column="1">
+                    <Button Content="Solve" Margin="8"/>
+                </Border>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

@@ -10,7 +10,7 @@
         <local:CellBorderConverter x:Key="CellBorderConverter"/>
     </UserControl.Resources>
     <Grid>
-        <ItemsControl Height="450" Width="450" ItemsSource="{Binding Cells}">
+        <ItemsControl Height="450" Width="450" ItemsSource="{Binding Cells}"> 
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel />
@@ -23,7 +23,7 @@
                         <TextBox.Template>
                             <ControlTemplate>
                                 <Border x:Name="border" BorderBrush="Black" BorderThickness="{Binding Path=Index, Converter={StaticResource CellBorderConverter}}" >
-                                    <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled"/>
+                                    <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled" Background="White"/>
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">

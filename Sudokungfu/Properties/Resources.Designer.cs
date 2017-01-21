@@ -61,6 +61,15 @@ namespace Sudokungfu.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Copyright © 2017 Jeff ten Have.
+        /// </summary>
+        public static string CopyrightMessage {
+            get {
+                return ResourceManager.GetString("CopyrightMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sudokungfu.
         /// </summary>
         public static string SudokuWindowTitle {
