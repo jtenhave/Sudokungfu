@@ -54,6 +54,11 @@
   <ItemGroup>
     <Compile Include="SudokuGrid\CellBorderConverterTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SudokuSolver\CellTest.cs" />
+    <Compile Include="SudokuSolver\Sets\BoxTest.cs" />
+    <Compile Include="SudokuSolver\Sets\ColumnTest.cs" />
+    <Compile Include="SudokuSolver\Sets\RowTest.cs" />
+    <Compile Include="SudokuSolver\Sets\SetTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sudokungfu\Sudokungfu.csproj">

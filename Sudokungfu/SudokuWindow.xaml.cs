@@ -13,7 +13,7 @@ namespace Sudokungfu
         }
 
         /// <summary>
-        /// Event handler for a Clear button click
+        /// Event handler for a Clear button click.
         /// </summary>
         private void ClearButtonClick(object sender, RoutedEventArgs e)
         {
@@ -25,6 +25,14 @@ namespace Sudokungfu
                     cell.Value = string.Empty;
                 }
             }
+        }
+
+        /// <summary>
+        /// Event handler for an Enter button click.
+        /// </summary>
+        private void EnterButtonClick(object sender, RoutedEventArgs e)
+        {
+          
         }
     }
 }

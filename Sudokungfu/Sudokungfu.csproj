@@ -55,6 +55,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Extensions\IntExtensions.cs" />
     <Compile Include="SudokuGrid\CellBorderConverter.cs" />
     <Compile Include="SudokuGrid\CellViewModel.cs" />
@@ -70,6 +71,11 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Constants.cs" />
+    <Compile Include="SudokuSolver\Sets\Box.cs" />
+    <Compile Include="SudokuSolver\Sets\Column.cs" />
+    <Compile Include="SudokuSolver\Sets\Row.cs" />
+    <Compile Include="SudokuSolver\Sets\Set.cs" />
+    <Compile Include="SudokuSolver\Cell.cs" />
     <Compile Include="SudokuWindow.xaml.cs">
       <DependentUpon>SudokuWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

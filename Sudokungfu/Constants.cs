@@ -15,5 +15,10 @@ namespace Sudokungfu
         /// The number of cells in a Sudoku grid.
         /// </summary>
         public const int CELL_COUNT = 81;
+
+        /// <summary>
+        /// The size of the side of a box.
+        /// </summary>
+        public const int BOX_SIZE = 3;
     }
 }

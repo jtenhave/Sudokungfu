@@ -35,7 +35,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Border BorderThickness="0 0 0 1" BorderBrush="Black" Grid.Row="0" Grid.Column="0">
-                    <Button Content="Enter" Margin="8"/>
+                    <Button Content="Enter" Margin="8" Click="EnterButtonClick"/>
                 </Border>
                 <Border BorderThickness="1 0 0 1" BorderBrush="Black" Grid.Row="0" Grid.Column="1">
                     <Button Content="Clear" Margin="8" Click="ClearButtonClick"/>
