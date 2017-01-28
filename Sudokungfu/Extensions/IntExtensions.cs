@@ -7,11 +7,19 @@ namespace Sudokungfu.Extensions
     public static class IntExtensions
     {
         /// <summary>
-        /// Returns true if an int is a valid sudoku index.
+        /// Returns true if an int is a valid Sudoku index.
         /// </summary>
-        public static bool IsSudokuIndex(this int value)
+        public static bool IsSudokuIndex(this int index)
         {
-            return value >= 0 && value < Constants.CELL_COUNT;
+            return index >= 0 && index < Constants.CELL_COUNT;
+        }
+
+        /// <summary>
+        /// Returns true if an int is valid Sudoku value.
+        /// </summary>
+        public static bool IsSudokuValue(this int value)
+        {
+            return value >= 0 && value <= Constants.SET_SIZE;
         }
     }
 }

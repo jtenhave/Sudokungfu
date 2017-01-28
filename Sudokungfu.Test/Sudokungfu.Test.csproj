@@ -59,6 +59,7 @@
     <Compile Include="SudokuSolver\Sets\ColumnTest.cs" />
     <Compile Include="SudokuSolver\Sets\RowTest.cs" />
     <Compile Include="SudokuSolver\Sets\SetTest.cs" />
+    <Compile Include="SudokuSolver\SolverTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sudokungfu\Sudokungfu.csproj">
