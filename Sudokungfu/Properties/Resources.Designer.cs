@@ -88,6 +88,24 @@ namespace Sudokungfu.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The provided Sudoku could not be solved. Please check that it&apos;s valid..
+        /// </summary>
+        public static string InvalidMessage {
+            get {
+                return ResourceManager.GetString("InvalidMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        public static string InvalidTitle {
+            get {
+                return ResourceManager.GetString("InvalidTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sudokungfu.
         /// </summary>
         public static string SudokuWindowTitle {

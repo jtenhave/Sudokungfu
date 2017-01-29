@@ -23,7 +23,7 @@
                         <TextBox.Template>
                             <ControlTemplate>
                                 <Border x:Name="border" BorderBrush="Black" BorderThickness="{Binding Path=Index, Converter={StaticResource CellBorderConverter}}" >
-                                    <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled" Background="White"/>
+                                    <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled" Background="{Binding Path=Background, UpdateSourceTrigger=PropertyChanged}"/>
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">

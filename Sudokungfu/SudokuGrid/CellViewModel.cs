@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Windows.Media;
 
 namespace Sudokungfu.SudokuGrid
 {
@@ -14,6 +15,7 @@ namespace Sudokungfu.SudokuGrid
     public class CellViewModel : INotifyPropertyChanged
     {
         private string _value;
+        private Brush _background;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -44,6 +46,26 @@ namespace Sudokungfu.SudokuGrid
         }
 
         /// <summary>
+        /// The background color of the cell.
+        /// </summary>
+        public Brush Background
+        {
+            get
+            {
+                return _background;
+            }
+
+            set
+            {
+                if (_background != value)
+                {
+                    _background = value;
+                    OnPropertyChanged(nameof(Background));
+                }
+            }
+        }
+
+        /// <summary>
         /// Creates a new <see cref="CellViewModel"/>
         /// </summary>
         /// <param name="index">The index of the cell.</param>
@@ -55,6 +77,7 @@ namespace Sudokungfu.SudokuGrid
             }
 
             Index = index;
+            Background = Brushes.White;
         }
 
         /// <summary>
@@ -63,7 +86,10 @@ namespace Sudokungfu.SudokuGrid
         /// <param name="propertyName">The name of the property that changed.</param>
         private void OnPropertyChanged(string propertyName)
         {
-            PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
     }
 }

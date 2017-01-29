@@ -35,19 +35,19 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Border BorderThickness="0 0 0 1" BorderBrush="Black" Grid.Row="0" Grid.Column="0">
-                    <Button Content="Enter" Margin="8" Click="EnterButtonClick"/>
+                    <Button x:Name="EnterButton" Content="Enter" Margin="8" Click="EnterButtonClick"/>
                 </Border>
                 <Border BorderThickness="1 0 0 1" BorderBrush="Black" Grid.Row="0" Grid.Column="1">
-                    <Button Content="Clear" Margin="8" Click="ClearButtonClick"/>
+                    <Button x:Name="ClearButton" Content="Clear" Margin="8" Click="ClearButtonClick"/>
                 </Border>
                 <Border BorderThickness="0 0 0 1" BorderBrush="Black" Grid.Row="1" Grid.Column="0">
-                    <Button Content="Previous" Margin="8"/>
+                    <Button x:Name="PreviousButton" Content="Previous" Margin="8" Click="PreviousButtonClick"/>
                 </Border>
                 <Border BorderThickness="1 0 0 1" BorderBrush="Black" Grid.Row="1" Grid.Column="1">
-                    <Button Content="Next" Margin="8"/>
+                    <Button x:Name="NextButton" Content="Next" Margin="8" Click="NextButtonClick"/>
                 </Border>
                 <Border BorderThickness="1 0 0 1" BorderBrush="Black" Grid.Row="2" Grid.Column="1">
-                    <Button Content="Solve" Margin="8"/>
+                    <Button x:Name="SolveButton" Content="SolveCurrent" Margin="8" Click="SolveButtonClick" />
                 </Border>
             </Grid>
         </Border>
