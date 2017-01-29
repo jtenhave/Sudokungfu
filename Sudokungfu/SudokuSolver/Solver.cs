@@ -68,7 +68,9 @@ namespace Sudokungfu.SudokuSolver
                 {
                     if (values[cell.Index] != 0)
                     {
-                        _foundValues.Add(InsertValue(cell, values[cell.Index]));
+                        var foundValue = InsertValue(cell, values[cell.Index]);
+                        foundValue.Method = FoundValueMethod.CreateGivenMethod();
+                        _foundValues.Add(foundValue);
                     }
                 }
 

@@ -15,5 +15,10 @@ namespace Sudokungfu.SudokuSolver
         /// The value.
         /// </summary>
         public int Value { get; set; }
+
+        /// <summary>
+        /// The method used to find the value.
+        /// </summary>
+        public FoundValueMethod Method { get; set; }
     }
 }
