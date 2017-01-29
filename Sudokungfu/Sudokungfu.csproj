@@ -72,6 +72,7 @@
     </Compile>
     <Compile Include="Constants.cs" />
     <Compile Include="SudokuSolver\FoundValue.cs" />
+    <Compile Include="SudokuSolver\FoundValueMethod.cs" />
     <Compile Include="SudokuSolver\Sets\Box.cs" />
     <Compile Include="SudokuSolver\Sets\Column.cs" />
     <Compile Include="SudokuSolver\Sets\Row.cs" />
