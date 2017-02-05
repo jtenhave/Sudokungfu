@@ -18,11 +18,11 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <TextBox Width="50" Height="50" Text="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="1" FontSize="36" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                    <TextBox Width="50" Height="50" Text="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="1" FontSize="36" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" IsReadOnly="{Binding Path=IsReadOnly, UpdateSourceTrigger=PropertyChanged}" Cursor="{Binding Path=Cursor, UpdateSourceTrigger=PropertyChanged}">
                         <!-- Set the TextBox template due to WPF bug using BorderBrush with styles. -->
                         <TextBox.Template>
                             <ControlTemplate>
-                                <Border x:Name="border" BorderBrush="Black" BorderThickness="{Binding Path=Index, Converter={StaticResource CellBorderConverter}}" >
+                                <Border x:Name="border" BorderBrush="Black" BorderThickness="{Binding Path=Index, Converter={StaticResource CellBorderConverter}}" PreviewMouseDown="CellMouseDown" PreviewMouseUp="CellMouseUp" MouseLeave="CellMouseLeave" >
                                     <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled" Background="{Binding Path=Background, UpdateSourceTrigger=PropertyChanged}"/>
                                 </Border>
                                 <ControlTemplate.Triggers>

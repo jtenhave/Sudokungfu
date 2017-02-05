@@ -13,7 +13,7 @@ namespace Sudokungfu
     /// </summary>
     public partial class SudokuWindow : Window
     {
-        private const int ARTIFICIAL_DELAY = 5000;
+        private const int ARTIFICIAL_DELAY = 3000;
 
         public SudokuWindow()
         {
@@ -63,7 +63,7 @@ namespace Sudokungfu
         {
             set
             {
-                SudokuGrid.IsEnabled = value;
+                SudokuGrid.IsReadOnly = !value;
                 EnterButton.IsEnabled = value;
             }
         }

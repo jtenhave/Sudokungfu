@@ -68,8 +68,7 @@ namespace Sudokungfu.SudokuSolver
                 {
                     if (values[cell.Index] != 0)
                     {
-                        var foundValue = InsertValue(cell, values[cell.Index]);
-                        foundValue.Method = FoundValueMethod.CreateGivenMethod();
+                        var foundValue = InsertValue(cell, values[cell.Index], FoundValueMethod.CreateGivenMethod());
                         _foundValues.Add(foundValue);
                     }
                 }
@@ -114,6 +113,7 @@ namespace Sudokungfu.SudokuSolver
         /// <returns>The found value.</returns>
         private FoundValue FindValue()
         {
+            // Look for values found in sets.
             foreach (var set in _sets)
             {
                 var foundValues = set.GetValuePossibleSpots().Where(v => v.Value.Count() == 1);
@@ -121,7 +121,17 @@ namespace Sudokungfu.SudokuSolver
                 {
                     var cell = foundValues.First().Value.First();
                     var value = foundValues.First().Key;
-                    return InsertValue(cell, value);
+                    return InsertValue(cell, value, FoundValueMethod.CreateSetMethod(set));
+                }
+            }
+
+            // Look for only possible values.
+            foreach (var cell in _cells)
+            {
+                var possibleValues = cell.GetPossibleValues();
+                if (possibleValues.Count() == 1)
+                {
+                    return InsertValue(cell, possibleValues.First(), FoundValueMethod.CreateSingleMethod(cell));
                 }
             }
 
@@ -133,14 +143,16 @@ namespace Sudokungfu.SudokuSolver
         /// </summary>
         /// <param name="cell">The cell to insert in.</param>
         /// <param name="value">The value to insert.</param>
+        /// <param name="method">The method used to find the value.</param>
         /// <returns>The found value.</returns>
-        private FoundValue InsertValue(Cell cell, int value)
+        private FoundValue InsertValue(Cell cell, int value, FoundValueMethod method)
         {
             cell.InsertValue(value);
             return new FoundValue()
             {
                 Index = cell.Index,
-                Value = value
+                Value = value,
+                Method = method
             };
         }
     }

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace Sudokungfu.SudokuGrid
@@ -20,6 +22,17 @@ namespace Sudokungfu.SudokuGrid
         /// The cells in the grid.
         /// </summary>
         public List<CellViewModel> Cells { get; set; }
+
+        /// <summary>
+        /// Sets the read only value of the cells in the grid.
+        /// </summary>
+        public bool IsReadOnly
+        {
+            set
+            {
+                Cells.ForEach(c => c.IsReadOnly = value);
+            }
+        }
 
         /// <summary>
         /// Creates a new <see cref="SudokuGridView"/>
@@ -54,11 +67,19 @@ namespace Sudokungfu.SudokuGrid
         }
 
         /// <summary>
+        /// Clears the current solved Sudoku.
+        /// </summary>
+        public void ClearSudoku()
+        {
+            _currentSudoku = null;
+        }
+
+        /// <summary>
         /// Shows all solved values in the grid.
         /// </summary>
         public void Solve()
         {
-            while (_shownValues < Constants.CELL_COUNT)
+            while (_shownValues < Constants.CELL_COUNT && _currentSudoku != null)
             {
                 Next();
             }
@@ -69,7 +90,7 @@ namespace Sudokungfu.SudokuGrid
         /// </summary>
         public void Next()
         {
-            if (_shownValues < Constants.CELL_COUNT)
+            if (_shownValues < Constants.CELL_COUNT && _currentSudoku != null)
             {
                 var value = _currentSudoku[_shownValues];
                 Cells[value.Index].Value = value.Value.ToString();
@@ -87,13 +108,62 @@ namespace Sudokungfu.SudokuGrid
         /// </summary>
         public void Previous()
         {
-            if (_shownValues > _givenValues)
+            if (_shownValues > _givenValues && _currentSudoku != null)
             {
                 _shownValues--;
 
                 var value = _currentSudoku[_shownValues];
                 Cells[value.Index].Value = string.Empty;
             }
+        }
+
+        /// <summary>
+        /// Event handler for an cell click.
+        /// </summary>
+        public void CellMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (_currentSudoku != null)
+            {
+                var textBox = (Border)sender;
+                var cellViewModel = textBox.DataContext as CellViewModel;
+
+                var valueIndex = _currentSudoku.FindIndex(v => v.Index == cellViewModel.Index);
+                if (valueIndex >= _givenValues && valueIndex < _shownValues)
+                {
+                    Cells.ForEach(c => c.SaveState());
+                    var foundValue = _currentSudoku[valueIndex];
+
+                    // Set found cell.
+                    var foundCell = Cells[foundValue.Index];
+                    foundCell.Background = Brushes.LightGreen;
+                    
+                    // Set method cells.
+                    var methodCells = Cells.Where(c => foundValue.Method.Indexes.Contains(c.Index) && c != foundCell);
+                    foreach (var cell in methodCells)
+                    {
+                        cell.Background = Brushes.Salmon;
+                        cell.Value = string.Empty;
+                    }
+                }
+
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// Event handler for an cell click.
+        /// </summary>
+        public void CellMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            Cells.ForEach(c => c.RestoreState());
+        }
+
+        /// <summary>
+        /// Event handler for an mouse leave event.
+        /// </summary>
+        private void CellMouseLeave(object sender, MouseEventArgs e)
+        {
+            Cells.ForEach(c => c.RestoreState());
         }
     }
 }
