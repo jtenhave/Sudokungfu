@@ -13,9 +13,6 @@ namespace Sudokungfu.Test.SudokuSolver.Sets
     [TestClass]
     public class RowTest
     {
-        /// <summary>
-        /// Test that rows are created with the correct cells.
-        /// </summary>
         [TestMethod]
         public void TestRowCellPicking()
         {

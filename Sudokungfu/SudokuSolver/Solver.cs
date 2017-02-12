@@ -68,8 +68,8 @@ namespace Sudokungfu.SudokuSolver
                 {
                     if (values[cell.Index] != 0)
                     {
-                        var foundValue = InsertValue(cell, values[cell.Index]);
-                        _foundValues.Add(foundValue);
+                        InsertValue(cell, values[cell.Index]);
+                        _foundValues.Add(FoundValue.CreateGivenValue(cell.Index, values[cell.Index]));
                     }
                 }
 
@@ -121,7 +121,7 @@ namespace Sudokungfu.SudokuSolver
                 {
                     var cell = foundValues.First().Value.First();
                     var value = foundValues.First().Key;
-                    return InsertValue(cell, value);
+                    return FoundValue.CreateFoundInSetValue(cell, value, set);
                 }
             }
 
@@ -132,7 +132,7 @@ namespace Sudokungfu.SudokuSolver
                 if (possibleValues.Count() == 1)
                 {
                     var value = possibleValues.First();
-                    return InsertValue(cell, value);
+                    return FoundValue.CreateOnlyPossiblValue(cell, value);
                 }
             }
 
@@ -144,12 +144,9 @@ namespace Sudokungfu.SudokuSolver
         /// </summary>
         /// <param name="cell">The cell to insert in.</param>
         /// <param name="value">The value to insert.</param>
-        /// <param name="method">The method used to find the value.</param>
-        /// <returns>The found value.</returns>
-        private FoundValue InsertValue(Cell cell, int value)
+        private void InsertValue(Cell cell, int value)
         {
             cell.InsertValue(value);
-            return new FoundValue(cell.Index, value);
         }
     }
 }

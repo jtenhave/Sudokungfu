@@ -8,6 +8,7 @@ namespace Sudokungfu.Test
     internal class TestEliminationTechnique : IEliminationTechnique
     {
         private int _complexity;
+        private IEnumerable<int> _indexes;
 
         public int Complexity
         {
@@ -21,7 +22,12 @@ namespace Sudokungfu.Test
         {
             get
             {
-                return Enumerable.Empty<int>();
+                return _indexes;
+            }
+
+            set
+            {
+                _indexes = value;
             }
         }
 
@@ -36,6 +42,7 @@ namespace Sudokungfu.Test
         public TestEliminationTechnique(int complexity)
         {
             _complexity = complexity;
+            _indexes = Enumerable.Empty<int>();
         }
     }
 }

@@ -7,6 +7,9 @@ namespace Sudokungfu.Test.SudokuSolver
     using Sudokungfu.SudokuSolver;
     using Sudokungfu.SudokuSolver.Sets;
 
+    /// <summary>
+    /// Test class for <see cref="BasicEliminationTechnique"/>.
+    /// </summary>
     [TestClass]
     public class BasicEliminationTechniqueTest
     {

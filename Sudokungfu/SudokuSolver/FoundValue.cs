@@ -27,56 +27,98 @@ namespace Sudokungfu.SudokuSolver
         public IEnumerable<int> Indexes { get; private set; }
 
         /// <summary>
-        /// The techniques used to find the value.
+        /// Techniques used to find the value.
         /// </summary>
         public IEnumerable<IEliminationTechnique> Techniques { get; private set; }
 
-        public FoundValue(int index, int value)
+        private FoundValue()
         {
-            Index = index;
-            Value = value;
-            Indexes = new List<int>();
-            Techniques = new List<IEliminationTechnique>();
         }
 
-        public FoundValue(int index, int value, IEnumerable<IEliminationTechnique> initalTechniques)
-            : this(index, value)
+        /// <summary>
+        /// Creates a <see cref="FoundValue"/> that represents a given value.
+        /// </summary>
+        /// <param name="index">Index of the given value.</param>
+        /// <param name="value">Value that was given.</param>
+        public static FoundValue CreateGivenValue(int index, int value)
         {
-            Index = index;
-            Value = value;
-            Techniques = FindMinTechniques(initalTechniques);
+            return new FoundValue()
+            {
+                Index = index,
+                Value = value,
+                Indexes = index.ToEnumerable(),
+                Techniques = new List<IEliminationTechnique>()
+            };
         }
 
-        public FoundValue(Cell cell, int value) 
-            : this(cell.Index, value, Constants.ALL_VALUES.Except(value).SelectMany(v => cell.EliminationTechniques[v]))
+        /// <summary>
+        /// Creates a <see cref="FoundValue"/> that a value found in a set.
+        /// </summary>
+        /// <param name="cell">Cell where the value was found.</param>
+        /// <param name="value">Value that was found.</param>
+        /// <param name="set">The set where the value was found.</param>
+        public static FoundValue CreateFoundInSetValue(Cell cell, int value, Set set)
         {
-            Indexes = new List<int> { cell.Index };
+            var setIndexes = set.Cells.Select(c => c.Index);
+            return new FoundValue()
+            {
+                Index = cell.Index,
+                Value = value,
+                Indexes = setIndexes,
+                Techniques = FindMinSetValueTechniques(set.Cells.Except(cell).SelectMany(c => c.EliminationTechniques[value]), setIndexes, cell.Index)
+            };
         }
 
-        public FoundValue(Cell cell, int value, Set set) 
-            : this(cell.Index, value, set.Cells.Except(cell).SelectMany(c => c.EliminationTechniques[value]))
+        /// <summary>
+        /// Creates a <see cref="FoundValue"/> that was found by eliminating all other possible values for a cell.
+        /// </summary>
+        /// <param name="cell">Cell where the value was found.</param>
+        /// <param name="value">Value that was found.</param>
+        public static FoundValue CreateOnlyPossiblValue(Cell cell, int value)
         {
-            Indexes = set.Cells.Select(c => c.Index);
+            return new FoundValue()
+            {
+                Index = cell.Index,
+                Value = value,
+                Indexes = cell.Index.ToEnumerable(),
+                Techniques = Constants.ALL_VALUES.Except(value).Select(v => cell.EliminationTechniques[v].First())
+            };
         }
 
-        private IEnumerable<IEliminationTechnique> FindMinTechniques(IEnumerable<IEliminationTechnique> techniques)
+        private static IEnumerable<IEliminationTechnique> FindMinSetValueTechniques(IEnumerable<IEliminationTechnique> techniques, IEnumerable<int> indexes, int index)
         {
             var finalTechniques = new List<IEliminationTechnique>();
-           /* var indexesRemaining = new List<int>(UsedIndexes);
-            indexesRemaining.Remove(Index);
+            var unusedTechniques = techniques.Except(finalTechniques);
+
+            var eliminatedIndexesWithoutTechnique = new List<int>(indexes);
+            eliminatedIndexesWithoutTechnique.Remove(index);
 
             // Add the techniques for the cells that are occupied.
             var occupiedTechniques = techniques.Where(t => t.Complexity == 0);
             finalTechniques.AddRange(occupiedTechniques);
-            indexesRemaining.RemoveAll(i => occupiedTechniques.SelectMany(t => t.Indexes).Contains(i));
+            eliminatedIndexesWithoutTechnique.RemoveAll(i => occupiedTechniques.SelectMany(t => t.Indexes).Contains(i));
 
-            // Get the list of techniques that definately needed
-            var singleTechniqueIndexes = indexesRemaining.Where(i => techniques.Where(t => t.Indexes.Contains(i)).Count() == 1);
-            var requiredTechniques = techniques.Where(t => t.Indexes.Intersect(singleTechniqueIndexes).Any());
+            // Get the list of techniques that are definately needed
+            var requiredTechniques = unusedTechniques
+                .Where(t => t
+                    .Indexes
+                    .Intersect(eliminatedIndexesWithoutTechnique)
+                    .Except(unusedTechniques
+                        .Except(t)
+                        .SelectMany(u => u.Indexes))
+                    .Any())
+                .ToList();
+
             finalTechniques.AddRange(requiredTechniques);
-            indexesRemaining.RemoveAll(i => requiredTechniques.Any(t => t.Indexes.Contains(i)));*/
+            eliminatedIndexesWithoutTechnique.RemoveAll(i => requiredTechniques.SelectMany(t => t.Indexes).Contains(i));
 
-            // Get the remaining techniques required.
+            // Apply leftover techniques until all indexes have a technique.
+            var leftoverTechniques = unusedTechniques
+                .OrderBy(t => t.Complexity)
+                .ThenByDescending(t => t.Indexes.Intersect(eliminatedIndexesWithoutTechnique).Count())
+                .TakeWhile((t, taken) => eliminatedIndexesWithoutTechnique.Except(taken.SelectMany(u => u.Indexes)).Any());
+
+            finalTechniques.AddRange(leftoverTechniques);
 
             return finalTechniques;
         }

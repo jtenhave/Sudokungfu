@@ -14,9 +14,6 @@ namespace Sudokungfu.Test.SudokuSolver.Sets
     [TestClass]
     public class ColumnTest
     {
-        /// <summary>
-        /// Test that columns are created with the correct cells.
-        /// </summary>
         [TestMethod]
         public void TestColumnCellPicking()
         {

@@ -1,11 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sudokungfu.Test.SudokuSolver.Sets
 {
     using Sudokungfu.SudokuSolver;
     using Sudokungfu.SudokuSolver.Sets;
-    using System.Linq;
 
     /// <summary>
     /// Test class for <see cref="Box"/>
