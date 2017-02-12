@@ -57,7 +57,7 @@ namespace Sudokungfu.SudokuGrid
         public void SetSudoku(IEnumerable<FoundValue> _foundValues)
         {
             _currentSudoku = _foundValues.ToList();
-            _givenValues = _foundValues.Count(v => v.Method?.Type == FoundValueMethodType.GIVEN);
+            _givenValues = _foundValues.Count(v => v.Techniques.Count() == 0);
             _shownValues = 0;
 
             while(_shownValues < _givenValues)
@@ -133,17 +133,33 @@ namespace Sudokungfu.SudokuGrid
                     Cells.ForEach(c => c.SaveState());
                     var foundValue = _currentSudoku[valueIndex];
 
-                    // Set found cell.
-                    var foundCell = Cells[foundValue.Index];
-                    foundCell.Background = Brushes.LightGreen;
-                    
+                    var techniqueIndexes = foundValue.Techniques.Select(t => t.Indexes).SelectMany(i => i);
+                    var techniqueCells = Cells.Where(c => techniqueIndexes.Contains(c.Index));
+                    var valueMap = foundValue.Techniques.Select(t => t.ValueMap).SelectMany(v => v);
+
+                    foreach (var cell in techniqueCells)
+                    {
+                        cell.Background = Brushes.LightSalmon;
+                        cell.Value = string.Empty;
+                    }
+
+                    foreach (var value in valueMap)
+                    {
+                        foreach (var index in value.Value)
+                        {
+                            Cells[index].Value = value.Key.ToString();
+                        }
+                    }
+
                     // Set method cells.
-                    var methodCells = Cells.Where(c => foundValue.Method.Indexes.Contains(c.Index) && c != foundCell);
+                    var methodCells = Cells.Where(c => foundValue.Indexes.Contains(c.Index));
                     foreach (var cell in methodCells)
                     {
                         cell.Background = Brushes.Salmon;
-                        cell.Value = string.Empty;
                     }
+
+                    // Set found cell.
+                    Cells[foundValue.Index].Background = Brushes.LightGreen;
                 }
 
                 e.Handled = true;

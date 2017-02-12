@@ -38,9 +38,9 @@ namespace Sudokungfu.SudokuSolver.Sets
         public IDictionary<int, IEnumerable<Cell>> GetValuePossibleSpots()
         {
             return Cells
-                    .SelectMany(c => c.GetPossibleValues())
+                    .SelectMany(c => c.PossibleValues)
                     .Distinct()
-                    .ToDictionary(i => i, i => Cells.Where(c => c.GetPossibleValues().Contains(i)));
+                    .ToDictionary(i => i, i => Cells.Where(c => c.PossibleValues.Contains(i)));
         }
 
         /// <summary>

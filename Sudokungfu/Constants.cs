@@ -1,4 +1,5 @@
-﻿
+﻿using System.Collections.Generic;
+
 namespace Sudokungfu
 {
     /// <summary>
@@ -20,5 +21,7 @@ namespace Sudokungfu
         /// The size of the side of a box.
         /// </summary>
         public const int BOX_SIZE = 3;
+
+        public static readonly IEnumerable<int> ALL_VALUES = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     }
 }

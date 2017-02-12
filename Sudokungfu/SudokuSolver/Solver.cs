@@ -68,7 +68,7 @@ namespace Sudokungfu.SudokuSolver
                 {
                     if (values[cell.Index] != 0)
                     {
-                        var foundValue = InsertValue(cell, values[cell.Index], FoundValueMethod.CreateGivenMethod());
+                        var foundValue = InsertValue(cell, values[cell.Index]);
                         _foundValues.Add(foundValue);
                     }
                 }
@@ -121,17 +121,18 @@ namespace Sudokungfu.SudokuSolver
                 {
                     var cell = foundValues.First().Value.First();
                     var value = foundValues.First().Key;
-                    return InsertValue(cell, value, FoundValueMethod.CreateSetMethod(set));
+                    return InsertValue(cell, value);
                 }
             }
 
             // Look for only possible values.
             foreach (var cell in _cells)
             {
-                var possibleValues = cell.GetPossibleValues();
+                var possibleValues = cell.PossibleValues;
                 if (possibleValues.Count() == 1)
                 {
-                    return InsertValue(cell, possibleValues.First(), FoundValueMethod.CreateSingleMethod(cell));
+                    var value = possibleValues.First();
+                    return InsertValue(cell, value);
                 }
             }
 
@@ -145,15 +146,10 @@ namespace Sudokungfu.SudokuSolver
         /// <param name="value">The value to insert.</param>
         /// <param name="method">The method used to find the value.</param>
         /// <returns>The found value.</returns>
-        private FoundValue InsertValue(Cell cell, int value, FoundValueMethod method)
+        private FoundValue InsertValue(Cell cell, int value)
         {
             cell.InsertValue(value);
-            return new FoundValue()
-            {
-                Index = cell.Index,
-                Value = value,
-                Method = method
-            };
+            return new FoundValue(cell.Index, value);
         }
     }
 }
