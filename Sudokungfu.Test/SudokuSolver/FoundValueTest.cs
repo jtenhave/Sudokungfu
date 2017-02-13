@@ -94,6 +94,40 @@ namespace Sudokungfu.Test.SudokuSolver
         }
 
         [TestMethod]
+        public void TestFoundInSetValueIgnoresHigherComplexityTechniques()
+        {
+            var testValue = 8;
+
+            var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10) };
+            var box = new Box(cells, 0);
+            var row = new Row(cells, 1);
+
+            var lowAffectTech = BasicEliminationTechnique.CreateSetTechnique(testValue, 12, row);
+            var highAffectTech = new TestEliminationTechnique(2)
+            {
+                Indexes = new List<int> { 1, 9, 10 }
+            };
+
+            var optionalTech = new TestEliminationTechnique(1)
+            {
+                Indexes = new List<int> { 1 }
+            };
+
+            var expectedTechs = new List<IEliminationTechnique>() { optionalTech, lowAffectTech };
+
+            cells[1].EliminatePossibleValue(testValue, highAffectTech);
+            cells[2].EliminatePossibleValue(testValue, highAffectTech);
+            cells[3].EliminatePossibleValue(testValue, highAffectTech);
+            cells[1].EliminatePossibleValue(testValue, optionalTech);
+            cells[2].EliminatePossibleValue(testValue, lowAffectTech);
+            cells[3].EliminatePossibleValue(testValue, lowAffectTech);
+
+            var value = FoundValue.CreateFoundInSetValue(cells[0], testValue, box);
+
+            Assert.IsTrue(expectedTechs.SequenceEqual(value.Techniques));
+        }
+
+        [TestMethod]
         public void TestFoundInSetValueHasOnlyRequiredTechniques()
         {
             var testValue = 8;
@@ -122,28 +156,38 @@ namespace Sudokungfu.Test.SudokuSolver
         }
 
         [TestMethod]
-        public void TestFoundInSetValueLeftoverTechniquesTakenByComplexityFirst()
+        public void TestFoundInSetValueLeftoverTechniquesTakenByCellsAffectedFirst()
         {
             var testValue = 8;
 
-            var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10) };
+            var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10), new Cell(18)};
             var box = new Box(cells, 0);
-            var row = new Row(cells, 1);
 
-            var occupiedTech = BasicEliminationTechnique.CreateOccupiedTechnique(testValue, cells[1].Index);
-            var lowComplexityTech = BasicEliminationTechnique.CreateSetTechnique(testValue, 12, row);
-            var highComplexityTech = new TestEliminationTechnique(2)
+            var lowAffectTech = new TestEliminationTechnique(1)
             {
-                Indexes = row.Cells.Select(c => c.Index)
+                Indexes = new List<int> { 9, 10}
             };
 
-            var expectedTechs = new List<IEliminationTechnique>() { occupiedTech, lowComplexityTech };
+            var highAffectTech = new TestEliminationTechnique(2)
+            {
+                Indexes = new List<int> { 1, 9, 10, 18 }
+            };
 
-            cells[1].EliminatePossibleValue(testValue, occupiedTech);
-            cells[2].EliminatePossibleValue(testValue, highComplexityTech);
-            cells[3].EliminatePossibleValue(testValue, highComplexityTech);
-            cells[2].EliminatePossibleValue(testValue, lowComplexityTech);
-            cells[3].EliminatePossibleValue(testValue, lowComplexityTech);
+            var optionalTech = new TestEliminationTechnique(2)
+            {
+                Indexes = new List<int> { 1, 18 }
+            };
+
+            var expectedTechs = new List<IEliminationTechnique>() { highAffectTech };
+
+            cells[1].EliminatePossibleValue(testValue, highAffectTech);
+            cells[2].EliminatePossibleValue(testValue, highAffectTech);
+            cells[3].EliminatePossibleValue(testValue, highAffectTech);
+            cells[4].EliminatePossibleValue(testValue, highAffectTech);
+            cells[1].EliminatePossibleValue(testValue, optionalTech);
+            cells[2].EliminatePossibleValue(testValue, lowAffectTech);
+            cells[3].EliminatePossibleValue(testValue, lowAffectTech);
+            cells[4].EliminatePossibleValue(testValue, optionalTech);
 
             var value = FoundValue.CreateFoundInSetValue(cells[0], testValue, box);
 
@@ -151,27 +195,82 @@ namespace Sudokungfu.Test.SudokuSolver
         }
 
         [TestMethod]
-        public void TestFoundInSetValueLeftoverTechniquesTakenByCellsAffectedSecond()
+        public void TestFoundInSetValueLeftoverTechniquesTakenByComplexitySecond()
         {
             var testValue = 8;
- 
+
+            var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10), new Cell(18) };
+            var box = new Box(cells, 0);
+
+            var lowComplexityTech = new TestEliminationTechnique(1)
+            {
+                Indexes = new List<int> { 1, 9, 10, 18 }
+            };
+
+            var highComplexityTech = new TestEliminationTechnique(2)
+            {
+                Indexes = new List<int> { 1, 9, 10, 18 }
+            };
+
+            var expectedTechs = new List<IEliminationTechnique>() { lowComplexityTech };
+
+            cells[1].EliminatePossibleValue(testValue, highComplexityTech);
+            cells[2].EliminatePossibleValue(testValue, highComplexityTech);
+            cells[3].EliminatePossibleValue(testValue, highComplexityTech);
+            cells[4].EliminatePossibleValue(testValue, highComplexityTech);
+            cells[1].EliminatePossibleValue(testValue, lowComplexityTech);
+            cells[2].EliminatePossibleValue(testValue, lowComplexityTech);
+            cells[3].EliminatePossibleValue(testValue, lowComplexityTech);
+            cells[4].EliminatePossibleValue(testValue, lowComplexityTech);
+
+            var value = FoundValue.CreateFoundInSetValue(cells[0], testValue, box);
+
+            Assert.IsTrue(expectedTechs.SequenceEqual(value.Techniques));
+        }
+
+        [TestMethod]
+        public void TestFoundInSetValueHandlesMutuallyExclusiveTechniques()
+        {
+            var testValue = 8;
+
             var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10) };
             var box = new Box(cells, 0);
             var row = new Row(cells, 1);
 
-            var lowAffectTech = BasicEliminationTechnique.CreateSetTechnique(testValue, 12, row);
-            var highAffectTech = new TestEliminationTechnique(2)
+            var techniqueA  = new TestEliminationTechnique(1)
             {
-                Indexes = new List<int> { 1, 9, 10 }
+                Indexes = new List<int> { 1 }
             };
 
-            var expectedTechs = new List<IEliminationTechnique>() { highAffectTech };
-            cells[2].EliminatePossibleValue(testValue, lowAffectTech);
-            cells[3].EliminatePossibleValue(testValue, lowAffectTech);
-            cells[1].EliminatePossibleValue(testValue, highAffectTech);
-            cells[2].EliminatePossibleValue(testValue, highAffectTech);
-            cells[3].EliminatePossibleValue(testValue, highAffectTech);
-            
+            var techniqueB = new TestEliminationTechnique(1)
+            {
+                Indexes = new List<int> { 9 }
+            };
+
+            var techniqueC = new TestEliminationTechnique(1)
+            {
+                Indexes = new List<int> { 1, 9 }
+            };
+
+            var techniqueD = new TestEliminationTechnique(1)
+            {
+                Indexes = new List<int> { 10 }
+            };
+
+            var techniqueE = new TestEliminationTechnique(1)
+            {
+                Indexes = new List<int> { 10 }
+            };
+
+            var expectedTechs = new List<IEliminationTechnique>() { techniqueC, techniqueD };
+
+            cells[1].EliminatePossibleValue(testValue, techniqueA);
+            cells[2].EliminatePossibleValue(testValue, techniqueB);
+            cells[1].EliminatePossibleValue(testValue, techniqueC);
+            cells[2].EliminatePossibleValue(testValue, techniqueC);
+            cells[3].EliminatePossibleValue(testValue, techniqueD);
+            cells[3].EliminatePossibleValue(testValue, techniqueE);
+
             var value = FoundValue.CreateFoundInSetValue(cells[0], testValue, box);
 
             Assert.IsTrue(expectedTechs.SequenceEqual(value.Techniques));

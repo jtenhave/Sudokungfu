@@ -121,7 +121,9 @@ namespace Sudokungfu.SudokuSolver
                 {
                     var cell = foundValues.First().Value.First();
                     var value = foundValues.First().Key;
-                    return FoundValue.CreateFoundInSetValue(cell, value, set);
+                    var foundValue = FoundValue.CreateFoundInSetValue(cell, value, set);
+                    InsertValue(cell, value);
+                    return foundValue;
                 }
             }
 
@@ -132,7 +134,9 @@ namespace Sudokungfu.SudokuSolver
                 if (possibleValues.Count() == 1)
                 {
                     var value = possibleValues.First();
-                    return FoundValue.CreateOnlyPossiblValue(cell, value);
+                    var foundValue = FoundValue.CreateOnlyPossiblValue(cell, value);
+                    InsertValue(cell, value);
+                    return foundValue;
                 }
             }
 

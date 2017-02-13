@@ -113,12 +113,23 @@ namespace Sudokungfu.SudokuSolver
             eliminatedIndexesWithoutTechnique.RemoveAll(i => requiredTechniques.SelectMany(t => t.Indexes).Contains(i));
 
             // Apply leftover techniques until all indexes have a technique.
-            var leftoverTechniques = unusedTechniques
-                .OrderBy(t => t.Complexity)
-                .ThenByDescending(t => t.Indexes.Intersect(eliminatedIndexesWithoutTechnique).Count())
-                .TakeWhile((t, taken) => eliminatedIndexesWithoutTechnique.Except(taken.SelectMany(u => u.Indexes)).Any());
+            while (eliminatedIndexesWithoutTechnique.Any())
+            {
+                var leftoverTechnique = unusedTechniques
+                    .OrderByDescending(t => t.Indexes.Intersect(eliminatedIndexesWithoutTechnique).Count())
+                    .ThenBy(t => t.Complexity)
+                    .FirstOrDefault();
 
-            finalTechniques.AddRange(leftoverTechniques);
+                if (leftoverTechnique != null)
+                {
+                    finalTechniques.Add(leftoverTechnique);
+                    eliminatedIndexesWithoutTechnique.RemoveAll(i => leftoverTechnique.Indexes.Contains(i));
+                }
+                else
+                {
+                    break;
+                }
+            }
 
             return finalTechniques;
         }

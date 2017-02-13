@@ -39,28 +39,5 @@ namespace Sudokungfu.Extensions
         {
             return new T[] { item };
         }
-
-        /// <summary>
-        /// Returns items from a sequence as long as a specified condition is true.
-        /// </summary>
-        /// <param name="enumerable">Enumerable to take items from</param>
-        /// <param name="predicate">Function that returns true if item should be taken. Takes current item and taken items as input.</param>
-        public static IEnumerable<T> TakeWhile<T>(this IEnumerable<T> enumerable, Func<T, IEnumerable<T>, bool> predicate)
-        {
-            var takenItems = new List<T>();
-            foreach (var item in enumerable)
-            {
-                if (predicate(item, takenItems))
-                {
-                    takenItems.Add(item);
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            return takenItems;
-        }
     }
 }

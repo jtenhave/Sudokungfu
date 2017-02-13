@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -133,17 +132,19 @@ namespace Sudokungfu.SudokuGrid
                     Cells.ForEach(c => c.SaveState());
                     var foundValue = _currentSudoku[valueIndex];
 
-                    var techniqueIndexes = foundValue.Techniques.Select(t => t.Indexes).SelectMany(i => i);
-                    var techniqueCells = Cells.Where(c => techniqueIndexes.Contains(c.Index));
-                    var valueMap = foundValue.Techniques.Select(t => t.ValueMap).SelectMany(v => v);
+                    var techniqueIndexes = foundValue.Techniques.SelectMany(t => t.Indexes);
+                    var techniqueCellModels = Cells.Where(c => techniqueIndexes.Contains(c.Index));
+                    var techniqueValueMap = foundValue.Techniques.SelectMany(t => t.ValueMap);
 
-                    foreach (var cell in techniqueCells)
+                    // Set the background for all techniques used in finding this value.
+                    foreach (var cell in techniqueCellModels)
                     {
                         cell.Background = Brushes.LightSalmon;
                         cell.Value = string.Empty;
                     }
 
-                    foreach (var value in valueMap)
+                    // Set the values all techniques used in finding this value.
+                    foreach (var value in techniqueValueMap)
                     {
                         foreach (var index in value.Value)
                         {
@@ -151,15 +152,16 @@ namespace Sudokungfu.SudokuGrid
                         }
                     }
 
-                    // Set method cells.
+                    // Set the background for cells used to find this value.
                     var methodCells = Cells.Where(c => foundValue.Indexes.Contains(c.Index));
                     foreach (var cell in methodCells)
                     {
                         cell.Background = Brushes.Salmon;
                     }
 
-                    // Set found cell.
+                    // Set the cell where the value was found.
                     Cells[foundValue.Index].Background = Brushes.LightGreen;
+                    Cells[foundValue.Index].Value = foundValue.Value.ToString();
                 }
 
                 e.Handled = true;
