@@ -17,19 +17,19 @@ namespace Sudokungfu.SudokuSolver
         /// <remarks>
         /// Basic techniques will have a lower complexity and advanced techniques will have a higher complexity.
         /// </remarks>
-        public int Complexity { get; private set; }
+        public int Complexity { get; protected set; }
 
         /// <summary>
         /// Indexes of cells that should be shown when this technique is displayed.
         /// </summary>
-        public IEnumerable<int> Indexes { get; private set; }
+        public IEnumerable<int> Indexes { get; protected set; }
 
         /// <summary>
         /// Values, and the indexes of the cells they should be in, that should be shown when this technique is displayed.
         /// </summary>
-        public IDictionary<int, IEnumerable<int>> ValueMap { get; private set; }
+        public IDictionary<int, IEnumerable<int>> ValueMap { get; protected set; }
 
-        private BasicEliminationTechnique()
+        protected BasicEliminationTechnique()
         {           
         }
 

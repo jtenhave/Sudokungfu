@@ -71,7 +71,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Constants.cs" />
-    <Compile Include="SudokuSolver\EliminationTechnique.cs" />
+    <Compile Include="SudokuSolver\BasicEliminationTechnique.cs" />
     <Compile Include="SudokuSolver\FoundValue.cs" />
     <Compile Include="SudokuSolver\IEliminationTechnique.cs" />
     <Compile Include="SudokuSolver\Sets\Box.cs" />
@@ -81,6 +81,9 @@
     <Compile Include="SudokuSolver\Cell.cs" />
     <Compile Include="SudokuSolver\Solver.cs" />
     <Compile Include="SudokuSolver\SolveResult.cs" />
+    <Compile Include="SudokuSolver\Techniques\AdvancedTechnique.cs" />
+    <Compile Include="SudokuSolver\Techniques\AdvancedTechniqueFactory.cs" />
+    <Compile Include="SudokuSolver\Techniques\PossibleValueSpotOverlapTechnique.cs" />
     <Compile Include="SudokuWindow.xaml.cs">
       <DependentUpon>SudokuWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -108,6 +111,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
