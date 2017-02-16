@@ -63,6 +63,8 @@
     <Compile Include="SudokuSolver\Sets\SetTest.cs" />
     <Compile Include="SudokuSolver\SolverTest.cs" />
     <Compile Include="SudokuSolver\Techniques\PossibleValueSpotOverlapTechniqueTest.cs" />
+    <Compile Include="SudokuSolver\Techniques\ThreeSpotClosureTechniqueTest.cs" />
+    <Compile Include="SudokuSolver\Techniques\TwoSpotClosureTechniqueTest.cs" />
     <Compile Include="TestEliminationTechnique.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -22,13 +22,14 @@ namespace Sudokungfu.Extensions
         }
 
         /// <summary>
-        /// Produces the set difference of an enumerable and a value.
+        /// Produces the set difference of an enumerable and an item in the enumerable.
         /// </summary>
         /// <param name="enumerable">Enumerable of the original set.</param>
-        /// <param name="value">Value to exclude from the set.</param>
-        public static IEnumerable<T> Except<T>(this IEnumerable<T> enumerable, T value)
+        /// <param name="item">Item to exclude from the set.</param>
+        /// <param name="items">More items to exclude from the set.</param>
+        public static IEnumerable<T> Except<T>(this IEnumerable<T> enumerable, T value, params T[] items)
         {
-            return enumerable.Except(value.ToEnumerable());
+            return enumerable.Except(value.ToEnumerable().Concat(items));
         }
 
         /// <summary>

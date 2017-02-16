@@ -6,6 +6,7 @@ namespace Sudokungfu.SudokuSolver
 {
     using Extensions;
     using Sets;
+    using Techniques;
 
     /// <summary>
     /// Class for solving Sudokus.
@@ -73,10 +74,26 @@ namespace Sudokungfu.SudokuSolver
                     }
                 }
 
+                var advancedTechniques = AdvancedTechniqueFactory.Techniques.OrderBy(t => t.Complexity);
+
                 // The main loop for finding values in the Sudoku.
                 while (_foundValues.Count < Constants.CELL_COUNT)
                 {
                     var foundValue = FindValue();
+
+                    if (foundValue == null)
+                    {
+                        foreach (var technique in advancedTechniques)
+                        {
+                            technique.Apply(_cells, _sets);
+                            foundValue = FindValue();
+                            if (foundValue != null)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    
                     if (foundValue == null)
                     {
                         return new SolveResult()
