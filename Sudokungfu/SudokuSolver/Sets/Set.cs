@@ -21,6 +21,20 @@ namespace Sudokungfu.SudokuSolver.Sets
         protected int Index { get; private set; }
 
         /// <summary>
+        /// Spots where all the unfound values in the set can go.
+        /// </summary>
+        public IDictionary<int, IEnumerable<Cell>> PossibleSpots
+        {
+            get
+            {
+                return Cells
+                    .SelectMany(c => c.PossibleValues)
+                    .Distinct()
+                    .ToDictionary(i => i, i => Cells.Where(c => c.PossibleValues.Contains(i)));
+            }
+        }
+
+        /// <summary>
         /// Creates a new <see cref="Set"/>
         /// </summary>
         /// <param name="grid">The Sudoku grid to create the set from.</param>
@@ -30,17 +44,6 @@ namespace Sudokungfu.SudokuSolver.Sets
             Index = index;
             Cells = grid.Where(IsCellInSet).ToList();
             Cells.ForEach(c => c.Sets.Add(this));
-        }
-
-        /// <summary>
-        /// Gets a dictionary of values to the cells in the set where the value could go.
-        /// </summary>
-        public IDictionary<int, IEnumerable<Cell>> GetValuePossibleSpots()
-        {
-            return Cells
-                    .SelectMany(c => c.PossibleValues)
-                    .Distinct()
-                    .ToDictionary(i => i, i => Cells.Where(c => c.PossibleValues.Contains(i)));
         }
 
         /// <summary>

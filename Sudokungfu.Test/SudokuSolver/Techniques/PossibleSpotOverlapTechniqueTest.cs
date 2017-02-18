@@ -9,10 +9,10 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
     using Sudokungfu.SudokuSolver.Techniques;
 
     /// <summary>
-    /// Test class for <see cref="PossibleValueSpotOverlapTechnique"/>.
+    /// Test class for <see cref="PossibleSpotOverlapTechnique"/>.
     /// </summary>
     [TestClass]
-    public class PossibleValueSpotOverlapTechniqueTest
+    public class PossibleSpotOverlapTechniqueTest
     {
         [TestMethod]
         public void TestTwoOverlappingCells()
@@ -37,12 +37,12 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
             cells[13].EliminatePossibleValue(testValue, testTechnique);
             cells[14].EliminatePossibleValue(testValue, testTechnique);
 
-            var possibleValueSpotOverlapTechnique = new PossibleValueSpotOverlapTechnique();
+            var possibleValueSpotOverlapTechnique = new PossibleSpotOverlapTechnique();
             possibleValueSpotOverlapTechnique.Apply(cells, new List<Set>() { box, row });
 
             var expectedCells = new List<Cell>() { cells[0], cells[2] };
 
-            Assert.IsTrue(row.GetValuePossibleSpots()[testValue].SequenceEqual(expectedCells));
+            Assert.IsTrue(row.PossibleSpots[testValue].SequenceEqual(expectedCells));
         }
 
         [TestMethod]
@@ -67,12 +67,12 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
             cells[13].EliminatePossibleValue(testValue, testTechnique);
             cells[14].EliminatePossibleValue(testValue, testTechnique);
 
-            var possibleValueSpotOverlapTechnique = new PossibleValueSpotOverlapTechnique();
+            var possibleValueSpotOverlapTechnique = new PossibleSpotOverlapTechnique();
             possibleValueSpotOverlapTechnique.Apply(cells, new List<Set>() { box, row });
 
             var expectedCells = new List<Cell>() { cells[0], cells[1], cells[2] };
 
-            Assert.IsTrue(row.GetValuePossibleSpots()[testValue].SequenceEqual(expectedCells));
+            Assert.IsTrue(row.PossibleSpots[testValue].SequenceEqual(expectedCells));
         }
 
         [TestMethod]
@@ -97,12 +97,12 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
             cells[13].EliminatePossibleValue(testValue, testTechnique);
             cells[14].EliminatePossibleValue(testValue, testTechnique);
 
-            var possibleValueSpotOverlapTechnique = new PossibleValueSpotOverlapTechnique();
+            var possibleValueSpotOverlapTechnique = new PossibleSpotOverlapTechnique();
             possibleValueSpotOverlapTechnique.Apply(cells, new List<Set>() { box, row });
 
             var expectedCells = new List<Cell>() { cells[0], cells[2], cells[3], cells[4], cells[5], cells[6], cells[7], cells[8] };
 
-            Assert.IsTrue(row.GetValuePossibleSpots()[testValue].SequenceEqual(expectedCells));
+            Assert.IsTrue(row.PossibleSpots[testValue].SequenceEqual(expectedCells));
         }
     }
 }

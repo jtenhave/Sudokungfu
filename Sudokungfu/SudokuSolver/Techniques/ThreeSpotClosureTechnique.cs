@@ -28,7 +28,7 @@ namespace Sudokungfu.SudokuSolver.Techniques
         {
             foreach (var set in sets)
             {
-                var possibleSpotSets = set.GetValuePossibleSpots().Where(s => s.Value.Count() == 2 || s.Value.Count() == 3);
+                var possibleSpotSets = set.PossibleSpots.Where(s => s.Value.Count() == 2 || s.Value.Count() == 3);
                 foreach (var possibleSpotsA in possibleSpotSets)
                 {
                     foreach (var possibleSpotsB in possibleSpotSets.Except(possibleSpotsA))

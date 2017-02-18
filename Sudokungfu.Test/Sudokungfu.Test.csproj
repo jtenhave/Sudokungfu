@@ -52,6 +52,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Extensions\IEnumerableExtensionsTest.cs" />
     <Compile Include="SudokuGrid\CellBorderConverterTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SudokuSolver\BasicEliminationTechniqueTest.cs" />
@@ -62,7 +63,7 @@
     <Compile Include="SudokuSolver\Sets\RowTest.cs" />
     <Compile Include="SudokuSolver\Sets\SetTest.cs" />
     <Compile Include="SudokuSolver\SolverTest.cs" />
-    <Compile Include="SudokuSolver\Techniques\PossibleValueSpotOverlapTechniqueTest.cs" />
+    <Compile Include="SudokuSolver\Techniques\PossibleSpotOverlapTechniqueTest.cs" />
     <Compile Include="SudokuSolver\Techniques\ThreeSpotClosureTechniqueTest.cs" />
     <Compile Include="SudokuSolver\Techniques\TwoSpotClosureTechniqueTest.cs" />
     <Compile Include="TestEliminationTechnique.cs" />

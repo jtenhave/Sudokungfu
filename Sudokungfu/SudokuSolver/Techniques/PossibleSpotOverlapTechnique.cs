@@ -7,11 +7,11 @@ namespace Sudokungfu.SudokuSolver.Techniques
     using Extensions;
 
     /// <summary>
-    /// Class that represents the possible value spot overlap technique.
+    /// Class that represents the 'Possible Spot Overlap' technique.
     /// </summary>
-    public class PossibleValueSpotOverlapTechnique : AdvancedTechnique
+    public class PossibleSpotOverlapTechnique : AdvancedTechnique
     {
-        public PossibleValueSpotOverlapTechnique()
+        public PossibleSpotOverlapTechnique()
         {
             Complexity = 2;
         }
@@ -25,14 +25,14 @@ namespace Sudokungfu.SudokuSolver.Techniques
         {
             foreach (var set in sets)
             {
-                var possibleValueSpotSets = set.GetValuePossibleSpots().Where(kvp => kvp.Value.Count() <= 3);
+                var possibleValueSpotSets = set.PossibleSpots.Where(kvp => kvp.Value.Count() <= 3);
                 foreach (var possibleValueSpot in possibleValueSpotSets)
                 {
                     var overlappingSets = sets.Except(set).Where(s => possibleValueSpot.Value.All(p => s.Cells.Contains(p)));
                     foreach (var overlappingSet in overlappingSets)
                     {
                         var cellsToEliminate = overlappingSet.Cells.Except(possibleValueSpot.Value);
-                        var technique = new PossibleValueSpotOverlapTechnique()
+                        var technique = new PossibleSpotOverlapTechnique()
                         {
                             Indexes = cellsToEliminate.Select(c => c.Index),
                             ValueMap = new Dictionary<int, IEnumerable<int>>()

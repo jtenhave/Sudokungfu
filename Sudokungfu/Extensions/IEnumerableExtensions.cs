@@ -40,5 +40,40 @@ namespace Sudokungfu.Extensions
         {
             return new T[] { item };
         }
+
+        /// <summary>
+        /// Produces a sequence by combining two sequences together like a zipper.
+        /// </summary>
+        /// <param name="first">First sequences.</param>
+        /// <param name="second">Second sequence.</param>
+        /// <returns></returns>
+        public static IEnumerable<T> Zipper<T>(this IEnumerable<T> first, IEnumerable<T> second)
+        {
+            var firstEnumerator = first.GetEnumerator();
+            var secondEnumerator = second.GetEnumerator();
+
+            var firstHasValue = false;
+            var secondHasValue = false;
+
+            Func<bool> valueLeft = () =>
+            {
+                firstHasValue = firstEnumerator.MoveNext();
+                secondHasValue = secondEnumerator.MoveNext();
+                return firstHasValue || secondHasValue;
+            };
+
+            while (valueLeft())
+            {
+                if (firstHasValue)
+                {
+                    yield return firstEnumerator.Current;
+                }
+
+                if (secondHasValue)
+                {
+                    yield return secondEnumerator.Current;
+                }
+            }
+        }
     }
 }

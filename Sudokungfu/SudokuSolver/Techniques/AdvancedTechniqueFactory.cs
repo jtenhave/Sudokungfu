@@ -30,7 +30,7 @@ namespace Sudokungfu.SudokuSolver.Techniques
             _techniques = new List<AdvancedTechnique>();
 
             // Register advanced techniques here
-            _techniques.Add(new PossibleValueSpotOverlapTechnique());
+            _techniques.Add(new PossibleSpotOverlapTechnique());
             _techniques.Add(new TwoSpotClosureTechnique());
             _techniques.Add(new ThreeSpotClosureTechnique());
         }

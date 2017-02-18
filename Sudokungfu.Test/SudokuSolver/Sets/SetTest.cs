@@ -14,7 +14,7 @@ namespace Sudokungfu.Test.SudokuSolver.Sets
     public class SetTest
     {
         [TestMethod]
-        public void TestGetPossibleValueSpots()
+        public void TestPossibleSpots()
         {
             var testValue = 6;
             var expectedIndexes = new List<int>() { 2, 5, 6, 8 };
@@ -32,7 +32,7 @@ namespace Sudokungfu.Test.SudokuSolver.Sets
             cells[4].EliminatePossibleValue(testValue, new TestEliminationTechnique(0));
             cells[7].EliminatePossibleValue(testValue, new TestEliminationTechnique(0));
 
-            Assert.IsTrue(expectedIndexes.SequenceEqual(row.GetValuePossibleSpots()[testValue].Select(c => c.Index)));
+            Assert.IsTrue(expectedIndexes.SequenceEqual(row.PossibleSpots[testValue].Select(c => c.Index)));
         }
     }
 }

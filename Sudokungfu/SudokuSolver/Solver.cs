@@ -69,8 +69,8 @@ namespace Sudokungfu.SudokuSolver
                 {
                     if (values[cell.Index] != 0)
                     {
-                        InsertValue(cell, values[cell.Index]);
-                        _foundValues.Add(FoundValue.CreateGivenValue(cell.Index, values[cell.Index]));
+                        var foundValue = FoundValue.CreateGivenValue(cell.Index, values[cell.Index]);
+                        InsertValue(foundValue);
                     }
                 }
 
@@ -79,21 +79,12 @@ namespace Sudokungfu.SudokuSolver
                 // The main loop for finding values in the Sudoku.
                 while (_foundValues.Count < Constants.CELL_COUNT)
                 {
-                    var foundValue = FindValue();
-
-                    if (foundValue == null)
+                    foreach (var technique in advancedTechniques)
                     {
-                        foreach (var technique in advancedTechniques)
-                        {
-                            technique.Apply(_cells, _sets);
-                            foundValue = FindValue();
-                            if (foundValue != null)
-                            {
-                                break;
-                            }
-                        }
+                        technique.Apply(_cells, _sets);
                     }
-                    
+
+                    var foundValue = FindValue();
                     if (foundValue == null)
                     {
                         return new SolveResult()
@@ -103,7 +94,7 @@ namespace Sudokungfu.SudokuSolver
                     }
                     else
                     {
-                        _foundValues.Add(foundValue);
+                        InsertValue(foundValue);
                     }
                 }
 
@@ -130,44 +121,30 @@ namespace Sudokungfu.SudokuSolver
         /// <returns>The found value.</returns>
         private FoundValue FindValue()
         {
-            // Look for values found in sets.
-            foreach (var set in _sets)
-            {
-                var foundValues = set.GetValuePossibleSpots().Where(v => v.Value.Count() == 1);
-                if (foundValues.Any())
-                {
-                    var cell = foundValues.First().Value.First();
-                    var value = foundValues.First().Key;
-                    var foundValue = FoundValue.CreateFoundInSetValue(cell, value, set);
-                    InsertValue(cell, value);
-                    return foundValue;
-                }
-            }
+            var foundValuesFromSets = _sets
+                   .SelectMany(s => s
+                       .PossibleSpots
+                       .Where(v => v.Value.Count() == 1)
+                       .Select(v => FoundValue.CreateFoundInSetValue(v.Value.First(), v.Key, s)))
+                    .OrderBy(v => v.TechniqueComplexity)
+                    .ThenBy(v => v.TechniqueCount);
 
-            // Look for only possible values.
-            foreach (var cell in _cells)
-            {
-                var possibleValues = cell.PossibleValues;
-                if (possibleValues.Count() == 1)
-                {
-                    var value = possibleValues.First();
-                    var foundValue = FoundValue.CreateOnlyPossiblValue(cell, value);
-                    InsertValue(cell, value);
-                    return foundValue;
-                }
-            }
+            var foundOnlyPossibleValues = _cells
+                .Where(c => c.PossibleValues.Count() == 1)
+                .Select(c => FoundValue.CreateOnlyPossiblValue(c, c.PossibleValues.First()));
 
-            return null;
+            var foundValues = foundValuesFromSets.Zipper(foundOnlyPossibleValues);
+            return foundValues.FirstOrDefault();
         }
 
         /// <summary>
         /// Inserts a value into a cell.
         /// </summary>
-        /// <param name="cell">The cell to insert in.</param>
-        /// <param name="value">The value to insert.</param>
-        private void InsertValue(Cell cell, int value)
+        /// <param name="value">Found value to insert into the Sudoku</param>
+        private void InsertValue(FoundValue value)
         {
-            cell.InsertValue(value);
+            _cells[value.Index].InsertValue(value.Value);
+            _foundValues.Add(value);
         }
     }
 }

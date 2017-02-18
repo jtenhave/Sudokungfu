@@ -11,6 +11,8 @@ namespace Sudokungfu.SudokuSolver
     /// </summary>
     public class FoundValue
     {
+        private IEnumerable<IEliminationTechnique> _techniques;
+
         /// <summary>
         /// Index of the value that was found.
         /// </summary>
@@ -29,7 +31,35 @@ namespace Sudokungfu.SudokuSolver
         /// <summary>
         /// Techniques used to find the value.
         /// </summary>
-        public IEnumerable<IEliminationTechnique> Techniques { get; private set; }
+        public IEnumerable<IEliminationTechnique> Techniques
+        {
+            get
+            {
+                return _techniques.OrderBy(t => t.Complexity);
+            }
+        }
+
+        /// <summary>
+        /// Number of techniques used to find the value.
+        /// </summary>
+        public int TechniqueCount
+        {
+            get
+            {
+                return Techniques?.Count() ?? 0;
+            }
+        }
+
+        /// <summary>
+        /// Complexity of the techniques used to find the value.
+        /// </summary>
+        public int TechniqueComplexity
+        {
+            get
+            {
+                return Techniques?.LastOrDefault()?.Complexity ?? int.MaxValue;
+            }
+        }
 
         private FoundValue()
         {
@@ -47,7 +77,7 @@ namespace Sudokungfu.SudokuSolver
                 Index = index,
                 Value = value,
                 Indexes = index.ToEnumerable(),
-                Techniques = new List<IEliminationTechnique>()
+                _techniques = new List<IEliminationTechnique>()
             };
         }
 
@@ -65,7 +95,7 @@ namespace Sudokungfu.SudokuSolver
                 Index = cell.Index,
                 Value = value,
                 Indexes = setIndexes,
-                Techniques = FindMinSetValueTechniques(set.Cells.Except(cell).SelectMany(c => c.EliminationTechniques[value]), setIndexes, cell.Index)
+                _techniques = FindMinSetValueTechniques(set.Cells.Except(cell).SelectMany(c => c.EliminationTechniques[value]), setIndexes, cell.Index)
             };
         }
 
@@ -81,7 +111,7 @@ namespace Sudokungfu.SudokuSolver
                 Index = cell.Index,
                 Value = value,
                 Indexes = cell.Index.ToEnumerable(),
-                Techniques = Constants.ALL_VALUES.Except(value).Select(v => cell.EliminationTechniques[v].First())
+                _techniques = Constants.ALL_VALUES.Except(value).Select(v => cell.EliminationTechniques[v].First())
             };
         }
 

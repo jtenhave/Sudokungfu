@@ -83,7 +83,7 @@
     <Compile Include="SudokuSolver\SolveResult.cs" />
     <Compile Include="SudokuSolver\Techniques\AdvancedTechnique.cs" />
     <Compile Include="SudokuSolver\Techniques\AdvancedTechniqueFactory.cs" />
-    <Compile Include="SudokuSolver\Techniques\PossibleValueSpotOverlapTechnique.cs" />
+    <Compile Include="SudokuSolver\Techniques\PossibleSpotOverlapTechnique.cs" />
     <Compile Include="SudokuSolver\Techniques\ThreeSpotClosureTechnique.cs" />
     <Compile Include="SudokuSolver\Techniques\TwoSpotClosureTechnique.cs" />
     <Compile Include="SudokuWindow.xaml.cs">

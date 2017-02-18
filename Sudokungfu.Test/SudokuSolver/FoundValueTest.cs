@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Sudokungfu.Test.SudokuSolver
 {
-    using Extensions;
+    using Sudokungfu.Extensions;
     using Sudokungfu.SudokuSolver;
     using Sudokungfu.SudokuSolver.Sets;
 
