@@ -75,5 +75,33 @@ namespace Sudokungfu.Extensions
                 }
             }
         }
+
+        /// <summary>
+        /// Compares two sequences and returns true if they are equal sets.
+        /// </summary>
+        /// <param name="first">Source sequence.</param>
+        /// <param name="second">Sequence to compare with.</param>
+        public static bool SetEqual<T>(this IEnumerable<T> first, IEnumerable<T> second)
+        {
+            var secondList = second.ToList();
+            if (first.Count() != second.Count())
+            {
+                return false;
+            }
+
+            foreach (var item in first)
+            {
+                if (secondList.Contains(item))
+                {
+                    secondList.Remove(item);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            return !secondList.Any();
+        }
     }
 }

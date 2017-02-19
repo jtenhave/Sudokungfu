@@ -50,5 +50,14 @@ namespace Sudokungfu.SudokuSolver.Sets
         /// Returns true if a cell is in this set.
         /// </summary>
         protected abstract bool IsCellInSet(Cell cell);
+
+        /// <summary>
+        /// Returns true if a sequence of cells is a subset of this set.
+        /// </summary>
+        /// <param name="cells">Cells to compare to this set.</param>
+        public bool IsSubset(IEnumerable<Cell> cells)
+        {
+            return cells.All(c => Cells.Contains(c));
+        }
     }
 }

@@ -23,27 +23,27 @@ namespace Sudokungfu.SudokuSolver.Techniques
         /// <param name="sets">Sets of cells in the Sudoku.</param>
         public override void Apply(IEnumerable<Cell> cells, IEnumerable<Set> sets)
         {
-            foreach (var set in sets)
+            foreach (var sourceSet in sets)
             {
-                var possibleValueSpotSets = set.PossibleSpots.Where(kvp => kvp.Value.Count() <= 3);
-                foreach (var possibleValueSpot in possibleValueSpotSets)
+                var possibleSpotSetsDic = sourceSet.PossibleSpots.Where(kvp => kvp.Value.Count() <= 3);
+                foreach (var possibleSpots in possibleSpotSetsDic)
                 {
-                    var overlappingSets = sets.Except(set).Where(s => possibleValueSpot.Value.All(p => s.Cells.Contains(p)));
+                    var overlappingSets = sets.Except(sourceSet).Where(s => s.IsSubset(possibleSpots.Value));
                     foreach (var overlappingSet in overlappingSets)
                     {
-                        var cellsToEliminate = overlappingSet.Cells.Except(possibleValueSpot.Value);
+                        var cellsToEliminate = overlappingSet.Cells.Except(sourceSet.Cells);
                         var technique = new PossibleSpotOverlapTechnique()
                         {
-                            Indexes = cellsToEliminate.Select(c => c.Index),
+                            Indexes = sourceSet.Cells.Union(overlappingSet.Cells).Select(c => c.Index),
                             ValueMap = new Dictionary<int, IEnumerable<int>>()
                             {
-                                [possibleValueSpot.Key] = possibleValueSpot.Value.Select(c => c.Index)
+                                [possibleSpots.Key] = possibleSpots.Value.Select(c => c.Index)
                             }
                         };
 
                         foreach (var cell in cellsToEliminate)
                         {
-                            cell.EliminatePossibleValue(possibleValueSpot.Key, technique);
+                            cell.EliminatePossibleValue(possibleSpots.Key, technique);
                         }
                     }
                 }
