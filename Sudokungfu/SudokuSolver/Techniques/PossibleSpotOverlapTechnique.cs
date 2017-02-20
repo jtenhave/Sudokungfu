@@ -9,11 +9,13 @@ namespace Sudokungfu.SudokuSolver.Techniques
     /// <summary>
     /// Class that represents the 'Possible Spot Overlap' technique.
     /// </summary>
-    public class PossibleSpotOverlapTechnique : AdvancedTechnique
+    public class PossibleSpotOverlapTechnique : BasicTechnique
     {
-        public PossibleSpotOverlapTechnique()
+        private const int DEFAULT_COMPLEXITY = 2;
+
+        private PossibleSpotOverlapTechnique()
         {
-            Complexity = 2;
+            
         }
 
         /// <summary>
@@ -21,7 +23,7 @@ namespace Sudokungfu.SudokuSolver.Techniques
         /// </summary>
         /// <param name="cells">Cells in the Sudoku.</param>
         /// <param name="sets">Sets of cells in the Sudoku.</param>
-        public override void Apply(IEnumerable<Cell> cells, IEnumerable<Set> sets)
+        public static void Apply(IEnumerable<Cell> cells, IEnumerable<Set> sets)
         {
             foreach (var sourceSet in sets)
             {
@@ -31,23 +33,29 @@ namespace Sudokungfu.SudokuSolver.Techniques
                     var overlappingSets = sets.Except(sourceSet).Where(s => s.IsSubset(possibleSpots.Value));
                     foreach (var overlappingSet in overlappingSets)
                     {
-                        var cellsToEliminate = overlappingSet.Cells.Except(sourceSet.Cells);
-                        var technique = new PossibleSpotOverlapTechnique()
-                        {
-                            Indexes = sourceSet.Cells.Union(overlappingSet.Cells).Select(c => c.Index),
-                            ValueMap = new Dictionary<int, IEnumerable<int>>()
-                            {
-                                [possibleSpots.Key] = possibleSpots.Value.Select(c => c.Index)
-                            }
-                        };
+                        var value = possibleSpots.Key;
+                        var indexes = possibleSpots.Value.Indexes();
+                        var setIndexes = sourceSet.Cells.Union(overlappingSet.Cells).Indexes();
 
-                        foreach (var cell in cellsToEliminate)
+                        var technique = CreatePossibleSpotOverlapTechnique(value, indexes, setIndexes);
+          
+                        foreach (var cell in overlappingSet.Cells.Except(sourceSet.Cells))
                         {
                             cell.EliminatePossibleValue(possibleSpots.Key, technique);
                         }
                     }
                 }
             }
+        }
+
+        public static PossibleSpotOverlapTechnique CreatePossibleSpotOverlapTechnique(int value, IEnumerable<int> indexes, IEnumerable<int> setindexes)
+        {
+            return new PossibleSpotOverlapTechnique()
+            {
+                Complexity = DEFAULT_COMPLEXITY,
+                IndexValueMap = setindexes.ToDictionary(i => i, i => indexes.Contains(i) ? value.ToEnumerable() : Enumerable.Empty<int>()),
+                UsesFoundValues = false
+            };
         }
     }
 }

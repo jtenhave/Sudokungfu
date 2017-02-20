@@ -18,7 +18,7 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <TextBox Width="50" Height="50" Text="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="1" FontSize="36" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" IsReadOnly="{Binding Path=IsReadOnly, UpdateSourceTrigger=PropertyChanged}" Cursor="{Binding Path=Cursor, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox Width="50" Height="50" Text="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="1" FontSize="{Binding Path=FontSize, UpdateSourceTrigger=PropertyChanged}" FontStyle="{Binding Path=FontStyle, UpdateSourceTrigger=PropertyChanged}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" IsReadOnly="{Binding Path=IsReadOnly, UpdateSourceTrigger=PropertyChanged}" Cursor="{Binding Path=Cursor, UpdateSourceTrigger=PropertyChanged}">
                         <!-- Set the TextBox template due to WPF bug using BorderBrush with styles. -->
                         <TextBox.Template>
                             <ControlTemplate>

@@ -74,15 +74,10 @@ namespace Sudokungfu.SudokuSolver
                     }
                 }
 
-                var advancedTechniques = AdvancedTechniqueFactory.Techniques.OrderBy(t => t.Complexity);
-
                 // The main loop for finding values in the Sudoku.
                 while (_foundValues.Count < Constants.CELL_COUNT)
                 {
-                    foreach (var technique in advancedTechniques)
-                    {
-                        technique.Apply(_cells, _sets);
-                    }
+                    AdvancedTechniqueManager.ApplyAdvancedTechniques(_cells, _sets);
 
                     var foundValue = FindValue();
                     if (foundValue == null)

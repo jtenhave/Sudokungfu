@@ -5,13 +5,14 @@ namespace Sudokungfu.SudokuSolver
 {
     using Extensions;
     using Sets;
+    using Techniques;
 
     /// <summary>
     /// Class that represents a found value in the Sudoku.
     /// </summary>
     public class FoundValue
     {
-        private IEnumerable<IEliminationTechnique> _techniques;
+        private IEnumerable<ITechnique> _techniques;
 
         /// <summary>
         /// Index of the value that was found.
@@ -31,7 +32,7 @@ namespace Sudokungfu.SudokuSolver
         /// <summary>
         /// Techniques used to find the value.
         /// </summary>
-        public IEnumerable<IEliminationTechnique> Techniques
+        public IEnumerable<ITechnique> Techniques
         {
             get
             {
@@ -77,7 +78,7 @@ namespace Sudokungfu.SudokuSolver
                 Index = index,
                 Value = value,
                 Indexes = index.ToEnumerable(),
-                _techniques = new List<IEliminationTechnique>()
+                _techniques = new List<ITechnique>()
             };
         }
 
@@ -115,9 +116,9 @@ namespace Sudokungfu.SudokuSolver
             };
         }
 
-        private static IEnumerable<IEliminationTechnique> FindMinSetValueTechniques(IEnumerable<IEliminationTechnique> techniques, IEnumerable<int> indexes, int index)
+        private static IEnumerable<ITechnique> FindMinSetValueTechniques(IEnumerable<ITechnique> techniques, IEnumerable<int> indexes, int index)
         {
-            var finalTechniques = new List<IEliminationTechnique>();
+            var finalTechniques = new List<ITechnique>();
             var unusedTechniques = techniques.Except(finalTechniques);
 
             var eliminatedIndexesWithoutTechnique = new List<int>(indexes);
@@ -126,34 +127,34 @@ namespace Sudokungfu.SudokuSolver
             // Add the techniques for the cells that are occupied.
             var occupiedTechniques = techniques.Where(t => t.Complexity == 0);
             finalTechniques.AddRange(occupiedTechniques);
-            eliminatedIndexesWithoutTechnique.RemoveAll(i => occupiedTechniques.SelectMany(t => t.Indexes).Contains(i));
+            eliminatedIndexesWithoutTechnique.RemoveAll(i => occupiedTechniques.SelectMany(t => t.Indexes()).Contains(i));
 
             // Get the list of techniques that are definately needed
             var requiredTechniques = unusedTechniques
                 .Where(t => t
-                    .Indexes
+                    .Indexes()
                     .Intersect(eliminatedIndexesWithoutTechnique)
                     .Except(unusedTechniques
                         .Except(t)
-                        .SelectMany(u => u.Indexes))
+                        .SelectMany(u => u.Indexes()))
                     .Any())
                 .ToList();
 
             finalTechniques.AddRange(requiredTechniques);
-            eliminatedIndexesWithoutTechnique.RemoveAll(i => requiredTechniques.SelectMany(t => t.Indexes).Contains(i));
+            eliminatedIndexesWithoutTechnique.RemoveAll(i => requiredTechniques.SelectMany(t => t.Indexes()).Contains(i));
 
             // Apply leftover techniques until all indexes have a technique.
             while (eliminatedIndexesWithoutTechnique.Any())
             {
                 var leftoverTechnique = unusedTechniques
-                    .OrderByDescending(t => t.Indexes.Intersect(eliminatedIndexesWithoutTechnique).Count())
+                    .OrderByDescending(t => t.Indexes().Intersect(eliminatedIndexesWithoutTechnique).Count())
                     .ThenBy(t => t.Complexity)
                     .FirstOrDefault();
 
                 if (leftoverTechnique != null)
                 {
                     finalTechniques.Add(leftoverTechnique);
-                    eliminatedIndexesWithoutTechnique.RemoveAll(i => leftoverTechnique.Indexes.Contains(i));
+                    eliminatedIndexesWithoutTechnique.RemoveAll(i => leftoverTechnique.Indexes().Contains(i));
                 }
                 else
                 {

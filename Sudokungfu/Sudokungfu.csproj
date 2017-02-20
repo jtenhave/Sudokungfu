@@ -71,9 +71,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Constants.cs" />
-    <Compile Include="SudokuSolver\BasicEliminationTechnique.cs" />
+    <Compile Include="SudokuSolver\SolverExtensions.cs" />
+    <Compile Include="SudokuSolver\Techniques\BasicTechnique.cs" />
     <Compile Include="SudokuSolver\FoundValue.cs" />
-    <Compile Include="SudokuSolver\IEliminationTechnique.cs" />
+    <Compile Include="SudokuSolver\Techniques\ITechnique.cs" />
     <Compile Include="SudokuSolver\Sets\Box.cs" />
     <Compile Include="SudokuSolver\Sets\Column.cs" />
     <Compile Include="SudokuSolver\Sets\Row.cs" />
@@ -81,8 +82,7 @@
     <Compile Include="SudokuSolver\Cell.cs" />
     <Compile Include="SudokuSolver\Solver.cs" />
     <Compile Include="SudokuSolver\SolveResult.cs" />
-    <Compile Include="SudokuSolver\Techniques\AdvancedTechnique.cs" />
-    <Compile Include="SudokuSolver\Techniques\AdvancedTechniqueFactory.cs" />
+    <Compile Include="SudokuSolver\Techniques\AdvancedTechniqueManager.cs" />
     <Compile Include="SudokuSolver\Techniques\PossibleSpotOverlapTechnique.cs" />
     <Compile Include="SudokuSolver\Techniques\ThreeSpotClosureTechnique.cs" />
     <Compile Include="SudokuSolver\Techniques\TwoSpotClosureTechnique.cs" />

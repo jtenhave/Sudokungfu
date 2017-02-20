@@ -7,6 +7,7 @@ using System.Windows.Media;
 namespace Sudokungfu.SudokuGrid
 {
     using SudokuSolver;
+    using System.Windows;
 
     /// <summary>
     /// Interaction logic for SudokuGrid.xaml
@@ -132,9 +133,9 @@ namespace Sudokungfu.SudokuGrid
                     Cells.ForEach(c => c.SaveState());
                     var foundValue = _currentSudoku[valueIndex];
 
-                    var techniqueIndexes = foundValue.Techniques.SelectMany(t => t.Indexes);
+                    var techniqueIndexes = foundValue.Techniques.SelectMany(t => t.Indexes());
                     var techniqueCellModels = Cells.Where(c => techniqueIndexes.Contains(c.Index));
-                    var techniqueValueMap = foundValue.Techniques.SelectMany(t => t.ValueMap);
+                    //var techniqueValueMap = foundValue.Techniques.SelectMany(t => t.ValueMap);
 
                     // Set the background for all techniques used in finding this value.
                     foreach (var cell in techniqueCellModels)
@@ -144,13 +145,13 @@ namespace Sudokungfu.SudokuGrid
                     }
 
                     // Set the values all techniques used in finding this value.
-                    foreach (var value in techniqueValueMap)
+                    /*foreach (var value in techniqueValueMap)
                     {
                         foreach (var index in value.Value)
                         {
                             Cells[index].Value = value.Key.ToString();
                         }
-                    }
+                    }*/
 
                     // Set the background for cells used to find this value.
                     var methodCells = Cells.Where(c => foundValue.Indexes.Contains(c.Index));

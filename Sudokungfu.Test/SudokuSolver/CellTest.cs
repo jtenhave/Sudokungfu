@@ -12,7 +12,7 @@ namespace Sudokungfu.Test.SudokuSolver
     /// Test class for <see cref="Cell"/>
     /// </summary>
     [TestClass]
-    public class CellTest
+    public class CellTest : BaseTest
     {
         [TestMethod]
         public void TestCellInitialize()
@@ -23,7 +23,7 @@ namespace Sudokungfu.Test.SudokuSolver
             var cell = new Cell(expectedIndex);
 
             Assert.AreEqual(expectedIndex, cell.Index);
-            Assert.IsTrue(cell.PossibleValues.SequenceEqual(expectedValues));
+            Assert.IsTrue(cell.PossibleValues.SetEqual(expectedValues));
             Assert.AreEqual(expectedValues.Count(), cell.EliminationTechniques.Count);
 
             foreach (var value in expectedValues)
@@ -40,91 +40,122 @@ namespace Sudokungfu.Test.SudokuSolver
             var expectedValues = Constants.ALL_VALUES.Except(testValue);
 
             var cell = new Cell(0);
-            cell.EliminatePossibleValue(testValue, new TestEliminationTechnique(0));
+            cell.EliminatePossibleValue(testValue, new TestTechnique());
 
-            Assert.IsTrue(expectedValues.SequenceEqual(cell.PossibleValues));
+            Assert.IsTrue(expectedValues.SetEqual(cell.PossibleValues));
         }
 
         [TestMethod]
-        public void TestEliminationTechniqueAdded()
+        public void TestTechniqueAdded()
         {
             var testValue = 3;
-            var expectedEliminationTechnique = new TestEliminationTechnique(0);
-            var expectedValues = Constants.ALL_VALUES.Except(testValue);
+            var expectedTechnique = new TestTechnique()
+            {
+                Complexity = 3,
+                IndexValueMap = new Dictionary<int, IEnumerable<int>>()
+                {
+                    [testValue] = 0.ToEnumerable()
+                }
+            };
 
             var cell = new Cell(0);
-            cell.EliminatePossibleValue(testValue, expectedEliminationTechnique);
+            cell.EliminatePossibleValue(testValue, expectedTechnique);
 
             Assert.AreEqual(1, cell.EliminationTechniques[testValue].Count());
-            Assert.AreEqual(expectedEliminationTechnique, cell.EliminationTechniques[testValue].First());
+            AssertITechniqueEqual(expectedTechnique, cell.EliminationTechniques[testValue].First());
         }
 
         [TestMethod]
         public void TestHigherComplexityEliminationTechniqueIgnored()
         {
             var testValue = 3;
-            var expectedEliminationTechniqueA = new TestEliminationTechnique(0);
-            var expectedEliminationTechniqueB = new TestEliminationTechnique(1);
-            var expectedValues = Constants.ALL_VALUES.Except(testValue);
+            var expectedTechniqueA = new TestTechnique()
+            {
+                Complexity = 0
+            };
+
+            var expectedTechniqueB = new TestTechnique()
+            {
+                Complexity = 1
+            };
 
             var cell = new Cell(0);
-            cell.EliminatePossibleValue(testValue, expectedEliminationTechniqueA);
-            cell.EliminatePossibleValue(testValue, expectedEliminationTechniqueB);
+            cell.EliminatePossibleValue(testValue, expectedTechniqueA);
+            cell.EliminatePossibleValue(testValue, expectedTechniqueB);
 
             Assert.AreEqual(1, cell.EliminationTechniques[testValue].Count());
-            Assert.AreEqual(expectedEliminationTechniqueA, cell.EliminationTechniques[testValue].First());
+            AssertITechniqueEqual(expectedTechniqueA, cell.EliminationTechniques[testValue].First());
         }
 
         [TestMethod]
         public void TestLowerComplexityEliminationTechniqueOverwrites()
         {
             var testValue = 3;
-            var expectedEliminationTechniqueA = new TestEliminationTechnique(0);
-            var expectedEliminationTechniqueB = new TestEliminationTechnique(1);
-            var expectedValues = Constants.ALL_VALUES.Except(testValue);
+            var expectedTechniqueA = new TestTechnique()
+            {
+                Complexity = 0
+            };
+
+            var expectedTechniqueB = new TestTechnique()
+            {
+                Complexity = 1
+            };
 
             var cell = new Cell(0);
-            cell.EliminatePossibleValue(testValue, expectedEliminationTechniqueB);
-            cell.EliminatePossibleValue(testValue, expectedEliminationTechniqueA);
+            cell.EliminatePossibleValue(testValue, expectedTechniqueB);
+            cell.EliminatePossibleValue(testValue, expectedTechniqueA);
 
             Assert.AreEqual(1, cell.EliminationTechniques[testValue].Count());
-            Assert.AreEqual(expectedEliminationTechniqueA, cell.EliminationTechniques[testValue].First());
+            AssertITechniqueEqual(expectedTechniqueA, cell.EliminationTechniques[testValue].First());
         }
 
         [TestMethod]
         public void TestEqualComplexityEliminationTechniqueIsAdded()
         {
             var testValue = 3;
-            var expectedEliminationTechniqueA = new TestEliminationTechnique(0);
-            var expectedEliminationTechniqueB = new TestEliminationTechnique(0);
-            var expectedValues = Constants.ALL_VALUES.Except(testValue);
+            var expectedTechniqueA = new TestTechnique()
+            {
+                Complexity = 0
+            };
+
+            var expectedTechniqueB = new TestTechnique()
+            {
+                Complexity = 0
+            };
 
             var cell = new Cell(0);
-            cell.EliminatePossibleValue(testValue, expectedEliminationTechniqueA);
-            cell.EliminatePossibleValue(testValue, expectedEliminationTechniqueB);
+            cell.EliminatePossibleValue(testValue, expectedTechniqueA);
+            cell.EliminatePossibleValue(testValue, expectedTechniqueB);
 
             Assert.AreEqual(2, cell.EliminationTechniques[testValue].Count());
-            Assert.AreEqual(expectedEliminationTechniqueA, cell.EliminationTechniques[testValue].First());
-            Assert.AreEqual(expectedEliminationTechniqueB, cell.EliminationTechniques[testValue].Last());
+            AssertITechniqueEqual(expectedTechniqueA, cell.EliminationTechniques[testValue].First());
+            AssertITechniqueEqual(expectedTechniqueB, cell.EliminationTechniques[testValue].Last());
         }
 
         [TestMethod]
         public void TestEliminationTechniqueNotAddedAfterCellFilled()
         {
             var testValue = 3;
-            var expectedEliminationTechniqueA = new TestEliminationTechnique(1);
-            var expectedEliminationTechniqueB = new TestEliminationTechnique(0);
+            var expectedTechniqueA = new TestTechnique()
+            {
+                Complexity = 1
+            };
+
+            var expectedTechniqueB = new TestTechnique()
+            {
+                Complexity = 0
+            };
          
             var cell = new Cell(0);
             foreach (var value in Constants.ALL_VALUES)
             {
-                cell.EliminatePossibleValue(value, expectedEliminationTechniqueA);
+                cell.EliminatePossibleValue(value, expectedTechniqueA);
             }
 
-            cell.EliminatePossibleValue(testValue, expectedEliminationTechniqueB);
+            cell.EliminatePossibleValue(testValue, expectedTechniqueB);
 
             Assert.AreEqual(1, cell.EliminationTechniques[testValue].Count());
-            Assert.AreEqual(expectedEliminationTechniqueA, cell.EliminationTechniques[testValue].First());
+            AssertITechniqueEqual(expectedTechniqueA, cell.EliminationTechniques[testValue].First());
         }
 
         [TestMethod]
@@ -136,15 +167,23 @@ namespace Sudokungfu.Test.SudokuSolver
             var cell = new Cell(testIndex);
             cell.InsertValue(testValue);
 
+            var expectedTechnique = new TestTechnique()
+            {
+                Complexity = 0,
+                IndexValueMap = new Dictionary<int, IEnumerable<int>>()
+                {
+                    [testIndex] = testValue.ToEnumerable()
+                },
+                UsesFoundValues = true
+            };
+
+            Assert.AreEqual(0, cell.EliminationTechniques[testValue].Count());
+
             foreach (var value in Constants.ALL_VALUES.Except(testValue))
             {
                 Assert.AreEqual(1, cell.EliminationTechniques[value].Count());
-                Assert.AreEqual(0, cell.EliminationTechniques[value].First().Complexity);
-                Assert.AreEqual(1, cell.EliminationTechniques[value].First().Indexes.Count());
-                Assert.AreEqual(testIndex, cell.EliminationTechniques[value].First().Indexes.First());
-            }
-
-            Assert.AreEqual(0, cell.EliminationTechniques[testValue].Count());
+                AssertITechniqueEqual(expectedTechnique, cell.EliminationTechniques[value].First());
+            } 
         }
 
         [TestMethod]
@@ -152,17 +191,35 @@ namespace Sudokungfu.Test.SudokuSolver
         {
             var testValue = 3;
             var testIndex = 23;
+            var testInsertedValue = 5;
 
             var cell = new Cell(testIndex);
-            cell.InsertValue(5);
+            cell.InsertValue(testInsertedValue);
 
-            var expectedEliminationTechnique = new TestEliminationTechnique(0);
-            cell.EliminatePossibleValue(testValue, expectedEliminationTechnique);
+            var expectedTechnique = new TestTechnique()
+            {
+                Complexity = 0,
+                IndexValueMap = new Dictionary<int, IEnumerable<int>>()
+                {
+                    [testIndex] = testInsertedValue.ToEnumerable()
+                },
+                UsesFoundValues = true
+            };
+
+            var testTechnique = new TestTechnique()
+            {
+                Complexity = 3,
+                IndexValueMap = new Dictionary<int, IEnumerable<int>>()
+                {
+                    [45] = 56.ToEnumerable()
+                },
+                UsesFoundValues = false
+            };
+
+            cell.EliminatePossibleValue(testValue, testTechnique);
 
             Assert.AreEqual(1, cell.EliminationTechniques[testValue].Count());
-            Assert.AreEqual(0, cell.EliminationTechniques[testValue].First().Complexity);
-            Assert.AreEqual(1, cell.EliminationTechniques[testValue].First().Indexes.Count());
-            Assert.AreEqual(testIndex, cell.EliminationTechniques[testValue].First().Indexes.First());
+            AssertITechniqueEqual(expectedTechnique, cell.EliminationTechniques[testValue].First());
         }
 
         [TestMethod]
@@ -170,20 +227,30 @@ namespace Sudokungfu.Test.SudokuSolver
         {
             var testValue = 4;
             var expectedValues = Constants.ALL_VALUES.Except(testValue);
-            var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10) };
+            var cells = GetAllCells();
 
             var row = new Row(cells, 0);
             var col = new Column(cells, 0);
             var box = new Box(cells, 0);
 
-            cells[0].InsertValue(testValue);
+            var testCell = cells.First();
+            testCell.InsertValue(testValue);
 
             Assert.IsFalse(row.Cells.First().PossibleValues.Any());
-            Assert.IsTrue(expectedValues.SequenceEqual(row.Cells.Last().PossibleValues));
-            Assert.IsFalse(col.Cells.First().PossibleValues.Any());
-            Assert.IsTrue(expectedValues.SequenceEqual(col.Cells.Last().PossibleValues));
-            Assert.IsFalse(box.Cells.First().PossibleValues.Any());
-            Assert.IsTrue(expectedValues.SequenceEqual(box.Cells.Last().PossibleValues));
+            foreach (var cell in row.Cells.Except(testCell))
+            {
+                Assert.IsTrue(expectedValues.SetEqual(cell.PossibleValues));
+            }
+
+            foreach (var cell in row.Cells.Except(testCell))
+            {
+                Assert.IsTrue(expectedValues.SetEqual(cell.PossibleValues));
+            }
+
+            foreach (var cell in box.Cells.Except(testCell))
+            {
+                Assert.IsTrue(expectedValues.SetEqual(cell.PossibleValues));
+            }
         }
     }
 }

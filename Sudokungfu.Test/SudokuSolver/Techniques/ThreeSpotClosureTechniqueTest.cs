@@ -12,21 +12,19 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
     /// Test class for <see cref="ThreeSpotClosureTechnique"/>.
     /// </summary>
     [TestClass]
-    public class ThreeSpotClosureTechniqueTest
+    public class ThreeSpotClosureTechniqueTest : BaseTest
     {
-        [TestMethod]
+        /*[TestMethod]
         public void TestThreeValueClosureA()
         {
             var testValueA = 3;
             var testValueB = 4;
             var testValueC = 5;
-            var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(2),
-                new Cell(9), new Cell(10), new Cell(11),
-                new Cell(18), new Cell(19),new Cell(20) };
+            var cells = GetAllCells();
 
             var box = new Box(cells, 0);
 
-            var testTechnique = new TestEliminationTechnique(0);
+            var testTechnique = new TestTechnique();
             for (int i = 3; i < cells.Count; i++)
             {
                 cells[i].EliminatePossibleValue(testValueA, testTechnique);
@@ -34,8 +32,7 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
                 cells[i].EliminatePossibleValue(testValueC, testTechnique);
             }
 
-            var closureTechnique = new ThreeSpotClosureTechnique();
-            closureTechnique.Apply(cells, new List<Set> { box });
+            ThreeSpotClosureTechnique.Apply(cells, new Set[] { box });
 
             for (int i = 0; i < 3; i++)
             {
@@ -56,7 +53,7 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
 
             var box = new Box(cells, 0);
 
-            var testTechnique = new TestEliminationTechnique(0);
+            var testTechnique = new TestTechnique(0);
             cells[2].EliminatePossibleValue(testValueA, testTechnique);
             cells[0].EliminatePossibleValue(testValueB, testTechnique);
             cells[1].EliminatePossibleValue(testValueC, testTechnique);
@@ -68,8 +65,7 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
                 cells[i].EliminatePossibleValue(testValueC, testTechnique);
             }
 
-            var closureTechnique = new ThreeSpotClosureTechnique();
-            closureTechnique.Apply(cells, new List<Set> { box });
+            ThreeSpotClosureTechnique.Apply(cells, new Set[] { box });
 
             Assert.AreEqual(2, cells[0].PossibleValues.Count());
             Assert.AreEqual(2, cells[1].PossibleValues.Count());
@@ -78,6 +74,6 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
             Assert.IsTrue(cells[0].PossibleValues.SequenceEqual(new List<int>() { testValueA, testValueC }));
             Assert.IsTrue(cells[1].PossibleValues.SequenceEqual(new List<int>() { testValueA, testValueB }));
             Assert.IsTrue(cells[2].PossibleValues.SequenceEqual(new List<int>() { testValueB, testValueC }));
-        }
+        }*/
     }
 }

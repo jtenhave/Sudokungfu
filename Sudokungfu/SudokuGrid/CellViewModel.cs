@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows;
 
 namespace Sudokungfu.SudokuGrid
 {
@@ -19,6 +20,8 @@ namespace Sudokungfu.SudokuGrid
         private Brush _background;
         private bool _isReadOnly;
         private Cursor _cursor;
+        private FontStyle _fontStyle;
+        private int _fontSize;
 
         private CellViewModel _savedState;
 
@@ -112,6 +115,41 @@ namespace Sudokungfu.SudokuGrid
             }
         }
 
+        public FontStyle FontStyle
+        {
+            get
+            {
+                return _fontStyle;
+            }
+
+            set
+            {
+                if (_fontStyle != value)
+                {
+                    _fontStyle = value;
+                    OnPropertyChanged(nameof(FontStyle));
+                }
+            }
+        }
+
+        public int FontSize
+        {
+            get
+            {
+                return _fontSize;
+            }
+
+            set
+            {
+                if (_fontSize != value)
+                {
+                    _fontSize = value;
+                    OnPropertyChanged(nameof(FontSize));
+                }
+            }
+        }
+
+
         /// <summary>
         /// Creates a new <see cref="CellViewModel"/>
         /// </summary>
@@ -150,6 +188,8 @@ namespace Sudokungfu.SudokuGrid
             _savedState._value = _value;
             _savedState._isReadOnly = _isReadOnly;
             _savedState._cursor = _cursor;
+            _savedState._fontSize = _fontSize;
+            _savedState._fontStyle = _fontStyle;
         }
 
         /// <summary>
@@ -163,6 +203,8 @@ namespace Sudokungfu.SudokuGrid
                 Value = _savedState._value;
                 IsReadOnly = _savedState._isReadOnly;
                 Cursor = _savedState._cursor;
+                FontStyle = _savedState._fontStyle;
+                FontSize = _savedState._fontSize;
 
                 _savedState = null;
             }

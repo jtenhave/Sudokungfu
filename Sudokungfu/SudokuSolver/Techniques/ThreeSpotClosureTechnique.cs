@@ -1,22 +1,24 @@
 ﻿using Sudokungfu.SudokuSolver.Sets;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 
 namespace Sudokungfu.SudokuSolver.Techniques
 {
     using Extensions;
-
+    
     /// <summary>
     /// Class that represents the 'Three Spot Closure' technique.
     /// </summary>
-    public class ThreeSpotClosureTechnique : AdvancedTechnique
+    public class ThreeSpotClosureTechnique : BasicTechnique
     {
-        /// <summary>
-        /// Creates a new <see cref="ThreeSpotClosureTechnique"/>.
-        /// </summary>
-        public ThreeSpotClosureTechnique()
+        private const int TWO_VALUE_FONT_SIZE = 20;
+        private const int THREE_VALUE_FONT_SIZE = 15;
+        private const int DEFAULT_COMPLEXITY = 3;
+
+        private ThreeSpotClosureTechnique()
         {
-            Complexity = 3;
+
         }
 
         /// <summary>
@@ -24,7 +26,7 @@ namespace Sudokungfu.SudokuSolver.Techniques
         /// </summary>
         /// <param name="cells">Cells in the Sudoku.</param>
         /// <param name="sets">Sets of cells in the Sudoku.</param>
-        public override void Apply(IEnumerable<Cell> cells, IEnumerable<Set> sets)
+        public static void Apply(IEnumerable<Cell> cells, IEnumerable<Set> sets)
         {
             foreach (var set in sets)
             {
@@ -38,22 +40,16 @@ namespace Sudokungfu.SudokuSolver.Techniques
                             var threeValueSpotsUnion = possibleSpotsA.Value.Union(possibleSpotsB.Value).Union(possibleSpotsC.Value);
                             if (threeValueSpotsUnion.Count() == 3)
                             {
-                                var threeSpotTechnique = new ThreeSpotClosureTechnique()
-                                {
-                                    Indexes = threeValueSpotsUnion.Select(c => c.Index),
-                                    ValueMap = new Dictionary<int, IEnumerable<int>>()
-                                    {
-                                        [possibleSpotsA.Key] = possibleSpotsA.Value.Select(c => c.Index),
-                                        [possibleSpotsB.Key] = possibleSpotsB.Value.Select(c => c.Index),
-                                        [possibleSpotsC.Key] = possibleSpotsC.Value.Select(c => c.Index),
-                                    }
-                                };
+                                var valueA = new KeyValuePair<int, IEnumerable<int>>(possibleSpotsA.Key, possibleSpotsA.Value.Indexes());
+                                var valueB = new KeyValuePair<int, IEnumerable<int>>(possibleSpotsB.Key, possibleSpotsB.Value.Indexes());
+                                var valueC = new KeyValuePair<int, IEnumerable<int>>(possibleSpotsC.Key, possibleSpotsC.Value.Indexes());
 
+                                var technique = CreateThreeSpotClosureTechnique(valueA, valueB, valueC, set.Indexes());
                                 foreach (var cell in threeValueSpotsUnion)
                                 {
                                     foreach (var value in cell.PossibleValues.Except(possibleSpotsA.Key, possibleSpotsB.Key, possibleSpotsC.Key).ToList())
                                     {
-                                        cell.EliminatePossibleValue(value, threeSpotTechnique);
+                                        cell.EliminatePossibleValue(value, technique);
                                     }
                                 }
                             }
@@ -61,6 +57,17 @@ namespace Sudokungfu.SudokuSolver.Techniques
                     }
                 }
             }
+        }
+
+        public static ThreeSpotClosureTechnique CreateThreeSpotClosureTechnique(KeyValuePair<int, IEnumerable<int>> valueA, KeyValuePair<int, IEnumerable<int>> valueB, KeyValuePair<int, IEnumerable<int>> valueC, IEnumerable<int> setIndexes)
+        {
+            var values = new KeyValuePair<int, IEnumerable<int>>[] { valueA, valueB, valueB };
+            return new ThreeSpotClosureTechnique()
+            {
+                Complexity = DEFAULT_COMPLEXITY,
+                IndexValueMap = setIndexes.ToDictionary(i => i, i => values.Where(v => v.Value.Contains(i)).Select(v => v.Key)),
+                UsesFoundValues = false
+            };
         }
     }
 }

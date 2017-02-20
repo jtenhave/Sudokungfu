@@ -7,12 +7,13 @@ namespace Sudokungfu.Test.SudokuSolver
     using Sudokungfu.Extensions;
     using Sudokungfu.SudokuSolver;
     using Sudokungfu.SudokuSolver.Sets;
+    using Sudokungfu.SudokuSolver.Techniques;
 
     /// <summary>
     /// Test class for <see cref="FoundValue"/>.
     /// </summary>
     [TestClass]
-    public class FoundValueTest
+    public class FoundValueTest : BaseTest
     {
         [TestMethod]
         public void TestCreateGivenValue()
@@ -52,13 +53,23 @@ namespace Sudokungfu.Test.SudokuSolver
             var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10) };
             var box = new Box(cells, 0);
 
-            cells[1].EliminatePossibleValue(testValue, BasicEliminationTechnique.CreateOccupiedTechnique(testValue, cells[1].Index));
-            cells[2].EliminatePossibleValue(testValue, BasicEliminationTechnique.CreateOccupiedTechnique(testValue, cells[2].Index));
-            cells[3].EliminatePossibleValue(testValue, BasicEliminationTechnique.CreateOccupiedTechnique(testValue, cells[3].Index));
+            var expectedTechniques = new ITechnique[]
+            {
+                BasicTechnique.CreateOccupiedTechnique(testValue, cells[1].Index),
+                BasicTechnique.CreateOccupiedTechnique(testValue, cells[2].Index),
+                BasicTechnique.CreateOccupiedTechnique(testValue, cells[3].Index)
+            };
+
+            cells[1].EliminatePossibleValue(testValue, expectedTechniques[0]);
+            cells[2].EliminatePossibleValue(testValue, expectedTechniques[1]);
+            cells[3].EliminatePossibleValue(testValue, expectedTechniques[2]);
 
             var value = FoundValue.CreateFoundInSetValue(cells[0], testValue, box);
 
-            Assert.IsTrue(cells.SelectMany(c => c.EliminationTechniques[testValue]).SequenceEqual(value.Techniques));
+            Assert.AreEqual(3, value.TechniqueCount);
+            Assert.IsTrue(value.Techniques.Contains(expectedTechniques[0]));
+            Assert.IsTrue(value.Techniques.Contains(expectedTechniques[1]));
+            Assert.IsTrue(value.Techniques.Contains(expectedTechniques[2]));
         }
 
         [TestMethod]
@@ -68,18 +79,18 @@ namespace Sudokungfu.Test.SudokuSolver
             var testRequiredIndex = 12;
             var testOptionalIndex = 27;
 
-            var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10) };
+            var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10), new Cell(12), new Cell(27) };
             var box = new Box(cells, 0);
             var row = new Row(cells, 1);
             var col = new Column(cells, 0);
 
-            var occupiedTechA = BasicEliminationTechnique.CreateOccupiedTechnique(testValue, cells[1].Index);
-            var occupiedTechB = BasicEliminationTechnique.CreateOccupiedTechnique(testValue, cells[2].Index);
-            var occupiedTechC = BasicEliminationTechnique.CreateOccupiedTechnique(testValue, cells[3].Index);
-            var requiredTech = BasicEliminationTechnique.CreateSetTechnique(testValue, testRequiredIndex, row);
-            var optionalTech = BasicEliminationTechnique.CreateSetTechnique(testValue, testOptionalIndex, col);
+            var occupiedTechA = BasicTechnique.CreateOccupiedTechnique(testValue, cells[1].Index);
+            var occupiedTechB = BasicTechnique.CreateOccupiedTechnique(testValue, cells[2].Index);
+            var occupiedTechC = BasicTechnique.CreateOccupiedTechnique(testValue, cells[3].Index);
+            var requiredTech = BasicTechnique.CreateSetTechnique(testValue, testRequiredIndex, row.Indexes());
+            var optionalTech = BasicTechnique.CreateSetTechnique(testValue, testOptionalIndex, col.Indexes());
 
-            var expectedTechs = new List<IEliminationTechnique>() { occupiedTechA, occupiedTechB, occupiedTechC };
+            var expectedTechs = new List<ITechnique>() { occupiedTechA, occupiedTechB, occupiedTechC };
 
             cells[1].EliminatePossibleValue(testValue, occupiedTechA);
             cells[2].EliminatePossibleValue(testValue, requiredTech);
@@ -90,7 +101,7 @@ namespace Sudokungfu.Test.SudokuSolver
 
             var value = FoundValue.CreateFoundInSetValue(cells[0], testValue, box);
 
-            Assert.IsTrue(expectedTechs.SequenceEqual(value.Techniques));
+            Assert.IsTrue(expectedTechs.SetEqual(value.Techniques));
         }
 
         [TestMethod]
@@ -98,22 +109,15 @@ namespace Sudokungfu.Test.SudokuSolver
         {
             var testValue = 8;
 
-            var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10) };
+            var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10), new Cell(12) };
             var box = new Box(cells, 0);
             var row = new Row(cells, 1);
 
-            var lowAffectTech = BasicEliminationTechnique.CreateSetTechnique(testValue, 12, row);
-            var highAffectTech = new TestEliminationTechnique(2)
-            {
-                Indexes = new List<int> { 1, 9, 10 }
-            };
+            var lowAffectTech = BasicTechnique.CreateSetTechnique(testValue, 12, row.Indexes());
+            var highAffectTech = TestTechnique.CreateTestTechnique(2, 1, 9, 10);
+            var optionalTech = TestTechnique.CreateTestTechnique(1, 1);
 
-            var optionalTech = new TestEliminationTechnique(1)
-            {
-                Indexes = new List<int> { 1 }
-            };
-
-            var expectedTechs = new List<IEliminationTechnique>() { optionalTech, lowAffectTech };
+            var expectedTechs = new List<ITechnique>() { optionalTech, lowAffectTech };
 
             cells[1].EliminatePossibleValue(testValue, highAffectTech);
             cells[2].EliminatePossibleValue(testValue, highAffectTech);
@@ -124,7 +128,7 @@ namespace Sudokungfu.Test.SudokuSolver
 
             var value = FoundValue.CreateFoundInSetValue(cells[0], testValue, box);
 
-            Assert.IsTrue(expectedTechs.SequenceEqual(value.Techniques));
+            Assert.IsTrue(expectedTechs.SetEqual(value.Techniques));
         }
 
         [TestMethod]
@@ -134,16 +138,16 @@ namespace Sudokungfu.Test.SudokuSolver
             var testRequiredIndex = 12;
             var testOptionalIndex = 27;
 
-            var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10) };
+            var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10), new Cell(12), new Cell(27) };
             var box = new Box(cells, 0);
             var row = new Row(cells, 1);
             var col = new Column(cells, 0);
 
-            var occupiedTech = BasicEliminationTechnique.CreateOccupiedTechnique(testValue, cells[1].Index);
-            var requiredTech = BasicEliminationTechnique.CreateSetTechnique(testValue, testRequiredIndex, row);
-            var optionalTech = BasicEliminationTechnique.CreateSetTechnique(testValue, testOptionalIndex, col);
+            var occupiedTech = BasicTechnique.CreateOccupiedTechnique(testValue, cells[1].Index);
+            var requiredTech = BasicTechnique.CreateSetTechnique(testValue, testRequiredIndex, row.Indexes());
+            var optionalTech = BasicTechnique.CreateSetTechnique(testValue, testOptionalIndex, col.Indexes());
 
-            var expectedTechs = new List<IEliminationTechnique>() { occupiedTech, requiredTech };
+            var expectedTechs = new List<ITechnique>() { occupiedTech, requiredTech };
 
             cells[1].EliminatePossibleValue(testValue, occupiedTech);
             cells[2].EliminatePossibleValue(testValue, requiredTech);
@@ -152,7 +156,7 @@ namespace Sudokungfu.Test.SudokuSolver
 
             var value = FoundValue.CreateFoundInSetValue(cells[0], testValue, box);
 
-            Assert.IsTrue(expectedTechs.SequenceEqual(value.Techniques));
+            Assert.IsTrue(expectedTechs.SetEqual(value.Techniques));
         }
 
         [TestMethod]
@@ -163,22 +167,11 @@ namespace Sudokungfu.Test.SudokuSolver
             var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10), new Cell(18)};
             var box = new Box(cells, 0);
 
-            var lowAffectTech = new TestEliminationTechnique(1)
-            {
-                Indexes = new List<int> { 9, 10}
-            };
+            var lowAffectTech = TestTechnique.CreateTestTechnique(1, 9, 10);           
+            var highAffectTech = TestTechnique.CreateTestTechnique(2, 1, 9, 10, 18);
+            var optionalTech = TestTechnique.CreateTestTechnique(2, 1, 18);
 
-            var highAffectTech = new TestEliminationTechnique(2)
-            {
-                Indexes = new List<int> { 1, 9, 10, 18 }
-            };
-
-            var optionalTech = new TestEliminationTechnique(2)
-            {
-                Indexes = new List<int> { 1, 18 }
-            };
-
-            var expectedTechs = new List<IEliminationTechnique>() { highAffectTech };
+            var expectedTechs = new List<ITechnique>() { highAffectTech };
 
             cells[1].EliminatePossibleValue(testValue, highAffectTech);
             cells[2].EliminatePossibleValue(testValue, highAffectTech);
@@ -191,7 +184,7 @@ namespace Sudokungfu.Test.SudokuSolver
 
             var value = FoundValue.CreateFoundInSetValue(cells[0], testValue, box);
 
-            Assert.IsTrue(expectedTechs.SequenceEqual(value.Techniques));
+            Assert.IsTrue(expectedTechs.SetEqual(value.Techniques));
         }
 
         [TestMethod]
@@ -202,30 +195,17 @@ namespace Sudokungfu.Test.SudokuSolver
             var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10), new Cell(18) };
             var box = new Box(cells, 0);
 
-            var lowComplexityTech = new TestEliminationTechnique(1)
-            {
-                Indexes = new List<int> { 1, 9, 10, 18 }
-            };
+            var lowComplexityTech = TestTechnique.CreateTestTechnique(1, 1, 9, 10, 18);
+            var highComplexityTech = TestTechnique.CreateTestTechnique(2, 1, 9, 10, 18);
 
-            var highComplexityTech = new TestEliminationTechnique(2)
-            {
-                Indexes = new List<int> { 1, 9, 10, 18 }
-            };
+            var expectedTechs = new List<ITechnique>() { lowComplexityTech };
 
-            var expectedTechs = new List<IEliminationTechnique>() { lowComplexityTech };
-
-            cells[1].EliminatePossibleValue(testValue, highComplexityTech);
-            cells[2].EliminatePossibleValue(testValue, highComplexityTech);
-            cells[3].EliminatePossibleValue(testValue, highComplexityTech);
-            cells[4].EliminatePossibleValue(testValue, highComplexityTech);
-            cells[1].EliminatePossibleValue(testValue, lowComplexityTech);
-            cells[2].EliminatePossibleValue(testValue, lowComplexityTech);
-            cells[3].EliminatePossibleValue(testValue, lowComplexityTech);
-            cells[4].EliminatePossibleValue(testValue, lowComplexityTech);
+            EliminatePossibleValues(highComplexityTech, cells, testValue, 1, 2, 3, 4);
+            EliminatePossibleValues(lowComplexityTech, cells, testValue, 1, 2, 3, 4);
 
             var value = FoundValue.CreateFoundInSetValue(cells[0], testValue, box);
 
-            Assert.IsTrue(expectedTechs.SequenceEqual(value.Techniques));
+            Assert.IsTrue(expectedTechs.SetEqual(value.Techniques));
         }
 
         [TestMethod]
@@ -237,32 +217,13 @@ namespace Sudokungfu.Test.SudokuSolver
             var box = new Box(cells, 0);
             var row = new Row(cells, 1);
 
-            var techniqueA  = new TestEliminationTechnique(1)
-            {
-                Indexes = new List<int> { 1 }
-            };
+            var techniqueA = TestTechnique.CreateTestTechnique(1, 1);
+            var techniqueB = TestTechnique.CreateTestTechnique(1, 9);
+            var techniqueC = TestTechnique.CreateTestTechnique(1, 1, 9);
+            var techniqueD = TestTechnique.CreateTestTechnique(1, 10);
+            var techniqueE = TestTechnique.CreateTestTechnique(1, 10);
 
-            var techniqueB = new TestEliminationTechnique(1)
-            {
-                Indexes = new List<int> { 9 }
-            };
-
-            var techniqueC = new TestEliminationTechnique(1)
-            {
-                Indexes = new List<int> { 1, 9 }
-            };
-
-            var techniqueD = new TestEliminationTechnique(1)
-            {
-                Indexes = new List<int> { 10 }
-            };
-
-            var techniqueE = new TestEliminationTechnique(1)
-            {
-                Indexes = new List<int> { 10 }
-            };
-
-            var expectedTechs = new List<IEliminationTechnique>() { techniqueC, techniqueD };
+            var expectedTechs = new List<ITechnique>() { techniqueC, techniqueD };
 
             cells[1].EliminatePossibleValue(testValue, techniqueA);
             cells[2].EliminatePossibleValue(testValue, techniqueB);
@@ -282,11 +243,11 @@ namespace Sudokungfu.Test.SudokuSolver
             var testValue = 8;
 
             var cell = new Cell(34);
-            var expectedTechs = new List<IEliminationTechnique>();
+            var expectedTechs = new List<ITechnique>();
 
             foreach (var v in Constants.ALL_VALUES.Except(testValue))
             {
-                var tech = BasicEliminationTechnique.CreateOccupiedTechnique(v, v);
+                var tech = BasicTechnique.CreateOccupiedTechnique(v, v);
                 cell.EliminatePossibleValue(v, tech);
                 expectedTechs.Add(tech);
             }

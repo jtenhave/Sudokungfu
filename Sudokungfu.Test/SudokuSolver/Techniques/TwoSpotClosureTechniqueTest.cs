@@ -1,44 +1,52 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
+using System.Linq;
 
 namespace Sudokungfu.Test.SudokuSolver.Techniques
 {
+    using Sudokungfu.Extensions;
     using Sudokungfu.SudokuSolver;
     using Sudokungfu.SudokuSolver.Sets;
     using Sudokungfu.SudokuSolver.Techniques;
-    using System.Linq;
 
     /// <summary>
     /// Test class for <see cref="TwoSpotClosureTechnique"/>.
     /// </summary>
     [TestClass]
-    public class TwoSpotClosureTechniqueTest
+    public class TwoSpotClosureTechniqueTest : BaseTest
     {
         [TestMethod]
         public void TestTwoSpotClosure()
         {
             var testValueA = 3;
             var testValueB = 4;
-            var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(2),
-                new Cell(9), new Cell(10), new Cell(11),
-                new Cell(18), new Cell(19),new Cell(20) };
-
+            var cells = GetAllCells().ToList();
+            var expectedCells = new Cell[] { cells[0], cells[1] };
+            var expectedValues = new int[] { testValueA, testValueB };
             var box = new Box(cells, 0);
-
-            var testTechnique = new TestEliminationTechnique(0);
-            for (int i = 2; i < cells.Count; i++)
+            var expectedTechnique = new TestTechnique()
             {
-                cells[i].EliminatePossibleValue(testValueA, testTechnique);
-                cells[i].EliminatePossibleValue(testValueB, testTechnique);
+                Complexity = 2,
+                IndexValueMap = box.Indexes().ToDictionary(i => i, i => expectedCells.Indexes().Contains(i) ? expectedValues : Enumerable.Empty<int>()),
+                UsesFoundValues = false
+            };
+
+            var testTechnique = new TestTechnique();
+            var cellsRemaining = box.Cells.Except(expectedCells);
+            foreach (var cell in cellsRemaining)
+            {
+                cell.EliminatePossibleValue(testValueA, testTechnique);
+                cell.EliminatePossibleValue(testValueB, testTechnique);
             }
 
-            var closureTechnique = new TwoSpotClosureTechnique();
-            closureTechnique.Apply(cells, new List<Set> { box });
+            TwoSpotClosureTechnique.Apply(cells, new Set[] { box });
 
-            for (int i = 0; i < 2; i++)
+            foreach(var cell in expectedCells)
             {
-                Assert.AreEqual(2, cells[i].PossibleValues.Count());
-                Assert.IsTrue(cells[i].PossibleValues.SequenceEqual(new List<int>() { testValueA, testValueB }));
+                Assert.IsTrue(cell.PossibleValues.SetEqual(expectedValues));
+                foreach (var value in Constants.ALL_VALUES.Except(expectedValues))
+                {
+                    AssertITechniqueEqual(expectedTechnique, cell.EliminationTechniques[value].First());
+                }
             }
         }
 
@@ -47,13 +55,11 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             var testValueA = 3;
             var testValueB = 4;
-            var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(2),
-                new Cell(9), new Cell(10), new Cell(11),
-                new Cell(18), new Cell(19),new Cell(20) };
+            var cells = GetAllCells().ToList();
 
             var box = new Box(cells, 0);
 
-            var testTechnique = new TestEliminationTechnique(0);
+            var testTechnique = new TestTechnique();
             cells[1].EliminatePossibleValue(testValueA, testTechnique);
             for (int i = 2; i < cells.Count; i++)
             {
@@ -61,8 +67,7 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
                 cells[i].EliminatePossibleValue(testValueB, testTechnique);
             }
 
-            var closureTechnique = new TwoSpotClosureTechnique();
-            closureTechnique.Apply(cells, new List<Set> { box });
+            TwoSpotClosureTechnique.Apply(cells, new Set[] { box });
 
             Assert.AreEqual(9, cells[0].PossibleValues.Count());
             Assert.AreEqual(8, cells[1].PossibleValues.Count());

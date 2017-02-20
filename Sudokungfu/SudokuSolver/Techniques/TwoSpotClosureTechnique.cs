@@ -1,6 +1,7 @@
 ﻿using Sudokungfu.SudokuSolver.Sets;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 
 namespace Sudokungfu.SudokuSolver.Techniques
 {
@@ -9,14 +10,13 @@ namespace Sudokungfu.SudokuSolver.Techniques
     /// <summary>
     /// Class that represents the 'Three Spot Closure' technique.
     /// </summary>
-    public class TwoSpotClosureTechnique : AdvancedTechnique
+    public class TwoSpotClosureTechnique : BasicTechnique
     {
-        /// <summary>
-        /// Creates a new <see cref="TwoSpotClosureTechnique"/>.
-        /// </summary>
-        public TwoSpotClosureTechnique()
+        private const int DEFAULT_COMPLEXITY = 2;
+
+        private TwoSpotClosureTechnique()
         {
-            Complexity = 2;
+
         }
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace Sudokungfu.SudokuSolver.Techniques
         /// </summary>
         /// <param name="cells">Cells in the Sudoku.</param>
         /// <param name="sets">Sets of cells in the Sudoku.</param>
-        public override void Apply(IEnumerable<Cell> cells, IEnumerable<Set> sets)
+        public static void Apply(IEnumerable<Cell> cells, IEnumerable<Set> sets)
         {
             foreach (var set in sets)
             {
@@ -36,27 +36,35 @@ namespace Sudokungfu.SudokuSolver.Techniques
                         var twoValueSpotsUnion = possibleSpotsA.Value.Union(possibleSpotsB.Value);
                         if (twoValueSpotsUnion.Count() == 2)
                         {
-                            var twoSpotTechnique = new TwoSpotClosureTechnique()
-                            {
-                                Indexes = twoValueSpotsUnion.Select(c => c.Index),
-                                ValueMap = new Dictionary<int, IEnumerable<int>>()
-                                {
-                                    [possibleSpotsA.Key] = possibleSpotsA.Value.Select(c => c.Index),
-                                    [possibleSpotsB.Key] = possibleSpotsB.Value.Select(c => c.Index)
-                                }
-                            };
+                            var valueA = possibleSpotsA.Key;
+                            var valueB = possibleSpotsB.Key;
+                            var indexes = twoValueSpotsUnion.Indexes();
+                            var setIndexes = set.Indexes();
+
+                            var technique = CreateTwoSpotClosureTechnique(valueA, valueB, indexes, setIndexes);
 
                             foreach (var cell in twoValueSpotsUnion)
                             {
                                 foreach (var value in cell.PossibleValues.Except(possibleSpotsA.Key, possibleSpotsB.Key).ToList())
                                 {
-                                    cell.EliminatePossibleValue(value, twoSpotTechnique);
+                                    cell.EliminatePossibleValue(value, technique);
                                 }
                             }
                         }
                     }
                 }
             }
+        }
+
+        public static TwoSpotClosureTechnique CreateTwoSpotClosureTechnique(int valueA, int valueB, IEnumerable<int> indexes, IEnumerable<int> setIndexes)
+        {
+            var values = new int[] { valueA, valueB };
+            return new TwoSpotClosureTechnique()
+            {
+                Complexity = DEFAULT_COMPLEXITY,
+                IndexValueMap = setIndexes.ToDictionary(i => i, i => indexes.Contains(i) ?  values : Enumerable.Empty<int>()),
+                UsesFoundValues = false
+            };
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace Sudokungfu.SudokuSolver
+namespace Sudokungfu.SudokuSolver.Techniques
 {
-    public interface IEliminationTechnique
+    public interface ITechnique
     {
         /// <summary>
         /// Complexity of the technique. 
@@ -13,14 +13,13 @@ namespace Sudokungfu.SudokuSolver
         int Complexity { get; }
 
         /// <summary>
-        /// Indexes of cells that should be shown when this technique is displayed.
+        /// Indexes of the cells that are part of the technique and the values that go in them.
         /// </summary>
-        IEnumerable<int> Indexes { get; }
+        IDictionary<int, IEnumerable<int>> IndexValueMap { get; }
 
         /// <summary>
-        /// Values, and the indexes of the cells they should be in, that should be shown when this technique is displayed.
+        /// Returns true if the technique uses values that have already been found in the Sudoku.
         /// </summary>
-        IDictionary<int, IEnumerable<int>> ValueMap { get;  }
-
+        bool UsesFoundValues { get; }
     }
 }
