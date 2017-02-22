@@ -1,14 +1,13 @@
-﻿using Sudokungfu.SudokuSolver.Sets;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
 
 namespace Sudokungfu.SudokuSolver.Techniques
 {
     using Extensions;
+    using Sets;
 
     /// <summary>
-    /// Class that represents the 'Three Spot Closure' technique.
+    /// Class that represents the 'Two Spot Closure' technique.
     /// </summary>
     public class TwoSpotClosureTechnique : BasicTechnique
     {
@@ -56,6 +55,13 @@ namespace Sudokungfu.SudokuSolver.Techniques
             }
         }
 
+        /// <summary>
+        /// Creates a <see cref="TwoSpotClosureTechnique"/>.
+        /// </summary>
+        /// <param name="valueA">Value in the closure.</param>
+        /// <param name="valueB">Value in the closure.</param>
+        /// <param name="indexes">Indexes of the closure.</param>
+        /// <param name="setIndexes">Indexes of the cells in the set with a closure.</param>
         public static TwoSpotClosureTechnique CreateTwoSpotClosureTechnique(int valueA, int valueB, IEnumerable<int> indexes, IEnumerable<int> setIndexes)
         {
             var values = new int[] { valueA, valueB };

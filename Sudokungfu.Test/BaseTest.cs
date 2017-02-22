@@ -7,9 +7,14 @@ namespace Sudokungfu.Test
     using Sudokungfu.SudokuSolver;
     using Sudokungfu.SudokuSolver.Techniques;
 
-
+    /// <summary>
+    /// Base test class for all other tests.
+    /// </summary>
     public class BaseTest
     {
+        /// <summary>
+        /// Gets all 81 cells.
+        /// </summary>
         public static IEnumerable<Cell> GetAllCells()
         {
             var cells = new List<Cell>();
@@ -21,6 +26,11 @@ namespace Sudokungfu.Test
             return cells;
         }
 
+        /// <summary>
+        /// Compares two <see cref="ITechnique"/> and asserts they are equal.
+        /// </summary>
+        /// <param name="expected">Expected technique.</param>
+        /// <param name="actual">Actual technique.</param>
         public static void AssertITechniqueEqual(ITechnique expected, ITechnique actual)
         {
             Assert.AreEqual(expected.Complexity, actual.Complexity);
@@ -44,6 +54,13 @@ namespace Sudokungfu.Test
             }
         }
 
+        /// <summary>
+        /// Eliminates a value from a group of cells using a technique.
+        /// </summary>
+        /// <param name="technique">Technique to use.</param>
+        /// <param name="cells">Cells in the Sudoku.</param>
+        /// <param name="value">Value to eliminate.</param>
+        /// <param name="indexes">Indexes of the cells to eliminate the value from.</param>
         public static void EliminatePossibleValues(ITechnique technique, List<Cell> cells, int value, params int[] indexes)
         {
             foreach (var i in indexes)
@@ -52,6 +69,4 @@ namespace Sudokungfu.Test
             }
         }
     }
-
-    
 }

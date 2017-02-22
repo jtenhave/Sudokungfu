@@ -34,7 +34,6 @@ namespace Sudokungfu.Test.SudokuSolver
         public void TestCreateFoundInSetValue()
         {
             var testValue = 8;
-
             var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10) };
             var box = new Box(cells, 0);
 
@@ -49,10 +48,8 @@ namespace Sudokungfu.Test.SudokuSolver
         public void TestFoundInSetValueHasAllOccupiedTechniques()
         {
             var testValue = 8;
-
             var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10) };
             var box = new Box(cells, 0);
-
             var expectedTechniques = new ITechnique[]
             {
                 BasicTechnique.CreateOccupiedTechnique(testValue, cells[1].Index),
@@ -78,7 +75,6 @@ namespace Sudokungfu.Test.SudokuSolver
             var testValue = 8;
             var testRequiredIndex = 12;
             var testOptionalIndex = 27;
-
             var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10), new Cell(12), new Cell(27) };
             var box = new Box(cells, 0);
             var row = new Row(cells, 1);
@@ -108,11 +104,9 @@ namespace Sudokungfu.Test.SudokuSolver
         public void TestFoundInSetValueIgnoresHigherComplexityTechniques()
         {
             var testValue = 8;
-
             var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10), new Cell(12) };
             var box = new Box(cells, 0);
             var row = new Row(cells, 1);
-
             var lowAffectTech = BasicTechnique.CreateSetTechnique(testValue, 12, row.Indexes());
             var highAffectTech = TestTechnique.CreateTestTechnique(2, 1, 9, 10);
             var optionalTech = TestTechnique.CreateTestTechnique(1, 1);
@@ -137,7 +131,6 @@ namespace Sudokungfu.Test.SudokuSolver
             var testValue = 8;
             var testRequiredIndex = 12;
             var testOptionalIndex = 27;
-
             var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10), new Cell(12), new Cell(27) };
             var box = new Box(cells, 0);
             var row = new Row(cells, 1);
@@ -163,7 +156,6 @@ namespace Sudokungfu.Test.SudokuSolver
         public void TestFoundInSetValueLeftoverTechniquesTakenByCellsAffectedFirst()
         {
             var testValue = 8;
-
             var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10), new Cell(18)};
             var box = new Box(cells, 0);
 
@@ -191,7 +183,6 @@ namespace Sudokungfu.Test.SudokuSolver
         public void TestFoundInSetValueLeftoverTechniquesTakenByComplexitySecond()
         {
             var testValue = 8;
-
             var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10), new Cell(18) };
             var box = new Box(cells, 0);
 
@@ -212,7 +203,6 @@ namespace Sudokungfu.Test.SudokuSolver
         public void TestFoundInSetValueHandlesMutuallyExclusiveTechniques()
         {
             var testValue = 8;
-
             var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10) };
             var box = new Box(cells, 0);
             var row = new Row(cells, 1);
@@ -241,7 +231,6 @@ namespace Sudokungfu.Test.SudokuSolver
         public void TestCreateOnlyPossiblValue()
         {
             var testValue = 8;
-
             var cell = new Cell(34);
             var expectedTechs = new List<ITechnique>();
 

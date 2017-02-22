@@ -16,10 +16,9 @@ namespace Sudokungfu.Test.SudokuSolver.Sets
         public void TestPossibleSpots()
         {
             var testValue = 6;
-            var expectedIndexes = new List<int>() { 2, 5, 6, 8 };
-
             var cells = GetAllCells().ToList();
             var row = new Row(cells, 0);
+            var expectedIndexes = new List<int>() { 2, 5, 6, 8 };
 
             var technique = new TestTechnique();
             EliminatePossibleValues(technique, cells, testValue, 0, 1, 3, 4, 7);

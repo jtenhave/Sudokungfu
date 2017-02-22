@@ -1,11 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sudokungfu.SudokuGrid;
 using System;
 using System.Linq;
 using System.Text;
 
 namespace Sudokungfu.Test.SudokuGrid
 {
+    using Sudokungfu.SudokuGrid;
+
     /// <summary>
     /// Test class for <see cref="CellBorderConverter"/>
     /// </summary>

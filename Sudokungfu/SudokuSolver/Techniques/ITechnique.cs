@@ -2,6 +2,9 @@
 
 namespace Sudokungfu.SudokuSolver.Techniques
 {
+    /// <summary>
+    /// Interface that represents a technique used to eliminate a possible value from a cell in the Sudoku.
+    /// </summary>
     public interface ITechnique
     {
         /// <summary>

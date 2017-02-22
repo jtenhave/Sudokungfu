@@ -1,19 +1,16 @@
 ﻿using Sudokungfu.SudokuSolver.Sets;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
 
 namespace Sudokungfu.SudokuSolver.Techniques
 {
     using Extensions;
-    
+
     /// <summary>
     /// Class that represents the 'Three Spot Closure' technique.
     /// </summary>
     public class ThreeSpotClosureTechnique : BasicTechnique
     {
-        private const int TWO_VALUE_FONT_SIZE = 20;
-        private const int THREE_VALUE_FONT_SIZE = 15;
         private const int DEFAULT_COMPLEXITY = 3;
 
         private ThreeSpotClosureTechnique()
@@ -59,9 +56,16 @@ namespace Sudokungfu.SudokuSolver.Techniques
             }
         }
 
+        /// <summary>
+        /// Creates a <see cref="ThreeSpotClosureTechnique"/>.
+        /// </summary>
+        /// <param name="valueA">Value in the closure and cells which the value can go in.</param>
+        /// <param name="valueB">Value in the closure and cells which the value can go in.</param>
+        /// <param name="valueC">Value in the closure and cells which the value can go in.</param>
+        /// <param name="setIndexes">Indexes of the cells in the set with a closure.</param>
         public static ThreeSpotClosureTechnique CreateThreeSpotClosureTechnique(KeyValuePair<int, IEnumerable<int>> valueA, KeyValuePair<int, IEnumerable<int>> valueB, KeyValuePair<int, IEnumerable<int>> valueC, IEnumerable<int> setIndexes)
         {
-            var values = new KeyValuePair<int, IEnumerable<int>>[] { valueA, valueB, valueB };
+            var values = new KeyValuePair<int, IEnumerable<int>>[] { valueA, valueB, valueC };
             return new ThreeSpotClosureTechnique()
             {
                 Complexity = DEFAULT_COMPLEXITY,

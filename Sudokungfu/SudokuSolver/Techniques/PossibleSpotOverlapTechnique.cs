@@ -48,6 +48,12 @@ namespace Sudokungfu.SudokuSolver.Techniques
             }
         }
 
+        /// <summary>
+        /// Creates a <see cref="PossibleSpotOverlapTechnique"/>.
+        /// </summary>
+        /// <param name="value">Value that must go in the overlapping cells.</param>
+        /// <param name="indexes">Indexes of the overlapping cells.</param>
+        /// <param name="setindexes">Indexes of the cells in the sets that overlap.</param>
         public static PossibleSpotOverlapTechnique CreatePossibleSpotOverlapTechnique(int value, IEnumerable<int> indexes, IEnumerable<int> setindexes)
         {
             return new PossibleSpotOverlapTechnique()

@@ -3,7 +3,6 @@ using System.Linq;
 
 namespace Sudokungfu.SudokuSolver.Techniques
 {
-    using Sets;
     using Extensions;
 
     /// <summary>

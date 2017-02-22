@@ -20,7 +20,6 @@ namespace Sudokungfu.Test.SudokuSolver
         {
             var testValue = 3;
             var testIndex = 76;
-
             var expectedTechnique = new TestTechnique()
             {
                 Complexity = 0,
@@ -41,10 +40,8 @@ namespace Sudokungfu.Test.SudokuSolver
         {
             var testValue = 3;
             var testIndex = 9;
-
             var cells = new Cell[] { new Cell(0), new Cell(1), new Cell(9), new Cell(10) };
             var box = new Box(cells, 0);
-
             var expectedTechnique = new TestTechnique()
             {
                 Complexity = 1,

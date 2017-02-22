@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 namespace Sudokungfu.SudokuSolver.Techniques
 {
-    using SudokuSolver;
     using Sets;
+    using SudokuSolver;
 
     /// <summary>
     /// Static class for accessing the list of advanced techniques

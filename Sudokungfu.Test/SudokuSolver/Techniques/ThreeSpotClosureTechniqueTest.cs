@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Sudokungfu.Test.SudokuSolver.Techniques
 {
+    using Sudokungfu.Extensions;
     using Sudokungfu.SudokuSolver;
     using Sudokungfu.SudokuSolver.Sets;
     using Sudokungfu.SudokuSolver.Techniques;
@@ -14,66 +14,82 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
     [TestClass]
     public class ThreeSpotClosureTechniqueTest : BaseTest
     {
-        /*[TestMethod]
-        public void TestThreeValueClosureA()
+        [TestMethod]
+        public void TestThreeValueClosureWithThreeTriples()
         {
             var testValueA = 3;
             var testValueB = 4;
             var testValueC = 5;
-            var cells = GetAllCells();
-
+            var cells = GetAllCells().ToList();
             var box = new Box(cells, 0);
+            var expectedCells = new Cell[] { cells[0], cells[1], cells[2] };
+            var expectedValues = new int[] { testValueA, testValueB, testValueC };
+            var expectedTechnique = new TestTechnique()
+            {
+                Complexity = 3,
+                IndexValueMap = box.Indexes().ToDictionary(i => i, i => expectedCells.Indexes().Contains(i) ? expectedValues : Enumerable.Empty<int>()),
+                UsesFoundValues = false
+            };
 
             var testTechnique = new TestTechnique();
-            for (int i = 3; i < cells.Count; i++)
+            foreach(var cell in box.Cells.Except(expectedCells))
             {
-                cells[i].EliminatePossibleValue(testValueA, testTechnique);
-                cells[i].EliminatePossibleValue(testValueB, testTechnique);
-                cells[i].EliminatePossibleValue(testValueC, testTechnique);
+                cell.EliminatePossibleValue(testValueA, testTechnique);
+                cell.EliminatePossibleValue(testValueB, testTechnique);
+                cell.EliminatePossibleValue(testValueC, testTechnique);
             }
 
             ThreeSpotClosureTechnique.Apply(cells, new Set[] { box });
 
-            for (int i = 0; i < 3; i++)
+            foreach(var cell in expectedCells)
             {
-                Assert.AreEqual(3, cells[i].PossibleValues.Count());
-                Assert.IsTrue(cells[i].PossibleValues.SequenceEqual(new List<int>() { testValueA, testValueB, testValueC }));
+                Assert.IsTrue(cell.PossibleValues.SetEqual(expectedValues));
+                foreach (var value in Constants.ALL_VALUES.Except(expectedValues))
+                {
+                    AssertITechniqueEqual(expectedTechnique, cell.EliminationTechniques[value].First());
+                }
             }
         }
 
         [TestMethod]
-        public void TestThreeValueClosureB()
+        public void TestThreeValueClosureWithThreePairs()
         {
-            var testValueA = 3;
-            var testValueB = 4;
-            var testValueC = 5;
-            var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(2),
-                new Cell(9), new Cell(10), new Cell(11),
-                new Cell(18), new Cell(19),new Cell(20) };
-
-            var box = new Box(cells, 0);
-
-            var testTechnique = new TestTechnique(0);
-            cells[2].EliminatePossibleValue(testValueA, testTechnique);
-            cells[0].EliminatePossibleValue(testValueB, testTechnique);
-            cells[1].EliminatePossibleValue(testValueC, testTechnique);
-
-            for (int i = 3; i < cells.Count; i++)
+            var testValueA = 1;
+            var testValueB = 2;
+            var testValueC = 3;
+            var cells = GetAllCells().ToList();
+            var box = new Row(cells, 0);
+            var expectedCells = new Cell[] { cells[1], cells[2], cells[3] };
+            var expectedValues = new int[] { testValueA, testValueB, testValueC };
+            var expectedTechnique = new TestTechnique()
             {
-                cells[i].EliminatePossibleValue(testValueA, testTechnique);
-                cells[i].EliminatePossibleValue(testValueB, testTechnique);
-                cells[i].EliminatePossibleValue(testValueC, testTechnique);
+                Complexity = 3,
+                IndexValueMap = box.Indexes().ToDictionary(i => i, i => expectedCells.Indexes().Contains(i) ? expectedValues.Except(i) : Enumerable.Empty<int>()),
+                UsesFoundValues = false
+            };
+
+            var testTechnique = new TestTechnique();
+            foreach (var cell in box.Cells.Except(expectedCells))
+            {
+                cell.EliminatePossibleValue(testValueA, testTechnique);
+                cell.EliminatePossibleValue(testValueB, testTechnique);
+                cell.EliminatePossibleValue(testValueC, testTechnique);
             }
+
+            cells[1].EliminatePossibleValue(testValueA, testTechnique);
+            cells[2].EliminatePossibleValue(testValueB, testTechnique);
+            cells[3].EliminatePossibleValue(testValueC, testTechnique);
 
             ThreeSpotClosureTechnique.Apply(cells, new Set[] { box });
 
-            Assert.AreEqual(2, cells[0].PossibleValues.Count());
-            Assert.AreEqual(2, cells[1].PossibleValues.Count());
-            Assert.AreEqual(2, cells[2].PossibleValues.Count());
-
-            Assert.IsTrue(cells[0].PossibleValues.SequenceEqual(new List<int>() { testValueA, testValueC }));
-            Assert.IsTrue(cells[1].PossibleValues.SequenceEqual(new List<int>() { testValueA, testValueB }));
-            Assert.IsTrue(cells[2].PossibleValues.SequenceEqual(new List<int>() { testValueB, testValueC }));
-        }*/
+            foreach (var cell in expectedCells)
+            {
+                Assert.IsTrue(cell.PossibleValues.SetEqual(expectedValues.Except(cell.Index)));
+                foreach (var value in Constants.ALL_VALUES.Except(expectedValues))
+                {
+                    AssertITechniqueEqual(expectedTechnique, cell.EliminationTechniques[value].First());
+                }
+            }
+        }
     }
 }

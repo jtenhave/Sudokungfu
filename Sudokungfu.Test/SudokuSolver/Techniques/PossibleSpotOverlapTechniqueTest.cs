@@ -19,12 +19,10 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         public void TestTwoOverlappingCells()
         {
             var testValue = 8;
-
             var cells = GetAllCells().ToList();
             var box = new Box(cells, 0);
             var row = new Row(cells, 0);
             var expectedCells = new List<Cell>() { cells[0], cells[2] };
-
             var expectedTechnique = new TestTechnique()
             {
                 Complexity = 2,
@@ -48,12 +46,10 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         public void TestThreeOverlappingCells()
         {
             var testValue = 8;
-
             var cells = GetAllCells().ToList();
             var box = new Box(cells, 0);
             var row = new Row(cells, 0);
             var expectedCells = new List<Cell>() { cells[0], cells[1], cells[2] };
-
             var expectedTechnique = new TestTechnique()
             {
                 Complexity = 2,
@@ -78,9 +74,7 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         public void TestTwoOverlappingCellsWithOneNonOverlapping()
         {
             var testValue = 8;
-
             var cells = GetAllCells().ToList();
-
             var box = new Box(cells, 0);
             var row = new Row(cells, 0);
 
@@ -98,12 +92,9 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         public void TestTechniqueNotAppliedToSourceSet()
         {
             var testValue = 8;
-
             var cells = GetAllCells().ToList();
-
             var box = new Box(cells, 0);
             var row = new Row(cells, 0);
-
             var expectedTechnique = new TestTechnique();
 
             EliminatePossibleValues(expectedTechnique, cells, testValue, 1, 9, 10, 11, 12, 13, 14);

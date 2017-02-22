@@ -20,9 +20,9 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
             var testValueA = 3;
             var testValueB = 4;
             var cells = GetAllCells().ToList();
+            var box = new Box(cells, 0);
             var expectedCells = new Cell[] { cells[0], cells[1] };
             var expectedValues = new int[] { testValueA, testValueB };
-            var box = new Box(cells, 0);
             var expectedTechnique = new TestTechnique()
             {
                 Complexity = 2,
@@ -56,7 +56,6 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
             var testValueA = 3;
             var testValueB = 4;
             var cells = GetAllCells().ToList();
-
             var box = new Box(cells, 0);
 
             var testTechnique = new TestTechnique();
