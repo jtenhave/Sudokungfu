@@ -21,6 +21,11 @@ namespace Sudokungfu.SudokuSolver.Techniques
         IDictionary<int, IEnumerable<int>> IndexValueMap { get; }
 
         /// <summary>
+        /// Indexes of cells that had values eliminanated by this technique.
+        /// </summary>
+        IEnumerable<int> AffectedIndexes { get; }
+
+        /// <summary>
         /// Returns true if the technique uses values that have already been found in the Sudoku.
         /// </summary>
         bool UsesFoundValues { get; }

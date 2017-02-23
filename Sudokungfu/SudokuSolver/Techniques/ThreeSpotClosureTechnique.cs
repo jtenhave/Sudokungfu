@@ -41,7 +41,7 @@ namespace Sudokungfu.SudokuSolver.Techniques
                                 var valueB = new KeyValuePair<int, IEnumerable<int>>(possibleSpotsB.Key, possibleSpotsB.Value.Indexes());
                                 var valueC = new KeyValuePair<int, IEnumerable<int>>(possibleSpotsC.Key, possibleSpotsC.Value.Indexes());
 
-                                var technique = CreateThreeSpotClosureTechnique(valueA, valueB, valueC, set.Indexes());
+                                var technique = CreateThreeSpotClosureTechnique(valueA, valueB, valueC, set.Indexes(), threeValueSpotsUnion.Indexes());
                                 foreach (var cell in threeValueSpotsUnion)
                                 {
                                     foreach (var value in cell.PossibleValues.Except(possibleSpotsA.Key, possibleSpotsB.Key, possibleSpotsC.Key).ToList())
@@ -63,13 +63,15 @@ namespace Sudokungfu.SudokuSolver.Techniques
         /// <param name="valueB">Value in the closure and cells which the value can go in.</param>
         /// <param name="valueC">Value in the closure and cells which the value can go in.</param>
         /// <param name="setIndexes">Indexes of the cells in the set with a closure.</param>
-        public static ThreeSpotClosureTechnique CreateThreeSpotClosureTechnique(KeyValuePair<int, IEnumerable<int>> valueA, KeyValuePair<int, IEnumerable<int>> valueB, KeyValuePair<int, IEnumerable<int>> valueC, IEnumerable<int> setIndexes)
+        /// <param name="affectedIndexes">Indexes of cells that had values eliminanated by this technique.</param>
+        public static ThreeSpotClosureTechnique CreateThreeSpotClosureTechnique(KeyValuePair<int, IEnumerable<int>> valueA, KeyValuePair<int, IEnumerable<int>> valueB, KeyValuePair<int, IEnumerable<int>> valueC, IEnumerable<int> setIndexes, IEnumerable<int> affectedIndexes)
         {
             var values = new KeyValuePair<int, IEnumerable<int>>[] { valueA, valueB, valueC };
             return new ThreeSpotClosureTechnique()
             {
                 Complexity = DEFAULT_COMPLEXITY,
                 IndexValueMap = setIndexes.ToDictionary(i => i, i => values.Where(v => v.Value.Contains(i)).Select(v => v.Key)),
+                AffectedIndexes = affectedIndexes,
                 UsesFoundValues = false
             };
         }

@@ -16,6 +16,8 @@ namespace Sudokungfu.SudokuGrid
     /// </remarks>
     public class CellViewModel : INotifyPropertyChanged
     {
+        private const int FONT_SIZE_DEFAULT = 36;
+
         private string _value;
         private Brush _background;
         private bool _isReadOnly;
@@ -149,7 +151,6 @@ namespace Sudokungfu.SudokuGrid
             }
         }
 
-
         /// <summary>
         /// Creates a new <see cref="CellViewModel"/>
         /// </summary>
@@ -164,6 +165,7 @@ namespace Sudokungfu.SudokuGrid
             Index = index;
             Background = Brushes.White;
             Value = string.Empty;
+            FontSize = FONT_SIZE_DEFAULT;
         }
 
         /// <summary>

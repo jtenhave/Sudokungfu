@@ -103,5 +103,22 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
             var actualTechnique = cells[1].EliminationTechniques[testValue].FirstOrDefault();
             Assert.AreEqual(expectedTechnique, actualTechnique);
         }
+
+        [TestMethod]
+        public void TestTechniqueRequiresAtLeastTwoCells()
+        {
+            var testValue = 8;
+            var cells = GetAllCells().ToList();
+            var box = new Box(cells, 0);
+            var row = new Row(cells, 0);
+            var expectedCells = row.Cells.Except(cells[1], cells[2]);
+
+            var testTechnique = new TestTechnique();
+
+            EliminatePossibleValues(testTechnique, cells, testValue, 1, 2, 9, 10, 11, 18, 19, 20);
+            PossibleSpotOverlapTechnique.Apply(cells, new Set[] { box, row });
+
+            Assert.IsTrue(row.PossibleSpots[testValue].SetEqual(expectedCells));
+        }
     }
 }

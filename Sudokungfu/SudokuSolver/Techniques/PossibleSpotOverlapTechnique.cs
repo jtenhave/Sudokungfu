@@ -27,7 +27,7 @@ namespace Sudokungfu.SudokuSolver.Techniques
         {
             foreach (var sourceSet in sets)
             {
-                var possibleSpotSetsDic = sourceSet.PossibleSpots.Where(kvp => kvp.Value.Count() <= 3);
+                var possibleSpotSetsDic = sourceSet.PossibleSpots.Where(kvp => kvp.Value.Count() <= 3 && kvp.Value.Count() >= 2);
                 foreach (var possibleSpots in possibleSpotSetsDic)
                 {
                     var overlappingSets = sets.Except(sourceSet).Where(s => s.IsSubset(possibleSpots.Value));
@@ -36,10 +36,11 @@ namespace Sudokungfu.SudokuSolver.Techniques
                         var value = possibleSpots.Key;
                         var indexes = possibleSpots.Value.Indexes();
                         var setIndexes = sourceSet.Cells.Union(overlappingSet.Cells).Indexes();
+                        var affectedCells = overlappingSet.Cells.Except(sourceSet.Cells);
 
-                        var technique = CreatePossibleSpotOverlapTechnique(value, indexes, setIndexes);
+                        var technique = CreatePossibleSpotOverlapTechnique(value, indexes, setIndexes, affectedCells.Indexes());
           
-                        foreach (var cell in overlappingSet.Cells.Except(sourceSet.Cells))
+                        foreach (var cell in affectedCells)
                         {
                             cell.EliminatePossibleValue(possibleSpots.Key, technique);
                         }
@@ -54,12 +55,14 @@ namespace Sudokungfu.SudokuSolver.Techniques
         /// <param name="value">Value that must go in the overlapping cells.</param>
         /// <param name="indexes">Indexes of the overlapping cells.</param>
         /// <param name="setindexes">Indexes of the cells in the sets that overlap.</param>
-        public static PossibleSpotOverlapTechnique CreatePossibleSpotOverlapTechnique(int value, IEnumerable<int> indexes, IEnumerable<int> setindexes)
+        /// <param name="affectedIndexes">Indexes of cells that had values eliminanated by this technique.</param>
+        public static PossibleSpotOverlapTechnique CreatePossibleSpotOverlapTechnique(int value, IEnumerable<int> indexes, IEnumerable<int> setindexes, IEnumerable<int> affectedIndexes)
         {
             return new PossibleSpotOverlapTechnique()
             {
                 Complexity = DEFAULT_COMPLEXITY,
                 IndexValueMap = setindexes.ToDictionary(i => i, i => indexes.Contains(i) ? value.ToEnumerable() : Enumerable.Empty<int>()),
+                AffectedIndexes = affectedIndexes,
                 UsesFoundValues = false
             };
         }

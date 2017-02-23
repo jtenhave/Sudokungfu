@@ -40,7 +40,7 @@ namespace Sudokungfu.SudokuSolver.Techniques
                             var indexes = twoValueSpotsUnion.Indexes();
                             var setIndexes = set.Indexes();
 
-                            var technique = CreateTwoSpotClosureTechnique(valueA, valueB, indexes, setIndexes);
+                            var technique = CreateTwoSpotClosureTechnique(valueA, valueB, indexes, setIndexes, twoValueSpotsUnion.Indexes());
 
                             foreach (var cell in twoValueSpotsUnion)
                             {
@@ -62,13 +62,15 @@ namespace Sudokungfu.SudokuSolver.Techniques
         /// <param name="valueB">Value in the closure.</param>
         /// <param name="indexes">Indexes of the closure.</param>
         /// <param name="setIndexes">Indexes of the cells in the set with a closure.</param>
-        public static TwoSpotClosureTechnique CreateTwoSpotClosureTechnique(int valueA, int valueB, IEnumerable<int> indexes, IEnumerable<int> setIndexes)
+        /// <param name="affectedIndexes">Indexes of cells that had values eliminanated by this technique.</param>
+        public static TwoSpotClosureTechnique CreateTwoSpotClosureTechnique(int valueA, int valueB, IEnumerable<int> indexes, IEnumerable<int> setIndexes, IEnumerable<int> affectedIndexes)
         {
             var values = new int[] { valueA, valueB };
             return new TwoSpotClosureTechnique()
             {
                 Complexity = DEFAULT_COMPLEXITY,
                 IndexValueMap = setIndexes.ToDictionary(i => i, i => indexes.Contains(i) ?  values : Enumerable.Empty<int>()),
+                AffectedIndexes = affectedIndexes,
                 UsesFoundValues = false
             };
         }

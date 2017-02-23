@@ -14,6 +14,11 @@ namespace Sudokungfu.SudokuGrid
     /// </summary>
     public partial class SudokuGridView : UserControl
     {
+        private const int FONT_SIZE_DEFAULT = 36;
+        private const int FONT_SIZE_ONE = 25;
+        private const int FONT_SIZE_TWO = 20;
+        private const int FONT_SIZE_THREE = 15;
+
         private int _shownValues;
         private int _givenValues;
         private List<FoundValue> _currentSudoku;
@@ -135,7 +140,6 @@ namespace Sudokungfu.SudokuGrid
 
                     var techniqueIndexes = foundValue.Techniques.SelectMany(t => t.Indexes());
                     var techniqueCellModels = Cells.Where(c => techniqueIndexes.Contains(c.Index));
-                    //var techniqueValueMap = foundValue.Techniques.SelectMany(t => t.ValueMap);
 
                     // Set the background for all techniques used in finding this value.
                     foreach (var cell in techniqueCellModels)
@@ -144,14 +148,38 @@ namespace Sudokungfu.SudokuGrid
                         cell.Value = string.Empty;
                     }
 
-                    // Set the values all techniques used in finding this value.
-                    /*foreach (var value in techniqueValueMap)
+                    // Set the values for all techniques used in finding this value.
+                    foreach (var index in foundValue.Techniques.Indexes())
                     {
-                        foreach (var index in value.Value)
+                        var technique = foundValue.Techniques
+                            .Where(t => t.IndexValueMap.ContainsKey(index))
+                            .FirstOrDefault(t => t.IndexValueMap[index].Any());
+
+                        if (technique != null)
                         {
-                            Cells[index].Value = value.Key.ToString();
+                            var fontSize = FONT_SIZE_DEFAULT;
+                            var values = technique.IndexValueMap[index];
+                            if (!technique.UsesFoundValues)
+                            {
+                                switch (values.Count())
+                                {
+                                    case 1:
+                                        fontSize = FONT_SIZE_ONE;
+                                        break;
+                                    case 2:
+                                        fontSize = FONT_SIZE_TWO;
+                                        break;
+                                    case 3:
+                                        fontSize = FONT_SIZE_THREE;
+                                        break;
+                                }
+                            }
+
+                            Cells[index].FontSize = fontSize;
+                            Cells[index].FontStyle = technique.UsesFoundValues ? FontStyles.Normal : FontStyles.Italic;
+                            Cells[index].Value = string.Join("", values);
                         }
-                    }*/
+                    }
 
                     // Set the background for cells used to find this value.
                     var methodCells = Cells.Where(c => foundValue.Indexes.Contains(c.Index));

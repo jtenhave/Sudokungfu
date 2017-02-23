@@ -22,5 +22,10 @@ namespace Sudokungfu.SudokuSolver
         {
             return cells.Select(c => c.Index);
         }
+
+        public static IEnumerable<int> Indexes(this IEnumerable<ITechnique> techniques)
+        {
+            return techniques.SelectMany(t => t.IndexValueMap.Keys).Distinct();
+        }
     }
 }

@@ -24,6 +24,11 @@ namespace Sudokungfu.SudokuSolver.Techniques
         public IDictionary<int, IEnumerable<int>> IndexValueMap { get; protected set; }
 
         /// <summary>
+        /// Indexes of cells that had values eliminanated by this technique.
+        /// </summary>
+        public IEnumerable<int> AffectedIndexes { get; protected set; }
+
+        /// <summary>
         /// Returns true if the technique uses values that have already been found in the Sudoku.
         /// </summary>
         public bool UsesFoundValues { get; protected set; }
@@ -47,6 +52,7 @@ namespace Sudokungfu.SudokuSolver.Techniques
                 {
                     [index] = value.ToEnumerable()
                 },
+                AffectedIndexes = index.ToEnumerable(),
                 UsesFoundValues = true
             };
         }
@@ -73,6 +79,7 @@ namespace Sudokungfu.SudokuSolver.Techniques
 
                     return Enumerable.Empty<int>();
                 }),
+                AffectedIndexes = setIndexes.Except(index),
                 UsesFoundValues = true
             };
 
