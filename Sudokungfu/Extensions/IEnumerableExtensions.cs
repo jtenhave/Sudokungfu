@@ -46,7 +46,6 @@ namespace Sudokungfu.Extensions
         /// </summary>
         /// <param name="first">First sequences.</param>
         /// <param name="second">Second sequence.</param>
-        /// <returns></returns>
         public static IEnumerable<T> Zipper<T>(this IEnumerable<T> first, IEnumerable<T> second)
         {
             var firstEnumerator = first.GetEnumerator();

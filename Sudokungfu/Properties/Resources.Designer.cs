@@ -88,6 +88,24 @@ namespace Sudokungfu.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An error occured while trying to solve the Sudoku. Please contact support..
+        /// </summary>
+        public static string ErrorMessage {
+            get {
+                return ResourceManager.GetString("ErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        public static string ErrorTitle {
+            get {
+                return ResourceManager.GetString("ErrorTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The provided Sudoku could not be solved. Please check that it&apos;s valid..
         /// </summary>
         public static string InvalidMessage {
@@ -97,7 +115,7 @@ namespace Sudokungfu.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Invalid.
         /// </summary>
         public static string InvalidTitle {
             get {

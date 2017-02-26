@@ -3,10 +3,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Collections.Generic;
 
 namespace Sudokungfu
 {
     using SudokuSolver;
+    using SudokuGrid;
+    using System.ComponentModel;
 
     /// <summary>
     /// Interaction logic for SudokuWindow.xaml
@@ -15,56 +18,38 @@ namespace Sudokungfu
     {
         private const int ARTIFICIAL_DELAY = 3000;
 
+        private SudokuModel _model;
+
+        /// <summary>
+        /// The cells in the grid.
+        /// </summary>
+        public List<CellViewModel> Cells { get; set; } = new List<CellViewModel>();
+
         public SudokuWindow()
         {
             InitializeComponent();
 
-            IsEnterEnabled = true;
-            IsWaitingEnabled = false;
-            IsSolveEnabled = false;
-        }
-
-        /// <summary>
-        /// Whether controls 
-        /// </summary>
-        private bool IsWaitingEnabled
-        {
-            set
+            // Initialize the cell view models.
+            for (int i = 0; i < Constants.CELL_COUNT; i++)
             {
-                ClearButton.IsEnabled = !value;
-                if (value)
-                {
-                    Cursor = Cursors.Wait;
-                }
-                else
-                {
-                    Cursor = Cursors.Arrow;
-                }
+                var cellViewModel = new CellViewModel(i);
+                Cells.Add(new CellViewModel(i));
             }
+
+            InitializeModel();
+
+            DataContext = this;
         }
 
-        /// <summary>
-        /// Whether the solve related controls are enabled.
-        /// </summary>
-        private bool IsSolveEnabled
+        private void InitializeModel()
         {
-            set
-            {
-                PreviousButton.IsEnabled = value;
-                NextButton.IsEnabled = value;
-                SolveButton.IsEnabled = value;
-            }
-        }
+            _model = new SudokuModel();
+            _model.PropertyChanged += OnModelChanged;
+            _model.Initialize();
 
-        /// <summary>
-        /// Whether the entering related controls are enabled.
-        /// </summary>
-        private bool IsEnterEnabled
-        {
-            set
+            foreach (var cellViewModel in Cells)
             {
-                SudokuGrid.IsReadOnly = !value;
-                EnterButton.IsEnabled = value;
+                cellViewModel.SetSudokuModel(_model);
             }
         }
 
@@ -76,14 +61,8 @@ namespace Sudokungfu
             var result = MessageBox.Show(Properties.Resources.ClearMessage, Properties.Resources.ClearTitle, MessageBoxButton.OKCancel, MessageBoxImage.Question);
             if (result == MessageBoxResult.OK)
             {
-                foreach (var cell in SudokuGrid.Cells)
-                {
-                    cell.Value = string.Empty;
-                }
+                InitializeModel();
             }
-
-            IsSolveEnabled = false;
-            IsEnterEnabled = true;
         }
 
         /// <summary>
@@ -91,26 +70,7 @@ namespace Sudokungfu
         /// </summary>
         private async void EnterButtonClick(object sender, RoutedEventArgs e)
         {
-            IsEnterEnabled = false;
-            IsWaitingEnabled = true;
-
-            var result = await SolveCurrent();
-            IsWaitingEnabled = false;
-            
-            if (result.Type == SudokuResultType.SUCCESS)
-            {
-                IsSolveEnabled = true;
-                SudokuGrid.SetSudoku(result.FoundValues);
-            }
-            else if (result.Type == SudokuResultType.INVALID)
-            {
-                MessageBox.Show(Properties.Resources.InvalidMessage, Properties.Resources.InvalidTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
-                IsEnterEnabled = true;
-            }
-            else if (result.Type == SudokuResultType.ERROR)
-            {
-                IsEnterEnabled = true;
-            }
+            await _model.Solve();
         }
 
         /// <summary>
@@ -118,7 +78,10 @@ namespace Sudokungfu
         /// </summary>
         private void SolveButtonClick(object sender, RoutedEventArgs e)
         {
-            SudokuGrid.Solve();
+            /*while (_shownValues < Constants.CELL_COUNT && _currentSudoku != null)
+            {
+                Next();
+            }*/
         }
 
         /// <summary>
@@ -126,7 +89,17 @@ namespace Sudokungfu
         /// </summary>
         private void NextButtonClick(object sender, RoutedEventArgs e)
         {
-            SudokuGrid.Next();
+            /*if (_shownValues < Constants.CELL_COUNT && _currentSudoku != null)
+            {
+                var value = _currentSudoku[_shownValues];
+                Cells[value.Index].Value = value.Value.ToString();
+                if (_shownValues < _givenValues)
+                {
+                    // Cells[value.Index].Background = Brushes.LightGray;
+                }
+
+                _shownValues++;
+            }*/
         }
 
         /// <summary>
@@ -134,21 +107,42 @@ namespace Sudokungfu
         /// </summary>
         private void PreviousButtonClick(object sender, RoutedEventArgs e)
         {
-            SudokuGrid.Previous();
+            /*if (_shownValues > _givenValues && _currentSudoku != null)
+            {
+                _shownValues--;
+
+                var value = _currentSudoku[_shownValues];
+                Cells[value.Index].Value = string.Empty;
+            }*/
         }
+
+        /// <summary>
+        /// Sets the current Sudoku for the grid.
+        /// </summary>
+        /*public void SetSudoku(IEnumerable<FoundValue> _foundValues)
+        {
+            _currentSudoku = _foundValues.ToList();
+            _givenValues = _foundValues.Count(v => v.Techniques.Count() == 0);
+            _shownValues = 0;
+
+            while (_shownValues < _givenValues)
+            {
+                Next();
+            }
+        }*/
 
         /// <summary>
         /// Trys to solve the Sudoku based on the currently entered values.
         /// </summary>
-        /// <returns>The <see cref="SolveResult"/></returns>
-        private async Task<SolveResult> SolveCurrent()
+        /// <returns>The <see cref="SudokuSolver.SolveResult"/></returns>
+        /*private async Task<SolveResult> SolveCurrent()
         {
             return await Task.Run(async () =>
             {
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
 
-                var initialValues = SudokuGrid.Cells.Select(c =>
+                var initialValues = Cells.Select(c =>
                 {
                     var value = 0;
                     int.TryParse(c.Value, out value);
@@ -167,6 +161,30 @@ namespace Sudokungfu
 
                 return solveResult;
             });
+        }*/
+
+        private void OnModelChanged(object sender, PropertyChangedEventArgs args)
+        {
+            if (args.PropertyName == "IsSolving")
+            {
+                Cursor = _model.IsSolving ? Cursors.Wait : Cursors.Arrow;
+                ClearButton.IsEnabled = !_model.IsSolving;
+            }
+            else if (args.PropertyName == "IsInputEnabled")
+            {
+                EnterButton.IsEnabled = _model.IsInputEnabled && !_model.IsSolving;
+            }
+            else if (args.PropertyName == "SolveResult")
+            {
+                if (_model.SolveResult == SolveResult.INVALID)
+                {
+                    MessageBox.Show(Properties.Resources.InvalidMessage, Properties.Resources.InvalidTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                else if (_model.SolveResult == SolveResult.ERROR)
+                {
+                    MessageBox.Show(Properties.Resources.ErrorMessage, Properties.Resources.ErrorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
     }
 }

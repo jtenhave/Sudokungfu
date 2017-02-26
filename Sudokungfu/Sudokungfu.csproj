@@ -55,13 +55,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CellInputModel.cs" />
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Extensions\IntExtensions.cs" />
-    <Compile Include="SudokuGrid\CellBorderConverter.cs" />
+    <Compile Include="ISudokuModel.cs" />
+    <Compile Include="CellBorderConverter.cs" />
     <Compile Include="SudokuGrid\CellViewModel.cs" />
-    <Compile Include="SudokuGrid\SudokuGridView.xaml.cs">
-      <DependentUpon>SudokuGridView.xaml</DependentUpon>
-    </Compile>
     <Page Include="SudokuWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -71,6 +70,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Constants.cs" />
+    <Compile Include="SudokuModel.cs" />
     <Compile Include="SudokuSolver\SolverExtensions.cs" />
     <Compile Include="SudokuSolver\Techniques\BasicTechnique.cs" />
     <Compile Include="SudokuSolver\FoundValue.cs" />
@@ -81,7 +81,6 @@
     <Compile Include="SudokuSolver\Sets\Set.cs" />
     <Compile Include="SudokuSolver\Cell.cs" />
     <Compile Include="SudokuSolver\Solver.cs" />
-    <Compile Include="SudokuSolver\SolveResult.cs" />
     <Compile Include="SudokuSolver\Techniques\AdvancedTechniqueManager.cs" />
     <Compile Include="SudokuSolver\Techniques\PossibleSpotOverlapTechnique.cs" />
     <Compile Include="SudokuSolver\Techniques\ThreeSpotClosureTechnique.cs" />
@@ -90,10 +89,6 @@
       <DependentUpon>SudokuWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="SudokuGrid\SudokuGridView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

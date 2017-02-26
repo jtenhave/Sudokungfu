@@ -3,6 +3,8 @@ using System.Linq;
 
 namespace Sudokungfu.SudokuSolver
 {
+    using System;
+    using System.ComponentModel;
     using Extensions;
     using Sets;
     using Techniques;
@@ -10,9 +12,11 @@ namespace Sudokungfu.SudokuSolver
     /// <summary>
     /// Class that represents a found value in the Sudoku.
     /// </summary>
-    public class FoundValue
+    public class FoundValue : ISudokuModel
     {
         private IEnumerable<ITechnique> _techniques;
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
         /// Index of the value that was found.
@@ -59,6 +63,49 @@ namespace Sudokungfu.SudokuSolver
             get
             {
                 return Techniques?.LastOrDefault()?.Complexity ?? int.MaxValue;
+            }
+        }
+
+        public IDictionary<int, IEnumerable<int>> IndexValueMap
+        {
+            get
+            {
+                return new Dictionary<int, IEnumerable<int>>()
+                {
+                    [Index] = Value.ToEnumerable()
+                };
+            }
+        }
+
+        public IEnumerable<ISudokuModel> Details
+        {
+            get
+            {
+                return Enumerable.Empty<ISudokuModel>();
+            }
+        }
+
+        public IEnumerable<int> AffectedIndexes
+        {
+            get
+            {
+                return Enumerable.Empty<int>();
+            }
+        }
+
+        public bool IsInputEnabled
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public bool IsSolving
+        {
+            get
+            {
+                return false;
             }
         }
 

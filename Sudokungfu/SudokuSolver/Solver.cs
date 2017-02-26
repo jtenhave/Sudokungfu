@@ -6,6 +6,7 @@ namespace Sudokungfu.SudokuSolver
 {
     using Extensions;
     using Sets;
+    using System.Threading.Tasks;
     using Techniques;
 
     /// <summary>
@@ -44,8 +45,13 @@ namespace Sudokungfu.SudokuSolver
         /// </summary>
         /// <param name="values">The intial values in the Sudoku.</param>
         /// <returns>The result.</returns>
-        public static SolveResult Solve(int[] values)
+        public static async Task<IEnumerable<ISudokuModel>> Solve(IEnumerable<int> values)
         {
+            if (values.Count() != Constants.CELL_COUNT || values.Any(v => !v.IsSudokuValue()))
+            {
+                throw new ArgumentException("values: Must contains 81 valid values.");
+            }
+
             var sudokuSolver = new Solver();
             return sudokuSolver.SolveInternal(values);
         }
@@ -55,59 +61,35 @@ namespace Sudokungfu.SudokuSolver
         /// </summary>
         /// <param name="values">The intial values in the Sudoku.</param>
         /// <returns>The result.</returns>
-        private SolveResult SolveInternal(int[] values)
+        private IEnumerable<ISudokuModel> SolveInternal(IEnumerable<int> values)
         {
-            try
+            // Insert the intial values.
+            foreach (var cell in _cells)
             {
-                if (values.Length != Constants.CELL_COUNT || values.Any(v => !v.IsSudokuValue()))
+                if (values.ElementAt(cell.Index) != 0)
                 {
-                    throw new ArgumentException("values: Must contains 81 valid values.");
+                    var foundValue = FoundValue.CreateGivenValue(cell.Index, values.ElementAt(cell.Index));
+                    InsertValue(foundValue);
                 }
-
-                // Insert the intial values.
-                foreach (var cell in _cells)
-                {
-                    if (values[cell.Index] != 0)
-                    {
-                        var foundValue = FoundValue.CreateGivenValue(cell.Index, values[cell.Index]);
-                        InsertValue(foundValue);
-                    }
-                }
-
-                // The main loop for finding values in the Sudoku.
-                while (_foundValues.Count < Constants.CELL_COUNT)
-                {
-                    AdvancedTechniqueManager.ApplyAdvancedTechniques(_cells, _sets);
-
-                    var foundValue = FindValue();
-                    if (foundValue == null)
-                    {
-                        return new SolveResult()
-                        {
-                            Type = SudokuResultType.INVALID
-                        };
-                    }
-                    else
-                    {
-                        InsertValue(foundValue);
-                    }
-                }
-
-                return new SolveResult()
-                {
-                    Type = SudokuResultType.SUCCESS,
-                    FoundValues = _foundValues
-                };
-
             }
-            catch (Exception ex)
+
+            // The main loop for finding values in the Sudoku.
+            while (_foundValues.Count < Constants.CELL_COUNT)
             {
-                return new SolveResult()
+                AdvancedTechniqueManager.ApplyAdvancedTechniques(_cells, _sets);
+
+                var foundValue = FindValue();
+                if (foundValue == null)
                 {
-                    Type = SudokuResultType.ERROR,
-                    Error = $"{ex.GetType().ToString()}:{ex.Message}"
-                };
+                    return null;
+                }
+                else
+                {
+                    InsertValue(foundValue);
+                }
             }
+
+            return _foundValues;
         }
 
         /// <summary>
