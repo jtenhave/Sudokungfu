@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Sudokungfu.Test
@@ -7,11 +8,19 @@ namespace Sudokungfu.Test
 
     internal class TestTechnique : ITechnique
     {
-        public int Complexity { get; set; }
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public IDictionary<int, IEnumerable<int>> IndexValueMap { get; set; }
 
-        public bool UsesFoundValues { get; set; }
+        public IEnumerable<ISudokuModel> Details { get; set; }
+
+        public IEnumerable<int> AffectedIndexes { get; set; }
+
+        public bool IsInputEnabled { get; set; }
+
+        public bool IsSolving { get; set; }
+
+        public int Complexity { get; set; }
 
         public static ITechnique CreateTestTechnique(int complexity, params int[] indexes)
         {

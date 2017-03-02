@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sudokungfu.Test
 {
@@ -34,8 +35,16 @@ namespace Sudokungfu.Test
         public static void AssertITechniqueEqual(ITechnique expected, ITechnique actual)
         {
             Assert.AreEqual(expected.Complexity, actual.Complexity);
-            Assert.AreEqual(expected.UsesFoundValues, actual.UsesFoundValues);
+            AssertISudokuModelEqual(expected, actual);
+        }
 
+        /// <summary>
+        /// Compares two <see cref="ISudokuModel"/>s and asserts they are equal.
+        /// </summary>
+        /// <param name="expected">Expected model.</param>
+        /// <param name="actual">Actual model.</param>
+        public static void AssertISudokuModelEqual(ISudokuModel expected, ISudokuModel actual)
+        {
             if (expected.IndexValueMap == null)
             {
                 Assert.IsNull(actual.IndexValueMap);
@@ -43,13 +52,42 @@ namespace Sudokungfu.Test
             else
             {
                 Assert.IsNotNull(actual.IndexValueMap);
-                Assert.IsNotNull(actual.IndexValueMap.Values);
 
                 Assert.IsTrue(actual.IndexValueMap.Keys.SetEqual(expected.IndexValueMap.Keys));
-
                 foreach (var index in expected.IndexValueMap.Keys)
                 {
                     Assert.IsTrue(actual.IndexValueMap[index].SetEqual(expected.IndexValueMap[index]));
+                }
+            }
+
+            if (expected.AffectedIndexes == null)
+            {
+                Assert.IsNull(actual.AffectedIndexes);
+            }
+            else
+            {
+                Assert.IsNotNull(actual.AffectedIndexes);
+                Assert.IsTrue(actual.AffectedIndexes.SetEqual(expected.AffectedIndexes));
+            }
+
+            Assert.AreEqual(expected.IsInputEnabled, actual.IsInputEnabled);
+            Assert.AreEqual(expected.IsSolving, actual.IsSolving);
+
+            if (expected.Details == null)
+            {
+                Assert.IsNull(actual.Details);
+            }
+            else
+            {
+                Assert.IsNotNull(actual.Details);
+                
+                var expectedDetails = expected.Details.ToList();
+                var actualDetails = actual.Details.ToList();
+
+                Assert.AreEqual(expectedDetails.Count, actualDetails.Count);
+                for (int i = 0; i < expectedDetails.Count; i++)
+                {
+                    AssertISudokuModelEqual(expectedDetails[i], actualDetails[i]);
                 }
             }
         }

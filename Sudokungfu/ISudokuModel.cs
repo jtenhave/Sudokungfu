@@ -14,7 +14,7 @@ namespace Sudokungfu
         IDictionary<int, IEnumerable<int>> IndexValueMap { get; }
 
         /// <summary>
-        /// Sub-details that make up these details;
+        /// Details that make up this model.
         /// </summary>
         IEnumerable<ISudokuModel> Details { get; }
 

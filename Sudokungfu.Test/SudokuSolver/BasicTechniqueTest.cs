@@ -27,7 +27,7 @@ namespace Sudokungfu.Test.SudokuSolver
                 {
                     [testIndex] = testValue.ToEnumerable()
                 },
-                UsesFoundValues = true
+                AffectedIndexes = testIndex.ToEnumerable()
             };
 
             var actualTechnique = BasicTechnique.CreateOccupiedTechnique(testValue, testIndex);
@@ -45,14 +45,13 @@ namespace Sudokungfu.Test.SudokuSolver
             var expectedTechnique = new TestTechnique()
             {
                 Complexity = 1,
-                IndexValueMap = cells.Indexes().ToDictionary(i => i, i => i == testIndex ? testValue.ToEnumerable() : Enumerable.Empty<int>()),
-                UsesFoundValues = true
+                IndexValueMap = cells.Indexes().ToDictionary(i => i, i => i == testIndex ? testValue.ToEnumerable() : 0.ToEnumerable()),
+                AffectedIndexes = cells.Indexes().Except(testIndex)
             };
 
             var actualTechnique = BasicTechnique.CreateSetTechnique(testValue, testIndex, box.Indexes());
 
             AssertITechniqueEqual(expectedTechnique, actualTechnique);
-
         }
     }
 }
