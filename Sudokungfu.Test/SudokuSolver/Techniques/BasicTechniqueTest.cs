@@ -1,8 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace Sudokungfu.Test.SudokuSolver
+namespace Sudokungfu.Test.SudokuSolver.Techniques
 {
     using Sudokungfu.Extensions;
     using Sudokungfu.SudokuSolver;
@@ -45,7 +44,7 @@ namespace Sudokungfu.Test.SudokuSolver
             var expectedTechnique = new TestTechnique()
             {
                 Complexity = 1,
-                IndexValueMap = cells.Indexes().ToDictionary(i => i, i => i == testIndex ? testValue.ToEnumerable() : 0.ToEnumerable()),
+                IndexValueMap = cells.Indexes().ToDictionary(testIndex, testValue),
                 AffectedIndexes = cells.Indexes().Except(testIndex)
             };
 

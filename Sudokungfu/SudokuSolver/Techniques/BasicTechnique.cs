@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 
 namespace Sudokungfu.SudokuSolver.Techniques
 {
@@ -85,10 +84,7 @@ namespace Sudokungfu.SudokuSolver.Techniques
             return new BasicTechnique()
             {
                 Complexity = 0,
-                IndexValueMap = new Dictionary<int, IEnumerable<int>>()
-                {
-                    [index] = value.ToEnumerable()
-                },
+                IndexValueMap = index.ToDictionary(value),
                 AffectedIndexes = index.ToEnumerable(),
             };
         }
@@ -106,7 +102,7 @@ namespace Sudokungfu.SudokuSolver.Techniques
             var technique = new BasicTechnique()
             {
                 Complexity = 1,
-                IndexValueMap = setIndexes.ToDictionary(i => i, i => i == index ? value.ToEnumerable() : 0.ToEnumerable()),
+                IndexValueMap = setIndexes.ToDictionary(index, value),
                 AffectedIndexes = setIndexes.Except(index),
             };
 

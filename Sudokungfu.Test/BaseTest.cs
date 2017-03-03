@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Sudokungfu.Test
@@ -106,5 +107,43 @@ namespace Sudokungfu.Test
                 cells[i].EliminatePossibleValue(value, technique);
             }
         }
+    }
+
+    /// <summary>
+    /// Implementation of <see cref="ISudokuModel"/> for testing purposes.
+    /// </summary>
+    internal class TestSudokuModel : ISudokuModel
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public IEnumerable<int> AffectedIndexes { get; set; } = Enumerable.Empty<int>();
+
+        public IEnumerable<ISudokuModel> Details { get; set; } = Enumerable.Empty<ISudokuModel>();
+
+        public IDictionary<int, IEnumerable<int>> IndexValueMap { get; set; }
+
+        public bool IsInputEnabled { get; set; }
+
+        public bool IsSolving { get; set; }
+    }
+
+    /// <summary>
+    ///  Implementation of <see cref="ITechnique"/> for testing purposes.
+    /// </summary>
+    internal class TestTechnique : ITechnique
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public IDictionary<int, IEnumerable<int>> IndexValueMap { get; set; }
+
+        public IEnumerable<ISudokuModel> Details { get; set; }
+
+        public IEnumerable<int> AffectedIndexes { get; set; }
+
+        public bool IsInputEnabled { get; set; }
+
+        public bool IsSolving { get; set; }
+
+        public int Complexity { get; set; }
     }
 }

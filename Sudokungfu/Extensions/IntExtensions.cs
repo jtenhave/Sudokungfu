@@ -1,4 +1,5 @@
-﻿
+﻿using System.Collections.Generic;
+
 namespace Sudokungfu.Extensions
 {
     /// <summary>
@@ -20,6 +21,18 @@ namespace Sudokungfu.Extensions
         public static bool IsSudokuValue(this int value)
         {
             return value >= 0 && value <= Constants.SET_SIZE;
+        }
+
+        /// <summary>
+        /// Creates a dictionary from one key and one value.
+        /// </summary>
+        /// <param name="value">Value.</param>
+        public static IDictionary<int, IEnumerable<int>> ToDictionary(this int key, int value)
+        {
+            return new Dictionary<int, IEnumerable<int>>()
+            {
+                [key] = value.ToEnumerable()
+            };
         }
     }
 }
