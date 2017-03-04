@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Sudokungfu.Test.SudokuGrid
 {
-    using Sudokungfu.SudokuGrid;
+    using View;
 
     /// <summary>
     /// Test class for <see cref="CellBorderConverter"/>

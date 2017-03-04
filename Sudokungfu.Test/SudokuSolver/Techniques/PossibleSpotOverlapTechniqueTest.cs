@@ -27,7 +27,7 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
             {
                 Complexity = 2,
                 IndexValueMap = box.Indexes().Union(row.Indexes()).ToDictionary(i => i, i => expectedCells.Indexes().Contains(i) ? testValue.ToEnumerable() : Enumerable.Empty<int>()),
-                UsesFoundValues = false
+                //UsesFoundValues = false
             };
 
             var testTechnique = new TestTechnique();
@@ -54,7 +54,7 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
             {
                 Complexity = 2,
                 IndexValueMap = box.Indexes().Union(row.Indexes()).ToDictionary(i => i, i => expectedCells.Indexes().Contains(i) ? testValue.ToEnumerable() : Enumerable.Empty<int>()),
-                UsesFoundValues = false
+                //UsesFoundValues = false
             };
 
             var testTechnique = new TestTechnique();

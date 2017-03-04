@@ -1,33 +1,100 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Sudokungfu.SudokuSolver
 {
     using Extensions;
+    using Model;
     using Sets;
     using Techniques;
 
     /// <summary>
     /// Class that represents a found value in the Sudoku.
     /// </summary>
-    public class FoundValue
+    public class FoundValue : ISudokuModel
     {
         private IEnumerable<ITechnique> _techniques;
+
+        #region ISudokuModel
+
+        /// <summary>
+        /// Not used by <see cref="FoundValue"/>.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Indexes of the cells that should be displayed and the values that go in them.
+        /// </summary>
+        public IDictionary<int, IEnumerable<int>> IndexValueMap { get; private set; }
+
+        /// <summary>
+        /// Techniques that make up this model.
+        /// </summary>
+        public IEnumerable<ISudokuModel> Details
+        {
+            get
+            {
+                return _techniques;
+            }
+        }
+
+        /// <summary>
+        /// Not used by <see cref="FoundValue"/>.
+        /// </summary>
+        public IEnumerable<int> AffectedIndexes
+        {
+            get
+            {
+                return Enumerable.Empty<int>();
+            }
+        }
+
+        /// <summary>
+        /// Not used by <see cref="FoundValue"/>.
+        /// </summary>
+        public bool IsInputEnabled
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Not used by <see cref="FoundValue"/>.
+        /// </summary>
+        public bool IsSolving
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// Index of the value that was found.
         /// </summary>
-        public int Index { get; private set; }
+        public int Index
+        {
+            get
+            {
+                return IndexValueMap.First(k => k.Value.Any()).Key;
+            }
+        }
 
         /// <summary>
         /// Value that was found.
         /// </summary>
-        public int Value { get; private set; }
-
-        /// <summary>
-        /// Indexes of cells that should be shown when details for this found value are displayed.
-        /// </summary>
-        public IEnumerable<int> Indexes { get; private set; }
+        public int Value
+        {
+            get
+            {
+                return IndexValueMap.SelectMany(k => k.Value).First();
+            }
+        }
 
         /// <summary>
         /// Techniques used to find the value.
@@ -64,6 +131,7 @@ namespace Sudokungfu.SudokuSolver
 
         private FoundValue()
         {
+        
         }
 
         /// <summary>
@@ -75,10 +143,8 @@ namespace Sudokungfu.SudokuSolver
         {
             return new FoundValue()
             {
-                Index = index,
-                Value = value,
-                Indexes = index.ToEnumerable(),
-                _techniques = new List<ITechnique>()
+                _techniques = Enumerable.Empty<ITechnique>(),
+                IndexValueMap = index.ToDictionary(value)
             };
         }
 
@@ -87,16 +153,13 @@ namespace Sudokungfu.SudokuSolver
         /// </summary>
         /// <param name="cell">Cell where the value was found.</param>
         /// <param name="value">Value that was found.</param>
-        /// <param name="set">The set where the value was found.</param>
+        /// <param name="set">Set where the value was found.</param>
         public static FoundValue CreateFoundInSetValue(Cell cell, int value, Set set)
         {
-            var setIndexes = set.Cells.Select(c => c.Index);
             return new FoundValue()
             {
-                Index = cell.Index,
-                Value = value,
-                Indexes = setIndexes,
-                _techniques = FindMinSetValueTechniques(set.Cells.Except(cell).SelectMany(c => c.EliminationTechniques[value]), setIndexes, cell.Index)
+                _techniques = FindMinTechniques(cell, value, set),
+                IndexValueMap = set.Cells.Indexes().ToDictionary(cell.Index, value)
             };
         }
 
@@ -109,60 +172,54 @@ namespace Sudokungfu.SudokuSolver
         {
             return new FoundValue()
             {
-                Index = cell.Index,
-                Value = value,
-                Indexes = cell.Index.ToEnumerable(),
-                _techniques = Constants.ALL_VALUES.Except(value).Select(v => cell.EliminationTechniques[v].First())
+                _techniques = FindMinTechniques(cell, value),
+                IndexValueMap = cell.Index.ToDictionary(value)
             };
         }
 
-        private static IEnumerable<ITechnique> FindMinSetValueTechniques(IEnumerable<ITechnique> techniques, IEnumerable<int> indexes, int index)
+        private static IEnumerable<ITechnique> FindMinTechniques(Cell cell, int value, Set set)
         {
             var finalTechniques = new List<ITechnique>();
-            var unusedTechniques = techniques.Except(finalTechniques);
 
-            var eliminatedIndexesWithoutTechnique = new List<int>(indexes);
-            eliminatedIndexesWithoutTechnique.Remove(index);
-
-            // Add the techniques for the cells that are occupied.
-            var occupiedTechniques = techniques.Where(t => t.Complexity == 0);
-            finalTechniques.AddRange(occupiedTechniques);
-            eliminatedIndexesWithoutTechnique.RemoveAll(i => occupiedTechniques.SelectMany(t => t.Indexes()).Contains(i));
-
-            // Get the list of techniques that are definately needed
-            var requiredTechniques = unusedTechniques
-                .Where(t => t
-                    .Indexes()
-                    .Intersect(eliminatedIndexesWithoutTechnique)
-                    .Except(unusedTechniques
-                        .Except(t)
-                        .SelectMany(u => u.Indexes()))
-                    .Any())
+            var techniques = set
+                .Cells
+                .Except(cell)
+                .SelectMany(c => c.EliminationTechniques[value])
                 .ToList();
 
-            finalTechniques.AddRange(requiredTechniques);
-            eliminatedIndexesWithoutTechnique.RemoveAll(i => requiredTechniques.SelectMany(t => t.Indexes()).Contains(i));
+            var uncoveredIndexes = set
+                .Indexes()
+                .Except(cell.Index)
+                .Except(finalTechniques.SelectMany(t => t.AffectedIndexes));
 
-            // Apply leftover techniques until all indexes have a technique.
-            while (eliminatedIndexesWithoutTechnique.Any())
+            var sortedTechniques = techniques
+                .Where(t => t.AffectedIndexes.Intersect(uncoveredIndexes).Any())
+                .OrderBy(t => t.Complexity)
+                .ThenByDescending(t => t
+                    .AffectedIndexes
+                    .Except(techniques.Except(t).SelectMany(u => u.AffectedIndexes))
+                    .Count())
+                .ThenByDescending(t => t
+                    .AffectedIndexes
+                    .Intersect(uncoveredIndexes)
+                    .Count());
+
+            // Apply techniques until all indexes have been covered.
+            while (uncoveredIndexes.Any() && sortedTechniques.Any())
             {
-                var leftoverTechnique = unusedTechniques
-                    .OrderByDescending(t => t.Indexes().Intersect(eliminatedIndexesWithoutTechnique).Count())
-                    .ThenBy(t => t.Complexity)
-                    .FirstOrDefault();
-
-                if (leftoverTechnique != null)
-                {
-                    finalTechniques.Add(leftoverTechnique);
-                    eliminatedIndexesWithoutTechnique.RemoveAll(i => leftoverTechnique.Indexes().Contains(i));
-                }
-                else
-                {
-                    break;
-                }
+                finalTechniques.Add(sortedTechniques.First());
             }
 
             return finalTechniques;
+        }
+
+        private static IEnumerable<ITechnique> FindMinTechniques(Cell cell, int value)
+        {
+            return Constants.ALL_VALUES.Except(value)
+                .Select(v => cell
+                    .EliminationTechniques[v]
+                    .FirstOrDefault())
+                .Where(t => t != null);
         }
     }
 }

@@ -2,16 +2,13 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace Sudokungfu.SudokuGrid
+namespace Sudokungfu.View
 {
     using Extensions;
 
     /// <summary>
-    /// Class for the Sudoku grid <see cref="CellViewModel"/> border converter.
+    /// Class for the border converter that makes the cell grid appear like a Sudoku grid.
     /// </summary>
-    /// <remarks>
-    /// This border converter makes the cell grid appear like a Sudoku grid.
-    /// </remarks>
     public class CellBorderConverter : IValueConverter
     {
         public const int NO_WIDTH = 0;
@@ -21,8 +18,8 @@ namespace Sudokungfu.SudokuGrid
         /// <summary>
         /// Converts a <see cref="CellViewModel"/> index to a WPF border string.
         /// </summary>
-        /// <param name="value">The cell index.</param>
-        /// <returns>The cell border string.</returns>
+        /// <param name="value">Cell index.</param>
+        /// <returns>Cell border string.</returns>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var cellIndex = value as int?;

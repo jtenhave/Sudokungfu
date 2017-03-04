@@ -1,8 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace Sudokungfu.Test.SudokuSolver
+namespace Sudokungfu.Test.SudokuSolver.Techniques
 {
     using Sudokungfu.Extensions;
     using Sudokungfu.SudokuSolver;
@@ -27,7 +26,7 @@ namespace Sudokungfu.Test.SudokuSolver
                 {
                     [testIndex] = testValue.ToEnumerable()
                 },
-                UsesFoundValues = true
+                AffectedIndexes = testIndex.ToEnumerable()
             };
 
             var actualTechnique = BasicTechnique.CreateOccupiedTechnique(testValue, testIndex);
@@ -45,14 +44,13 @@ namespace Sudokungfu.Test.SudokuSolver
             var expectedTechnique = new TestTechnique()
             {
                 Complexity = 1,
-                IndexValueMap = cells.Indexes().ToDictionary(i => i, i => i == testIndex ? testValue.ToEnumerable() : Enumerable.Empty<int>()),
-                UsesFoundValues = true
+                IndexValueMap = cells.Indexes().ToDictionary(testIndex, testValue),
+                AffectedIndexes = cells.Indexes().Except(testIndex)
             };
 
             var actualTechnique = BasicTechnique.CreateSetTechnique(testValue, testIndex, box.Indexes());
 
             AssertITechniqueEqual(expectedTechnique, actualTechnique);
-
         }
     }
 }

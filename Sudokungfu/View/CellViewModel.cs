@@ -1,11 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows;
 
-namespace Sudokungfu.SudokuGrid
+namespace Sudokungfu.View
 {
+    using Model;
     using Extensions;
 
     /// <summary>
@@ -24,18 +26,17 @@ namespace Sudokungfu.SudokuGrid
         private Cursor _cursor;
         private FontStyle _fontStyle;
         private int _fontSize;
-
-        private CellViewModel _savedState;
+        private ISudokuModel _model;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
-        /// The index of the cell. 
+        /// Gets the index of the cell. 
         /// </summary>
         public int Index { get; private set; }
 
         /// <summary>
-        /// Gets or sets the value of the cell.
+        /// Gets the value of the cell.
         /// </summary>
         public string Value
         {
@@ -46,17 +47,22 @@ namespace Sudokungfu.SudokuGrid
 
             set
             {
-                int i;
-                if (string.IsNullOrWhiteSpace(value) || (int.TryParse(value, out i) && i >= 1 && i <= 9))
+                int i = 0;
+                if (string.IsNullOrWhiteSpace(value) || (int.TryParse(value, out i) && i.IsSudokuValue()))
                 {
-                    _value = value;
+                    _value = i == 0 ? string.Empty : value;
                     OnPropertyChanged(nameof(Value));
+
+                    if (_model.IsInputEnabled)
+                    {
+                        CellModel.IndexValueMap[Index] = i.ToEnumerable();
+                    }
                 }
             }
         }
 
         /// <summary>
-        /// Gets or sets background color of the cell.
+        /// Gets the background color of the cell.
         /// </summary>
         public Brush Background
         {
@@ -65,7 +71,7 @@ namespace Sudokungfu.SudokuGrid
                 return _background;
             }
 
-            set
+            private set
             {
                 if (_background != value)
                 {
@@ -76,7 +82,7 @@ namespace Sudokungfu.SudokuGrid
         }
 
         /// <summary>
-        /// Gets or sets the read only value of the cell.
+        /// Gets the read only value of the cell.
         /// </summary>
         public bool IsReadOnly
         {
@@ -85,7 +91,7 @@ namespace Sudokungfu.SudokuGrid
                 return _isReadOnly;
             }
 
-            set
+            private set
             {
                 if (_isReadOnly != value)
                 {
@@ -98,7 +104,7 @@ namespace Sudokungfu.SudokuGrid
         }
 
         /// <summary>
-        /// Gets or sets the cursor of the cell.
+        /// Gets the cursor of the cell.
         /// </summary>
         public Cursor Cursor
         {
@@ -107,7 +113,7 @@ namespace Sudokungfu.SudokuGrid
                 return _cursor;
             }
 
-            set
+            private set
             {
                 if (_cursor != value)
                 {
@@ -117,6 +123,9 @@ namespace Sudokungfu.SudokuGrid
             }
         }
 
+        /// <summary>
+        /// Gets the font style of the cell.
+        /// </summary>
         public FontStyle FontStyle
         {
             get
@@ -124,7 +133,7 @@ namespace Sudokungfu.SudokuGrid
                 return _fontStyle;
             }
 
-            set
+            private set
             {
                 if (_fontStyle != value)
                 {
@@ -134,6 +143,9 @@ namespace Sudokungfu.SudokuGrid
             }
         }
 
+        /// <summary>
+        /// Gets the font size of cell.
+        /// </summary>
         public int FontSize
         {
             get
@@ -141,7 +153,7 @@ namespace Sudokungfu.SudokuGrid
                 return _fontSize;
             }
 
-            set
+            private set
             {
                 if (_fontSize != value)
                 {
@@ -151,10 +163,18 @@ namespace Sudokungfu.SudokuGrid
             }
         }
 
+        private ISudokuModel CellModel
+        {
+            get
+            {
+                return _model.Details.FirstOrDefault(d => d.IndexValueMap.ContainsKey(Index));
+            }
+        }
+
         /// <summary>
         /// Creates a new <see cref="CellViewModel"/>
         /// </summary>
-        /// <param name="index">The index of the cell.</param>
+        /// <param name="index">Index of the cell.</param>
         public CellViewModel(int index)
         {
             if (!index.IsSudokuIndex())
@@ -163,9 +183,43 @@ namespace Sudokungfu.SudokuGrid
             }
 
             Index = index;
-            Background = Brushes.White;
-            Value = string.Empty;
-            FontSize = FONT_SIZE_DEFAULT;
+        }
+
+        public void SetSudokuModel(ISudokuModel model)
+        {
+            _model = model;
+            _model.PropertyChanged += OnModelChanged;
+
+            RefreshCell();
+        }
+
+        private void OnModelChanged(object sender, PropertyChangedEventArgs args)
+        {
+            if (args.PropertyName == "IsSolving" || args.PropertyName == "IsInputEnabled")
+            {
+                IsReadOnly = !_model.IsInputEnabled;
+                Cursor = _model.IsSolving ? Cursors.Wait : _model.IsInputEnabled ? Cursors.IBeam : Cursors.Arrow;
+            }
+            else if (args.PropertyName == "Details")
+            {
+                RefreshCell();
+            }
+        }
+
+        private void RefreshCell()
+        {
+            if (_model.IndexValueMap.Any())
+            {
+                // TODO show details.
+            }
+            else
+            {
+                var value = CellModel.IndexValueMap[Index].First().ToString();
+                FontSize = FONT_SIZE_DEFAULT;
+                FontStyle = FontStyles.Normal;
+                Background = value != "0" && !CellModel.Details.Any() ? Brushes.LightGray : Brushes.White;             
+                Value = value;
+            }
         }
 
         /// <summary>
@@ -177,38 +231,6 @@ namespace Sudokungfu.SudokuGrid
             if (PropertyChanged != null)
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-        /// <summary>
-        /// Saves the visual state of the cell.
-        /// </summary>
-        public void SaveState()
-        {
-            _savedState = new CellViewModel(this.Index);
-            _savedState._background = _background;
-            _savedState._value = _value;
-            _savedState._isReadOnly = _isReadOnly;
-            _savedState._cursor = _cursor;
-            _savedState._fontSize = _fontSize;
-            _savedState._fontStyle = _fontStyle;
-        }
-
-        /// <summary>
-        /// Restores the visual state of the cell.
-        /// </summary>
-        public void RestoreState()
-        {
-            if (_savedState != null)
-            {
-                Background = _savedState._background;
-                Value = _savedState._value;
-                IsReadOnly = _savedState._isReadOnly;
-                Cursor = _savedState._cursor;
-                FontStyle = _savedState._fontStyle;
-                FontSize = _savedState._fontSize;
-
-                _savedState = null;
             }
         }
     }

@@ -126,11 +126,17 @@
   <data name="CopyrightMessage" xml:space="preserve">
     <value>Copyright © 2017 Jeff ten Have</value>
   </data>
+  <data name="ErrorMessage" xml:space="preserve">
+    <value>An error occured while trying to solve the Sudoku. Please contact support.</value>
+  </data>
+  <data name="ErrorTitle" xml:space="preserve">
+    <value>Error</value>
+  </data>
   <data name="InvalidMessage" xml:space="preserve">
     <value>The provided Sudoku could not be solved. Please check that it's valid.</value>
   </data>
   <data name="InvalidTitle" xml:space="preserve">
-    <value />
+    <value>Invalid</value>
   </data>
   <data name="SudokuWindowTitle" xml:space="preserve">
     <value>Sudokungfu</value>

@@ -3,29 +3,29 @@ using System.Linq;
 
 namespace Sudokungfu.SudokuSolver
 {
-    using Techniques;
     using Sets;
 
+    /// <summary>
+    /// Class for Sudoku solver extensions.s
+    /// </summary>
     public static class SolverExtensions
     {
-        public static IEnumerable<int> Indexes(this ITechnique technique)
-        {
-            return technique.IndexValueMap.Keys;
-        }
-
+        /// <summary>
+        /// Returns the indexes of the cells in a set.
+        /// </summary>
+        /// <param name="set">Set.</param>
         public static IEnumerable<int> Indexes(this Set set)
         {
             return set.Cells.Indexes();
         }
 
+        /// <summary>
+        /// Returns the indexes of a sequence of cells.
+        /// </summary>
+        /// <param name="cells">Cells.</param>
         public static IEnumerable<int> Indexes(this IEnumerable<Cell> cells)
         {
             return cells.Select(c => c.Index);
-        }
-
-        public static IEnumerable<int> Indexes(this IEnumerable<ITechnique> techniques)
-        {
-            return techniques.SelectMany(t => t.IndexValueMap.Keys).Distinct();
         }
     }
 }

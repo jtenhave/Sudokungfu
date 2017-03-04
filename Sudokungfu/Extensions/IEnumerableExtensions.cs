@@ -24,12 +24,11 @@ namespace Sudokungfu.Extensions
         /// <summary>
         /// Produces the set difference of an enumerable and an item in the enumerable.
         /// </summary>
-        /// <param name="enumerable">Enumerable of the original set.</param>
         /// <param name="item">Item to exclude from the set.</param>
         /// <param name="items">More items to exclude from the set.</param>
-        public static IEnumerable<T> Except<T>(this IEnumerable<T> enumerable, T value, params T[] items)
+        public static IEnumerable<T> Except<T>(this IEnumerable<T> enumerable, T item, params T[] items)
         {
-            return enumerable.Except(value.ToEnumerable().Concat(items));
+            return enumerable.Except(item.ToEnumerable().Concat(items));
         }
 
         /// <summary>
@@ -42,11 +41,20 @@ namespace Sudokungfu.Extensions
         }
 
         /// <summary>
+        /// Creates a dictionary from an enumerable with all items as keys and one key with a value.
+        /// </summary>
+        /// <param name="key">Key with a value.</param>
+        /// <param name="value">Value.</param>
+        public static IDictionary<int, IEnumerable<int>> ToDictionary(this IEnumerable<int> enumerable, int key, int value)
+        {
+            return enumerable.ToDictionary(i => i, i => i == key ? value.ToEnumerable() : Enumerable.Empty<int>());
+        }
+
+        /// <summary>
         /// Produces a sequence by combining two sequences together like a zipper.
         /// </summary>
         /// <param name="first">First sequences.</param>
         /// <param name="second">Second sequence.</param>
-        /// <returns></returns>
         public static IEnumerable<T> Zipper<T>(this IEnumerable<T> first, IEnumerable<T> second)
         {
             var firstEnumerator = first.GetEnumerator();
@@ -79,8 +87,8 @@ namespace Sudokungfu.Extensions
         /// <summary>
         /// Compares two sequences and returns true if they are equal sets.
         /// </summary>
-        /// <param name="first">Source sequence.</param>
-        /// <param name="second">Sequence to compare with.</param>
+        /// <param name="first">First sequence.</param>
+        /// <param name="second">Second sequence.</param>
         public static bool SetEqual<T>(this IEnumerable<T> first, IEnumerable<T> second)
         {
             var secondList = second.ToList();

@@ -26,8 +26,7 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
             var expectedTechnique = new TestTechnique()
             {
                 Complexity = 2,
-                IndexValueMap = box.Indexes().ToDictionary(i => i, i => expectedCells.Indexes().Contains(i) ? expectedValues : Enumerable.Empty<int>()),
-                UsesFoundValues = false
+                IndexValueMap = box.Indexes().ToDictionary(i => i, i => expectedCells.Indexes().Contains(i) ? expectedValues : Enumerable.Empty<int>())
             };
 
             var testTechnique = new TestTechnique();
