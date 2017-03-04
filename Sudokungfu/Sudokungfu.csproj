@@ -37,6 +37,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -55,13 +57,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="CellInputModel.cs" />
+    <Compile Include="Model\CellInputModel.cs" />
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Extensions\IntExtensions.cs" />
-    <Compile Include="ISudokuModel.cs" />
-    <Compile Include="CellBorderConverter.cs" />
-    <Compile Include="SudokuGrid\CellViewModel.cs" />
-    <Page Include="SudokuWindow.xaml">
+    <Compile Include="Model\ISudokuModel.cs" />
+    <Compile Include="View\CellBorderConverter.cs" />
+    <Compile Include="View\CellViewModel.cs" />
+    <Page Include="View\Sudokungfu.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -70,7 +72,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Constants.cs" />
-    <Compile Include="SudokuModel.cs" />
+    <Compile Include="Model\SudokuModel.cs" />
     <Compile Include="SudokuSolver\SolverExtensions.cs" />
     <Compile Include="SudokuSolver\Techniques\BasicTechnique.cs" />
     <Compile Include="SudokuSolver\FoundValue.cs" />
@@ -85,8 +87,8 @@
     <Compile Include="SudokuSolver\Techniques\PossibleSpotOverlapTechnique.cs" />
     <Compile Include="SudokuSolver\Techniques\ThreeSpotClosureTechnique.cs" />
     <Compile Include="SudokuSolver\Techniques\TwoSpotClosureTechnique.cs" />
-    <Compile Include="SudokuWindow.xaml.cs">
-      <DependentUpon>SudokuWindow.xaml</DependentUpon>
+    <Compile Include="View\Sudokungfu.xaml.cs">
+      <DependentUpon>Sudokungfu.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

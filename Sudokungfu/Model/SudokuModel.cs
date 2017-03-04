@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace Sudokungfu
+namespace Sudokungfu.Model
 {
     using SudokuSolver;
 
@@ -21,7 +20,7 @@ namespace Sudokungfu
     }
 
     /// <summary>
-    /// 
+    /// Class that represents the values in a Sudoku grid.
     /// </summary>
     public class SudokuModel : ISudokuModel
     {
@@ -30,22 +29,16 @@ namespace Sudokungfu
         private bool _isInputEnabled;
         private SolveResult _result;
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public SudokuModel()
-        {
-            var details = new List<ISudokuModel>();
-
-            for(int i = 0; i < Constants.CELL_COUNT; i++)
-            {
-                details.Add(new CellInputModel(i));
-            }
-
-            _details = details;
-        }
-
         #region ISudokuModel
 
+        /// <summary>
+        /// Not used by <see cref="SudokuModel"/>.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Not used by <see cref="SudokuModel"/>.
+        /// </summary>
         public IEnumerable<int> AffectedIndexes
         {
             get
@@ -54,6 +47,9 @@ namespace Sudokungfu
             }
         }
 
+        /// <summary>
+        /// Details of the current values in the Sudoku
+        /// </summary>
         public IEnumerable<ISudokuModel> Details
         {
             get
@@ -71,6 +67,9 @@ namespace Sudokungfu
             }
         }
 
+        /// <summary>
+        /// Not used by <see cref="SudokuModel"/>.
+        /// </summary>
         public IDictionary<int, IEnumerable<int>> IndexValueMap
         {
             get
@@ -79,6 +78,9 @@ namespace Sudokungfu
             }
         }
 
+        /// <summary>
+        /// Whether the model is currently accepting input.
+        /// </summary>
         public bool IsInputEnabled
         {
             get
@@ -96,6 +98,9 @@ namespace Sudokungfu
             }
         }
 
+        /// <summary>
+        /// Whether the model is currently solvers.
+        /// </summary>
         public bool IsSolving
         {
             get
@@ -115,19 +120,26 @@ namespace Sudokungfu
 
         #endregion
 
+       
+
         /// <summary>
-        /// Notifies listeners of the PropertyChanged event that a property value has changed.
+        /// Creates a new <see cref="SudokuModel"/>.
         /// </summary>
-        /// <param name="propertyName">The name of the property that changed.</param>
-        private void OnPropertyChanged(string propertyName)
+        public SudokuModel()
         {
-            if (PropertyChanged != null)
+            var details = new List<ISudokuModel>();
+
+            for (int i = 0; i < Constants.CELL_COUNT; i++)
             {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                details.Add(new CellInputModel(i));
             }
+
+            _details = details;
         }
 
-
+        /// <summary>
+        /// Result of last try for solving the Sudoku.
+        /// </summary>
         public SolveResult SolveResult
         {
             get
@@ -145,6 +157,9 @@ namespace Sudokungfu
             }
         }
 
+        /// <summary>
+        /// Initializes the model.
+        /// </summary>
         public void Initialize()
         {
             _isSolving = true;
@@ -155,6 +170,9 @@ namespace Sudokungfu
             IsInputEnabled = true;
         }
 
+        /// <summary>
+        /// Solves the Sudoku.
+        /// </summary>
         public async Task Solve()
         {
             if (SolveResult != SolveResult.SUCCESS)
@@ -182,6 +200,18 @@ namespace Sudokungfu
                 }
 
                 IsSolving = false;
+            }
+        }
+
+        /// <summary>
+        /// Notifies listeners of the PropertyChanged event that a property value has changed.
+        /// </summary>
+        /// <param name="propertyName">The name of the property that changed.</param>
+        private void OnPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }

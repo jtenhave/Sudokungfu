@@ -1,12 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows;
-using System.Linq;
 
-namespace Sudokungfu.SudokuGrid
+namespace Sudokungfu.View
 {
+    using Model;
     using Extensions;
 
     /// <summary>

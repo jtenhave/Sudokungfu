@@ -4,6 +4,7 @@ using System.ComponentModel;
 namespace Sudokungfu.SudokuSolver.Techniques
 {
     using Extensions;
+    using Model;
 
     /// <summary>
     /// Class that represents the basic techniques for eliminating a possile value from a Sudoku cell.

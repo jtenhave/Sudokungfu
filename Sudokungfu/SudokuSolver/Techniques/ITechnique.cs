@@ -1,6 +1,8 @@
 ﻿
 namespace Sudokungfu.SudokuSolver.Techniques
 {
+    using Model;
+
     /// <summary>
     /// Interface that represents a technique used to eliminate a possible value from a cell in the Sudoku.
     /// </summary>

@@ -5,16 +5,15 @@ using System.Windows;
 using System.Windows.Input;
 using System.Collections.Generic;
 
-namespace Sudokungfu
+namespace Sudokungfu.View
 {
-    using SudokuSolver;
-    using SudokuGrid;
+    using Model;
     using System.ComponentModel;
 
     /// <summary>
     /// Interaction logic for SudokuWindow.xaml
     /// </summary>
-    public partial class SudokuWindow : Window
+    public partial class Sudokungfu : Window
     {
         private const int ARTIFICIAL_DELAY = 3000;
 
@@ -25,7 +24,7 @@ namespace Sudokungfu
         /// </summary>
         public List<CellViewModel> Cells { get; set; } = new List<CellViewModel>();
 
-        public SudokuWindow()
+        public Sudokungfu()
         {
             InitializeComponent();
 

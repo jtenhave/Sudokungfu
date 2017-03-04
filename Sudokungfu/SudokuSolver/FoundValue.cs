@@ -5,6 +5,7 @@ using System.Linq;
 namespace Sudokungfu.SudokuSolver
 {
     using Extensions;
+    using Model;
     using Sets;
     using Techniques;
 

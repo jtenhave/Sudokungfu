@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace Sudokungfu
+namespace Sudokungfu.Model
 {
     /// <summary>
     /// Interface that describes how the details of a found value or technique should be displayed.

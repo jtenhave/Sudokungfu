@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace Sudokungfu.Test
 {
+    using Model;
     using Sudokungfu.Extensions;
     using Sudokungfu.SudokuSolver;
     using Sudokungfu.SudokuSolver.Techniques;

@@ -173,8 +173,7 @@ namespace Sudokungfu.Test.SudokuSolver
                 IndexValueMap = new Dictionary<int, IEnumerable<int>>()
                 {
                     [testIndex] = testValue.ToEnumerable()
-                },
-                UsesFoundValues = true
+                }
             };
 
             Assert.AreEqual(0, cell.EliminationTechniques[testValue].Count());
@@ -202,8 +201,7 @@ namespace Sudokungfu.Test.SudokuSolver
                 IndexValueMap = new Dictionary<int, IEnumerable<int>>()
                 {
                     [testIndex] = testInsertedValue.ToEnumerable()
-                },
-                UsesFoundValues = true
+                }
             };
 
             var testTechnique = new TestTechnique()
@@ -212,8 +210,7 @@ namespace Sudokungfu.Test.SudokuSolver
                 IndexValueMap = new Dictionary<int, IEnumerable<int>>()
                 {
                     [45] = 56.ToEnumerable()
-                },
-                UsesFoundValues = false
+                }
             };
 
             cell.EliminatePossibleValue(testValue, testTechnique);
