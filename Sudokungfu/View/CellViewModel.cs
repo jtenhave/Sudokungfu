@@ -7,8 +7,8 @@ using System.Windows.Media;
 
 namespace Sudokungfu.View
 {
-    using Model;
     using Extensions;
+    using Model;
 
     /// <summary>
     /// Class for the view model of a cell in the Sudoku grid.
@@ -55,7 +55,7 @@ namespace Sudokungfu.View
 
                     if (_model.IsInputEnabled)
                     {
-                        CellModel.IndexValueMap[Index] = i.ToEnumerable();
+                        GetCellModel().IndexValueMap[Index] = i.ToEnumerable();
                     }
                 }
             }
@@ -163,14 +163,6 @@ namespace Sudokungfu.View
             }
         }
 
-        private ISudokuModel CellModel
-        {
-            get
-            {
-                return _model.Details.FirstOrDefault(d => d.IndexValueMap.ContainsKey(Index));
-            }
-        }
-
         /// <summary>
         /// Creates a new <see cref="CellViewModel"/>
         /// </summary>
@@ -214,12 +206,31 @@ namespace Sudokungfu.View
             }
             else
             {
-                var value = CellModel.IndexValueMap[Index].First().ToString();
-                FontSize = FONT_SIZE_DEFAULT;
-                FontStyle = FontStyles.Normal;
-                Background = value != "0" && !CellModel.Details.Any() ? Brushes.LightGray : Brushes.White;             
-                Value = value;
+                var cellModel = GetCellModel();
+                if (cellModel == null)
+                {
+                    Background = Brushes.White;
+                    Value = string.Empty;
+                }
+                else
+                {
+                    var value = cellModel.IndexValueMap[Index].First().ToString();
+                    FontSize = FONT_SIZE_DEFAULT;
+                    FontStyle = FontStyles.Normal;
+                    Background = value != "0" && !cellModel.Details.Any() ? Brushes.LightGray : Brushes.White;
+                    Value = value;
+                }
             }
+        }
+
+        private ISudokuModel GetCellModel()
+        {
+            if (_model.IsInputEnabled)
+            {
+                return _model.Details.FirstOrDefault(d => d.IndexValueMap.ContainsKey(Index));
+            }
+
+            return _model.Details.FirstOrDefault(d => d.IndexValueMap.ContainsKey(Index) && d.IndexValueMap[Index].Any());
         }
 
         /// <summary>

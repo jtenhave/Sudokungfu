@@ -28,6 +28,8 @@ namespace Sudokungfu.Model
         private bool _isSolving;
         private bool _isInputEnabled;
         private SolveResult _result;
+        private int _shownValues;
+        private int _givenValues;
 
         #region ISudokuModel
 
@@ -54,16 +56,7 @@ namespace Sudokungfu.Model
         {
             get
             {
-                return _details;
-            }
-
-            private set
-            {
-                if (value != _details)
-                {
-                    _details = value;
-                    OnPropertyChanged(nameof(Details));
-                }
+                return _details.Take(_shownValues);
             }
         }
 
@@ -120,8 +113,6 @@ namespace Sudokungfu.Model
 
         #endregion
 
-       
-
         /// <summary>
         /// Creates a new <see cref="SudokuModel"/>.
         /// </summary>
@@ -135,6 +126,7 @@ namespace Sudokungfu.Model
             }
 
             _details = details;
+            _shownValues = Constants.CELL_COUNT;
         }
 
         /// <summary>
@@ -149,11 +141,9 @@ namespace Sudokungfu.Model
 
             set
             {
-                if (value != _result)
-                {
-                    _result = value;
-                    OnPropertyChanged(nameof(SolveResult));
-                }
+                _result = value;
+                OnPropertyChanged(nameof(SolveResult));
+                
             }
         }
 
@@ -164,8 +154,8 @@ namespace Sudokungfu.Model
         {
             _isSolving = true;
             _isInputEnabled = false;
-            _result = SolveResult.NONE;
 
+            SolveResult = SolveResult.NONE;
             IsSolving = false;
             IsInputEnabled = true;
         }
@@ -190,7 +180,15 @@ namespace Sudokungfu.Model
                     }
                     else
                     {
-                        Details = result;
+                        SolveResult = SolveResult.SUCCESS;
+
+                        _details = result;
+                        _givenValues = _details.Count(v => v.Details.Count() == 0);
+                        _shownValues = 0;
+
+                        ShowValues(_givenValues);
+
+                        OnPropertyChanged(nameof(Details));
                     }
                 }
                 catch (Exception)
@@ -200,6 +198,47 @@ namespace Sudokungfu.Model
                 }
 
                 IsSolving = false;
+            }
+        }
+
+        /// <summary>
+        /// Shows the next value in the Sudoku.
+        /// </summary>
+        public void NextValue()
+        {
+            if (_shownValues < Constants.CELL_COUNT)
+            {
+                _shownValues++;
+                OnPropertyChanged(nameof(Details));
+            }
+        }
+
+        /// <summary>
+        /// Hides the current value in the Sudoku.
+        /// </summary>
+        public void PreviousValue()
+        {
+           if (_shownValues > _givenValues)
+           {
+               _shownValues--;
+                OnPropertyChanged(nameof(Details));
+            }
+        }
+
+        /// <summary>
+        /// Shows all values in the Sudoku.
+        /// </summary>
+        public void AllValues()
+        {
+            ShowValues(Constants.CELL_COUNT);
+            OnPropertyChanged(nameof(Details));
+        }
+
+        private void ShowValues(int count)
+        {
+            while (_shownValues < count)
+            {
+                NextValue();
             }
         }
 

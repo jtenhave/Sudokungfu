@@ -1,22 +1,19 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Collections.Generic;
 
 namespace Sudokungfu.View
 {
     using Model;
-    using System.ComponentModel;
+
 
     /// <summary>
     /// Interaction logic for SudokuWindow.xaml
     /// </summary>
     public partial class Sudokungfu : Window
     {
-        private const int ARTIFICIAL_DELAY = 3000;
-
         private SudokuModel _model;
 
         /// <summary>
@@ -77,10 +74,7 @@ namespace Sudokungfu.View
         /// </summary>
         private void SolveButtonClick(object sender, RoutedEventArgs e)
         {
-            /*while (_shownValues < Constants.CELL_COUNT && _currentSudoku != null)
-            {
-                Next();
-            }*/
+            _model.AllValues();
         }
 
         /// <summary>
@@ -88,17 +82,7 @@ namespace Sudokungfu.View
         /// </summary>
         private void NextButtonClick(object sender, RoutedEventArgs e)
         {
-            /*if (_shownValues < Constants.CELL_COUNT && _currentSudoku != null)
-            {
-                var value = _currentSudoku[_shownValues];
-                Cells[value.Index].Value = value.Value.ToString();
-                if (_shownValues < _givenValues)
-                {
-                    // Cells[value.Index].Background = Brushes.LightGray;
-                }
-
-                _shownValues++;
-            }*/
+            _model.NextValue();
         }
 
         /// <summary>
@@ -106,61 +90,8 @@ namespace Sudokungfu.View
         /// </summary>
         private void PreviousButtonClick(object sender, RoutedEventArgs e)
         {
-            /*if (_shownValues > _givenValues && _currentSudoku != null)
-            {
-                _shownValues--;
-
-                var value = _currentSudoku[_shownValues];
-                Cells[value.Index].Value = string.Empty;
-            }*/
+            _model.PreviousValue();
         }
-
-        /// <summary>
-        /// Sets the current Sudoku for the grid.
-        /// </summary>
-        /*public void SetSudoku(IEnumerable<FoundValue> _foundValues)
-        {
-            _currentSudoku = _foundValues.ToList();
-            _givenValues = _foundValues.Count(v => v.Techniques.Count() == 0);
-            _shownValues = 0;
-
-            while (_shownValues < _givenValues)
-            {
-                Next();
-            }
-        }*/
-
-        /// <summary>
-        /// Trys to solve the Sudoku based on the currently entered values.
-        /// </summary>
-        /// <returns>The <see cref="SudokuSolver.SolveResult"/></returns>
-        /*private async Task<SolveResult> SolveCurrent()
-        {
-            return await Task.Run(async () =>
-            {
-                var stopWatch = new Stopwatch();
-                stopWatch.Start();
-
-                var initialValues = Cells.Select(c =>
-                {
-                    var value = 0;
-                    int.TryParse(c.Value, out value);
-
-                    return value;
-                }).ToArray();
-
-                var solveResult = Solver.Solve(initialValues);
-
-                stopWatch.Stop();
-
-                if (stopWatch.ElapsedMilliseconds < ARTIFICIAL_DELAY)
-                {
-                    await Task.Delay(ARTIFICIAL_DELAY - (int)stopWatch.ElapsedMilliseconds);
-                }
-
-                return solveResult;
-            });
-        }*/
 
         private void OnModelChanged(object sender, PropertyChangedEventArgs args)
         {
@@ -171,10 +102,16 @@ namespace Sudokungfu.View
             }
             else if (args.PropertyName == "IsInputEnabled")
             {
-                EnterButton.IsEnabled = _model.IsInputEnabled && !_model.IsSolving;
+                EnterButton.IsEnabled = _model.IsInputEnabled;
             }
             else if (args.PropertyName == "SolveResult")
             {
+                if (_model.SolveResult == SolveResult.NONE)
+                {
+                    NextButton.IsEnabled = false;
+                    PreviousButton.IsEnabled = false;
+                    SolveButton.IsEnabled = false;
+                }
                 if (_model.SolveResult == SolveResult.INVALID)
                 {
                     MessageBox.Show(Properties.Resources.InvalidMessage, Properties.Resources.InvalidTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -182,6 +119,15 @@ namespace Sudokungfu.View
                 else if (_model.SolveResult == SolveResult.ERROR)
                 {
                     MessageBox.Show(Properties.Resources.ErrorMessage, Properties.Resources.ErrorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else if (args.PropertyName == "Details")
+            {
+                if (_model.SolveResult == SolveResult.SUCCESS)
+                {
+                    NextButton.IsEnabled = _model.Details.Count() < Constants.CELL_COUNT;
+                    PreviousButton.IsEnabled = _model.Details.Any(d => d.Details.Any());
+                    SolveButton.IsEnabled = _model.Details.Count() != Constants.CELL_COUNT;
                 }
             }
         }
