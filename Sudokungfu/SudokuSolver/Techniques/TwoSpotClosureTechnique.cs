@@ -66,12 +66,16 @@ namespace Sudokungfu.SudokuSolver.Techniques
         public static TwoSpotClosureTechnique CreateTwoSpotClosureTechnique(int valueA, int valueB, IEnumerable<int> indexes, IEnumerable<int> setIndexes, IEnumerable<int> affectedIndexes)
         {
             var values = new int[] { valueA, valueB };
-            return new TwoSpotClosureTechnique()
+            var technique = new TwoSpotClosureTechnique()
             {
                 Complexity = DEFAULT_COMPLEXITY,
                 IndexValueMap = setIndexes.ToDictionary(i => i, i => indexes.Contains(i) ?  values : Enumerable.Empty<int>()),
                 AffectedIndexes = affectedIndexes
             };
+
+            technique.ClickableModel = technique;
+
+            return technique;
         }
     }
 }

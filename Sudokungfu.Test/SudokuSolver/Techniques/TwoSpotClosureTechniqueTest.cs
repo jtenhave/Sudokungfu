@@ -23,10 +23,20 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
             var box = new Box(cells, 0);
             var expectedCells = new Cell[] { cells[0], cells[1] };
             var expectedValues = new int[] { testValueA, testValueB };
+            var expectedComplexity = 2;
+            var expectedIndexValueMap = box.Indexes().ToDictionary(i => i, i => expectedCells.Indexes().Contains(i) ? expectedValues : Enumerable.Empty<int>());
+            var expectedAffectedIndexes = expectedCells.Indexes();
             var expectedTechnique = new TestTechnique()
             {
-                Complexity = 2,
-                IndexValueMap = box.Indexes().ToDictionary(i => i, i => expectedCells.Indexes().Contains(i) ? expectedValues : Enumerable.Empty<int>())
+                Complexity = expectedComplexity,
+                IndexValueMap = expectedIndexValueMap,
+                AffectedIndexes = expectedAffectedIndexes,
+                ClickableModel = new TestTechnique()
+                {
+                    Complexity = expectedComplexity,
+                    IndexValueMap = expectedIndexValueMap,
+                    AffectedIndexes = expectedAffectedIndexes
+                }
             };
 
             var testTechnique = new TestTechnique();

@@ -58,12 +58,17 @@ namespace Sudokungfu.SudokuSolver.Techniques
         /// <param name="affectedIndexes">Indexes of cells that had values eliminated by this technique.</param>
         public static PossibleSpotOverlapTechnique CreatePossibleSpotOverlapTechnique(int value, IEnumerable<int> indexes, IEnumerable<int> setindexes, IEnumerable<int> affectedIndexes)
         {
-            return new PossibleSpotOverlapTechnique()
+            var technique = new PossibleSpotOverlapTechnique()
             {
                 Complexity = DEFAULT_COMPLEXITY,
                 IndexValueMap = setindexes.ToDictionary(i => i, i => indexes.Contains(i) ? value.ToEnumerable() : Enumerable.Empty<int>()),
                 AffectedIndexes = affectedIndexes
             };
+
+            technique.ClickableModel = technique;
+
+            return technique;
+
         }
     }
 }

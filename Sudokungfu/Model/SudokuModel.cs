@@ -72,6 +72,17 @@ namespace Sudokungfu.Model
         }
 
         /// <summary>
+        /// Not used by <see cref="SudokuModel"/>.
+        /// </summary>
+        public ISudokuModel ClickableModel
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Whether the model is currently accepting input.
         /// </summary>
         public bool IsInputEnabled

@@ -121,7 +121,7 @@ namespace Sudokungfu.SudokuSolver
         /// <param name="value">Found value to insert into the Sudoku</param>
         private void InsertValue(FoundValue value)
         {
-            _cells[value.Index].InsertValue(value.Value);
+            _cells[value.Index].InsertValue(value);
             _foundValues.Add(value);
         }
     }

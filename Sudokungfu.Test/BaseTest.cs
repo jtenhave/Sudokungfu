@@ -47,6 +47,14 @@ namespace Sudokungfu.Test
         /// <param name="actual">Actual model.</param>
         public static void AssertISudokuModelEqual(ISudokuModel expected, ISudokuModel actual)
         {
+            if (expected == null)
+            {
+                Assert.IsNull(actual);
+                return;
+            }
+
+            Assert.IsNotNull(actual);
+
             if (expected.IndexValueMap == null)
             {
                 Assert.IsNull(actual.IndexValueMap);
@@ -92,6 +100,15 @@ namespace Sudokungfu.Test
                     AssertISudokuModelEqual(expectedDetails[i], actualDetails[i]);
                 }
             }
+
+            if (expected.ClickableModel == null)
+            {
+                Assert.IsNull(actual.ClickableModel);
+            }
+            else
+            {
+                AssertISudokuModelEqual(expected.ClickableModel, actual.ClickableModel);
+            }
         }
 
         /// <summary>
@@ -123,6 +140,8 @@ namespace Sudokungfu.Test
 
         public IDictionary<int, IEnumerable<int>> IndexValueMap { get; set; }
 
+        public ISudokuModel ClickableModel { get; set; }
+
         public bool IsInputEnabled { get; set; }
 
         public bool IsSolving { get; set; }
@@ -140,6 +159,8 @@ namespace Sudokungfu.Test
         public IEnumerable<ISudokuModel> Details { get; set; }
 
         public IEnumerable<int> AffectedIndexes { get; set; }
+
+        public ISudokuModel ClickableModel { get; set; }
 
         public bool IsInputEnabled { get; set; }
 

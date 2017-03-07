@@ -51,6 +51,11 @@ namespace Sudokungfu.SudokuSolver
         }
 
         /// <summary>
+        /// Model that will be displayed when this model is clicked.
+        /// </summary>
+        public ISudokuModel ClickableModel { get; private set; }
+
+        /// <summary>
         /// Not used by <see cref="FoundValue"/>.
         /// </summary>
         public bool IsInputEnabled
@@ -156,10 +161,18 @@ namespace Sudokungfu.SudokuSolver
         /// <param name="set">Set where the value was found.</param>
         public static FoundValue CreateFoundInSetValue(Cell cell, int value, Set set)
         {
+            var techniques = FindMinTechniques(cell, value, set);
+            var indexValueMap = set.Cells.Indexes().ToDictionary(cell.Index, value);
+
             return new FoundValue()
             {
-                _techniques = FindMinTechniques(cell, value, set),
-                IndexValueMap = set.Cells.Indexes().ToDictionary(cell.Index, value)
+                _techniques = techniques,
+                IndexValueMap = indexValueMap,
+                ClickableModel = new FoundValue()
+                {
+                    _techniques = techniques,
+                    IndexValueMap = indexValueMap,
+                }
             };
         }
 
@@ -170,10 +183,18 @@ namespace Sudokungfu.SudokuSolver
         /// <param name="value">Value that was found.</param>
         public static FoundValue CreateOnlyPossiblValue(Cell cell, int value)
         {
+            var techniques = FindMinTechniques(cell, value);
+            var indexValueMap = cell.Index.ToDictionary(value);
+
             return new FoundValue()
             {
-                _techniques = FindMinTechniques(cell, value),
-                IndexValueMap = cell.Index.ToDictionary(value)
+                _techniques = techniques,
+                IndexValueMap = indexValueMap,
+                ClickableModel = new FoundValue()
+                {
+                    _techniques = techniques,
+                    IndexValueMap = indexValueMap,
+                }
             };
         }
 

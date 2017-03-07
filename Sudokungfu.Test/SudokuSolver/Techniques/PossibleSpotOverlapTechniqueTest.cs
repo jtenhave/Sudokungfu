@@ -23,11 +23,20 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
             var box = new Box(cells, 0);
             var row = new Row(cells, 0);
             var expectedCells = new List<Cell>() { cells[0], cells[2] };
+            var expectedComplexity = 2;
+            var expectedIndexValueMap = box.Indexes().Union(row.Indexes()).ToDictionary(i => i, i => expectedCells.Indexes().Contains(i) ? testValue.ToEnumerable() : Enumerable.Empty<int>());
+            var expectedAffectedIndexes = row.Cells.Except(box.Cells).Indexes();
             var expectedTechnique = new TestTechnique()
             {
-                Complexity = 2,
-                IndexValueMap = box.Indexes().Union(row.Indexes()).ToDictionary(i => i, i => expectedCells.Indexes().Contains(i) ? testValue.ToEnumerable() : Enumerable.Empty<int>()),
-                //UsesFoundValues = false
+                Complexity = expectedComplexity,
+                IndexValueMap = expectedIndexValueMap,
+                AffectedIndexes = expectedAffectedIndexes,
+                ClickableModel = new TestTechnique()
+                {
+                    Complexity = expectedComplexity,
+                    IndexValueMap = expectedIndexValueMap,
+                    AffectedIndexes = expectedAffectedIndexes,
+                }
             };
 
             var testTechnique = new TestTechnique();
@@ -50,11 +59,20 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
             var box = new Box(cells, 0);
             var row = new Row(cells, 0);
             var expectedCells = new List<Cell>() { cells[0], cells[1], cells[2] };
+            var expectedComplexity = 2;
+            var expectedIndexValueMap = box.Indexes().Union(row.Indexes()).ToDictionary(i => i, i => expectedCells.Indexes().Contains(i) ? testValue.ToEnumerable() : Enumerable.Empty<int>());
+            var expectedAffectedIndexes = row.Cells.Except(box.Cells).Indexes();
             var expectedTechnique = new TestTechnique()
             {
-                Complexity = 2,
-                IndexValueMap = box.Indexes().Union(row.Indexes()).ToDictionary(i => i, i => expectedCells.Indexes().Contains(i) ? testValue.ToEnumerable() : Enumerable.Empty<int>()),
-                //UsesFoundValues = false
+                Complexity = expectedComplexity,
+                IndexValueMap = expectedIndexValueMap,
+                AffectedIndexes = expectedAffectedIndexes,
+                ClickableModel = new TestTechnique()
+                {
+                    Complexity = expectedComplexity,
+                    IndexValueMap = expectedIndexValueMap,
+                    AffectedIndexes = expectedAffectedIndexes,
+                }
             };
 
             var testTechnique = new TestTechnique();

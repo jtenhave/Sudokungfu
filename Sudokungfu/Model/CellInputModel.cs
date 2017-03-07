@@ -56,6 +56,17 @@ namespace Sudokungfu.Model
         /// <summary>
         /// Not used by <see cref="CellInputModel"/>.
         /// </summary>
+        public ISudokuModel ClickableModel
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Not used by <see cref="CellInputModel"/>.
+        /// </summary>
         public bool IsInputEnabled
         {
             get

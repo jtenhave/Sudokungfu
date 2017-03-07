@@ -24,6 +24,11 @@ namespace Sudokungfu.Model
         IEnumerable<int> AffectedIndexes { get; }
 
         /// <summary>
+        /// Model that will be displayed when this model is clicked.
+        /// </summary>
+        ISudokuModel ClickableModel { get; }
+
+        /// <summary>
         /// Whether the model is accepting input at this time.
         /// </summary>
         bool IsInputEnabled { get; }
