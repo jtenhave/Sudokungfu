@@ -16,7 +16,7 @@ namespace Sudokungfu.View
         public const int THICK_WIDTH = 4;
 
         /// <summary>
-        /// Converts a <see cref="CellViewModel"/> index to a WPF border string.
+        /// Converts an index to a WPF border string.
         /// </summary>
         /// <param name="value">Cell index.</param>
         /// <returns>Cell border string.</returns>

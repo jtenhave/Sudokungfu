@@ -80,9 +80,6 @@ namespace Sudokungfu.Test
                 Assert.IsTrue(actual.AffectedIndexes.SetEqual(expected.AffectedIndexes));
             }
 
-            Assert.AreEqual(expected.IsInputEnabled, actual.IsInputEnabled);
-            Assert.AreEqual(expected.IsSolving, actual.IsSolving);
-
             if (expected.Details == null)
             {
                 Assert.IsNull(actual.Details);

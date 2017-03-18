@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 
 namespace Sudokungfu.SudokuSolver
@@ -17,11 +16,6 @@ namespace Sudokungfu.SudokuSolver
         private IEnumerable<ITechnique> _techniques;
 
         #region ISudokuModel
-
-        /// <summary>
-        /// Not used by <see cref="FoundValue"/>.
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
         /// Indexes of the cells that should be displayed and the values that go in them.
@@ -54,28 +48,6 @@ namespace Sudokungfu.SudokuSolver
         /// Model that will be displayed when this model is clicked.
         /// </summary>
         public ISudokuModel ClickableModel { get; private set; }
-
-        /// <summary>
-        /// Not used by <see cref="FoundValue"/>.
-        /// </summary>
-        public bool IsInputEnabled
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Not used by <see cref="FoundValue"/>.
-        /// </summary>
-        public bool IsSolving
-        {
-            get
-            {
-                return false;
-            }
-        }
 
         #endregion
 

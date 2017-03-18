@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 
 namespace Sudokungfu.SudokuSolver.Techniques
 {
@@ -14,11 +13,6 @@ namespace Sudokungfu.SudokuSolver.Techniques
         private ISudokuModel _clickableModel;
 
         #region ISudokuModel
-
-        /// <summary>
-        /// Not used by <see cref="ITechnique"/>.
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
         /// Indexes of the cells that are part of the technique and the values that go in them.
@@ -60,28 +54,6 @@ namespace Sudokungfu.SudokuSolver.Techniques
             }
         }
         
-        /// <summary>
-        /// Not used by <see cref="ITechnique"/>.
-        /// </summary>
-        public bool IsInputEnabled
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Not used by <see cref="ITechnique"/>.
-        /// </summary>
-        public bool IsSolving
-        {
-            get
-            {
-                return false;
-            }
-        }
-
         #endregion
 
         #region ITechnique

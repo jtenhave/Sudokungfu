@@ -17,7 +17,7 @@ namespace Sudokungfu.SudokuSolver
     {
         private List<Cell> _cells;
         private List<Set> _sets;
-        private List<FoundValue> _foundValues;
+        private List<ISudokuModel> _foundValues;
 
         /// <summary>
         /// Create a new <see cref="Solver"/>
@@ -26,7 +26,7 @@ namespace Sudokungfu.SudokuSolver
         {
             _cells = new List<Cell>();
             _sets = new List<Set>();
-            _foundValues = new List<FoundValue>();
+            _foundValues = new List<ISudokuModel>();
 
             for (int i = 0; i < Constants.CELL_COUNT; i++)
             {
@@ -46,15 +46,18 @@ namespace Sudokungfu.SudokuSolver
         /// </summary>
         /// <param name="values">The intial values in the Sudoku.</param>
         /// <returns>The result.</returns>
-        public static async Task<IEnumerable<ISudokuModel>> Solve(IEnumerable<int> values)
+        public static async Task<List<ISudokuModel>> Solve(IEnumerable<int> values)
         {
             if (values.Count() != Constants.CELL_COUNT || values.Any(v => !v.IsSudokuValue()))
             {
                 throw new ArgumentException("values: Must contains 81 valid values.");
             }
 
-            var sudokuSolver = new Solver();
-            return sudokuSolver.SolveInternal(values);
+            return await Task.Run(() =>
+            {
+                var sudokuSolver = new Solver();
+                return sudokuSolver.SolveInternal(values);
+            });
         }
 
         /// <summary>
@@ -62,7 +65,7 @@ namespace Sudokungfu.SudokuSolver
         /// </summary>
         /// <param name="values">The intial values in the Sudoku.</param>
         /// <returns>The result.</returns>
-        private IEnumerable<ISudokuModel> SolveInternal(IEnumerable<int> values)
+        private List<ISudokuModel> SolveInternal(IEnumerable<int> values)
         {
             // Insert the intial values.
             foreach (var cell in _cells)
