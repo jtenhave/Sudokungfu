@@ -163,18 +163,20 @@ namespace Sudokungfu.Test.SudokuSolver
         {
             var testValue = 3;
             var testIndex = 23;
-
-            var cell = new Cell(testIndex);
-            cell.InsertValue(testValue);
-
+            var testFoundValue = FoundValue.CreateGivenValue(testIndex, testValue);
             var expectedTechnique = new TestTechnique()
             {
                 Complexity = 0,
                 IndexValueMap = new Dictionary<int, IEnumerable<int>>()
                 {
                     [testIndex] = testValue.ToEnumerable()
-                }
+                },
+                AffectedIndexes = testIndex.ToEnumerable(),
+                ClickableModel = testFoundValue
             };
+
+            var cell = new Cell(testIndex);
+            cell.InsertValue(testFoundValue);
 
             Assert.AreEqual(0, cell.EliminationTechniques[testValue].Count());
 
@@ -191,9 +193,7 @@ namespace Sudokungfu.Test.SudokuSolver
             var testValue = 3;
             var testIndex = 23;
             var testInsertedValue = 5;
-
-            var cell = new Cell(testIndex);
-            cell.InsertValue(testInsertedValue);
+            var testFoundValue = FoundValue.CreateGivenValue(testIndex, testInsertedValue);
 
             var expectedTechnique = new TestTechnique()
             {
@@ -201,7 +201,9 @@ namespace Sudokungfu.Test.SudokuSolver
                 IndexValueMap = new Dictionary<int, IEnumerable<int>>()
                 {
                     [testIndex] = testInsertedValue.ToEnumerable()
-                }
+                },
+                AffectedIndexes = testIndex.ToEnumerable(),
+                ClickableModel = testFoundValue
             };
 
             var testTechnique = new TestTechnique()
@@ -213,6 +215,8 @@ namespace Sudokungfu.Test.SudokuSolver
                 }
             };
 
+            var cell = new Cell(testIndex);
+            cell.InsertValue(testFoundValue);
             cell.EliminatePossibleValue(testValue, testTechnique);
 
             Assert.AreEqual(1, cell.EliminationTechniques[testValue].Count());
@@ -225,13 +229,13 @@ namespace Sudokungfu.Test.SudokuSolver
             var testValue = 4;
             var expectedValues = Constants.ALL_VALUES.Except(testValue);
             var cells = GetAllCells();
-
+            var testFoundValue = FoundValue.CreateGivenValue(0, testValue);
             var row = new Row(cells, 0);
             var col = new Column(cells, 0);
             var box = new Box(cells, 0);
 
             var testCell = cells.First();
-            testCell.InsertValue(testValue);
+            testCell.InsertValue(testFoundValue);
 
             Assert.IsFalse(row.Cells.First().PossibleValues.Any());
             foreach (var cell in row.Cells.Except(testCell))

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 
 namespace Sudokungfu.SudokuSolver
@@ -17,11 +16,6 @@ namespace Sudokungfu.SudokuSolver
         private IEnumerable<ITechnique> _techniques;
 
         #region ISudokuModel
-
-        /// <summary>
-        /// Not used by <see cref="FoundValue"/>.
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
         /// Indexes of the cells that should be displayed and the values that go in them.
@@ -51,26 +45,9 @@ namespace Sudokungfu.SudokuSolver
         }
 
         /// <summary>
-        /// Not used by <see cref="FoundValue"/>.
+        /// Model that will be displayed when this model is clicked.
         /// </summary>
-        public bool IsInputEnabled
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Not used by <see cref="FoundValue"/>.
-        /// </summary>
-        public bool IsSolving
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public ISudokuModel ClickableModel { get; private set; }
 
         #endregion
 
@@ -156,10 +133,18 @@ namespace Sudokungfu.SudokuSolver
         /// <param name="set">Set where the value was found.</param>
         public static FoundValue CreateFoundInSetValue(Cell cell, int value, Set set)
         {
+            var techniques = FindMinTechniques(cell, value, set);
+            var indexValueMap = set.Cells.Indexes().ToDictionary(cell.Index, value);
+
             return new FoundValue()
             {
-                _techniques = FindMinTechniques(cell, value, set),
-                IndexValueMap = set.Cells.Indexes().ToDictionary(cell.Index, value)
+                _techniques = techniques,
+                IndexValueMap = indexValueMap,
+                ClickableModel = new FoundValue()
+                {
+                    _techniques = techniques,
+                    IndexValueMap = indexValueMap,
+                }
             };
         }
 
@@ -170,10 +155,18 @@ namespace Sudokungfu.SudokuSolver
         /// <param name="value">Value that was found.</param>
         public static FoundValue CreateOnlyPossiblValue(Cell cell, int value)
         {
+            var techniques = FindMinTechniques(cell, value);
+            var indexValueMap = cell.Index.ToDictionary(value);
+
             return new FoundValue()
             {
-                _techniques = FindMinTechniques(cell, value),
-                IndexValueMap = cell.Index.ToDictionary(value)
+                _techniques = techniques,
+                IndexValueMap = indexValueMap,
+                ClickableModel = new FoundValue()
+                {
+                    _techniques = techniques,
+                    IndexValueMap = indexValueMap,
+                }
             };
         }
 

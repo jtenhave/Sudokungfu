@@ -90,20 +90,20 @@ namespace Sudokungfu.SudokuSolver
         /// Inserts a value into this cell.
         /// </summary>
         /// <param name="value">Value to insert.</param>
-        public void InsertValue(int value)
+        public void InsertValue(FoundValue value)
         {
-            var occupiedTechnique = BasicTechnique.CreateOccupiedTechnique(value, Index);
-            foreach(var v in Constants.ALL_VALUES.Except(value))
+            var occupiedTechnique = BasicTechnique.CreateOccupiedTechnique(value);
+            foreach(var v in Constants.ALL_VALUES.Except(value.Value))
             {
                 EliminatePossibleValue(v, occupiedTechnique);
             }
 
-            _possibleValues.Remove(value);
+            _possibleValues.Remove(value.Value);
 
             foreach (var set in Sets)
             {
-                var setTechnique = BasicTechnique.CreateSetTechnique(value, Index, set.Indexes());
-                set.Cells.Except(this).ForEach(c => c.EliminatePossibleValue(value, setTechnique));
+                var setTechnique = BasicTechnique.CreateSetTechnique(value, set.Indexes());
+                set.Cells.Except(this).ForEach(c => c.EliminatePossibleValue(value.Value, setTechnique));
             }
         }
     }

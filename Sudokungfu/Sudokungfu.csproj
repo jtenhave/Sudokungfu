@@ -57,13 +57,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Model\CellInputModel.cs" />
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Extensions\IntExtensions.cs" />
     <Compile Include="Model\ISudokuModel.cs" />
+    <Compile Include="ViewModel\DelegateCommand.cs" />
+    <Compile Include="ViewModel\SudokungfuViewModel.cs" />
     <Compile Include="View\CellBorderConverter.cs" />
-    <Compile Include="View\CellViewModel.cs" />
-    <Page Include="View\Sudokungfu.xaml">
+    <Compile Include="ViewModel\CellViewModel.cs" />
+    <Page Include="View\SudokungfuView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -72,7 +73,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Constants.cs" />
-    <Compile Include="Model\SudokuModel.cs" />
     <Compile Include="SudokuSolver\SolverExtensions.cs" />
     <Compile Include="SudokuSolver\Techniques\BasicTechnique.cs" />
     <Compile Include="SudokuSolver\FoundValue.cs" />
@@ -87,8 +87,9 @@
     <Compile Include="SudokuSolver\Techniques\PossibleSpotOverlapTechnique.cs" />
     <Compile Include="SudokuSolver\Techniques\ThreeSpotClosureTechnique.cs" />
     <Compile Include="SudokuSolver\Techniques\TwoSpotClosureTechnique.cs" />
-    <Compile Include="View\Sudokungfu.xaml.cs">
-      <DependentUpon>Sudokungfu.xaml</DependentUpon>
+    <Compile Include="View\CursorConverter.cs" />
+    <Compile Include="View\SudokungfuView.xaml.cs">
+      <DependentUpon>SudokungfuView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

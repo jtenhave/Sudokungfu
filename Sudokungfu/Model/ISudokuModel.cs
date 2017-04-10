@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 
 namespace Sudokungfu.Model
 {
     /// <summary>
     /// Interface that describes how the details of a found value or technique should be displayed.
     /// </summary>
-    public interface ISudokuModel : INotifyPropertyChanged
+    public interface ISudokuModel
     {
         /// <summary>
         /// Indexes of the cells that should be displayed and the values that go in them.
@@ -24,13 +23,8 @@ namespace Sudokungfu.Model
         IEnumerable<int> AffectedIndexes { get; }
 
         /// <summary>
-        /// Whether the model is accepting input at this time.
+        /// Model that will be displayed when this model is clicked.
         /// </summary>
-        bool IsInputEnabled { get; }
-
-        /// <summary>
-        /// Whether the model is solving.
-        /// </summary>
-        bool IsSolving { get; }
+        ISudokuModel ClickableModel { get; }
     }
 }

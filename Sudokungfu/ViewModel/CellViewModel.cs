@@ -1,13 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace Sudokungfu.View
+namespace Sudokungfu.ViewModel
 {
-    using Model;
     using Extensions;
 
     /// <summary>
@@ -22,13 +20,26 @@ namespace Sudokungfu.View
 
         private string _value;
         private Brush _background;
-        private bool _isReadOnly;
-        private Cursor _cursor;
         private FontStyle _fontStyle;
         private int _fontSize;
-        private ISudokuModel _model;
+
+        private Action<int> _clicked;
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Gets the click command.
+        /// </summary>
+        public ICommand ClickCommand
+        {
+            get
+            {
+                return DelegateCommand.Create(() =>
+                {
+                    _clicked(Index);
+                });
+            }
+        }
 
         /// <summary>
         /// Gets the index of the cell. 
@@ -36,7 +47,7 @@ namespace Sudokungfu.View
         public int Index { get; private set; }
 
         /// <summary>
-        /// Gets the value of the cell.
+        /// Gets or sets the value of the cell.
         /// </summary>
         public string Value
         {
@@ -52,12 +63,23 @@ namespace Sudokungfu.View
                 {
                     _value = i == 0 ? string.Empty : value;
                     OnPropertyChanged(nameof(Value));
-
-                    if (_model.IsInputEnabled)
-                    {
-                        CellModel.IndexValueMap[Index] = i.ToEnumerable();
-                    }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Gets the value of the cell as an int.
+        /// </summary>
+        public int ValueAsInt
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(Value))
+                {
+                    return 0;
+                }
+
+                return int.Parse(Value);
             }
         }
 
@@ -71,54 +93,12 @@ namespace Sudokungfu.View
                 return _background;
             }
 
-            private set
+            set
             {
                 if (_background != value)
                 {
                     _background = value;
                     OnPropertyChanged(nameof(Background));
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the read only value of the cell.
-        /// </summary>
-        public bool IsReadOnly
-        {
-            get
-            {
-                return _isReadOnly;
-            }
-
-            private set
-            {
-                if (_isReadOnly != value)
-                {
-                    _isReadOnly = value;
-                    Cursor = _isReadOnly ? Cursors.Arrow : Cursors.IBeam;
-
-                    OnPropertyChanged(nameof(IsReadOnly));
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the cursor of the cell.
-        /// </summary>
-        public Cursor Cursor
-        {
-            get
-            {
-                return _cursor;
-            }
-
-            private set
-            {
-                if (_cursor != value)
-                {
-                    _cursor = value;
-                    OnPropertyChanged(nameof(Cursor));
                 }
             }
         }
@@ -133,7 +113,7 @@ namespace Sudokungfu.View
                 return _fontStyle;
             }
 
-            private set
+            set
             {
                 if (_fontStyle != value)
                 {
@@ -153,7 +133,7 @@ namespace Sudokungfu.View
                 return _fontSize;
             }
 
-            private set
+            set
             {
                 if (_fontSize != value)
                 {
@@ -163,19 +143,11 @@ namespace Sudokungfu.View
             }
         }
 
-        private ISudokuModel CellModel
-        {
-            get
-            {
-                return _model.Details.FirstOrDefault(d => d.IndexValueMap.ContainsKey(Index));
-            }
-        }
-
         /// <summary>
         /// Creates a new <see cref="CellViewModel"/>
         /// </summary>
         /// <param name="index">Index of the cell.</param>
-        public CellViewModel(int index)
+        public CellViewModel(int index, Action<int> clicked)
         {
             if (!index.IsSudokuIndex())
             {
@@ -183,43 +155,16 @@ namespace Sudokungfu.View
             }
 
             Index = index;
+            _clicked = clicked;
+
+            SetDefaultCellProperties();
         }
 
-        public void SetSudokuModel(ISudokuModel model)
+        public void SetDefaultCellProperties()
         {
-            _model = model;
-            _model.PropertyChanged += OnModelChanged;
-
-            RefreshCell();
-        }
-
-        private void OnModelChanged(object sender, PropertyChangedEventArgs args)
-        {
-            if (args.PropertyName == "IsSolving" || args.PropertyName == "IsInputEnabled")
-            {
-                IsReadOnly = !_model.IsInputEnabled;
-                Cursor = _model.IsSolving ? Cursors.Wait : _model.IsInputEnabled ? Cursors.IBeam : Cursors.Arrow;
-            }
-            else if (args.PropertyName == "Details")
-            {
-                RefreshCell();
-            }
-        }
-
-        private void RefreshCell()
-        {
-            if (_model.IndexValueMap.Any())
-            {
-                // TODO show details.
-            }
-            else
-            {
-                var value = CellModel.IndexValueMap[Index].First().ToString();
-                FontSize = FONT_SIZE_DEFAULT;
-                FontStyle = FontStyles.Normal;
-                Background = value != "0" && !CellModel.Details.Any() ? Brushes.LightGray : Brushes.White;             
-                Value = value;
-            }
+            Value = string.Empty;
+            FontSize = FONT_SIZE_DEFAULT;
+            Background = Brushes.White;
         }
 
         /// <summary>
@@ -228,10 +173,7 @@ namespace Sudokungfu.View
         /// <param name="propertyName">The name of the property that changed.</param>
         private void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

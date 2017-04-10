@@ -36,9 +36,14 @@ namespace Sudokungfu.Test.SudokuSolver
             var cells = new List<Cell>() { new Cell(0), new Cell(1), new Cell(9), new Cell(10) };
             var expectedCell = cells[0];
             var box = new Box(cells, 0);
+            var expectedIndexValueMap = cells.Indexes().ToDictionary(expectedCell.Index, testValue);
             var expectedValue = new TestSudokuModel()
             {
-                IndexValueMap = cells.Indexes().ToDictionary(expectedCell.Index, testValue),
+                IndexValueMap = expectedIndexValueMap,
+                ClickableModel = new TestSudokuModel()
+                {
+                    IndexValueMap = expectedIndexValueMap
+                }
             };
 
             var actualValue = FoundValue.CreateFoundInSetValue(expectedCell, testValue, box);
@@ -51,9 +56,14 @@ namespace Sudokungfu.Test.SudokuSolver
         {
             var testValue = 8;
             var cell = new Cell(34);
+            var expectedIndexValueMap = cell.Index.ToDictionary(testValue);
             var expectedValue = new TestSudokuModel()
             {
-                IndexValueMap = cell.Index.ToDictionary(testValue)
+                IndexValueMap = expectedIndexValueMap,
+                ClickableModel = new TestSudokuModel()
+                {
+                    IndexValueMap = expectedIndexValueMap
+                }
             };
 
             var actualValue = FoundValue.CreateOnlyPossiblValue(cell, testValue);

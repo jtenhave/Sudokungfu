@@ -19,6 +19,7 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             var testValue = 3;
             var testIndex = 76;
+            var testFoundValue = FoundValue.CreateGivenValue(testIndex, testValue);
             var expectedTechnique = new TestTechnique()
             {
                 Complexity = 0,
@@ -26,10 +27,11 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
                 {
                     [testIndex] = testValue.ToEnumerable()
                 },
-                AffectedIndexes = testIndex.ToEnumerable()
+                AffectedIndexes = testIndex.ToEnumerable(),
+                ClickableModel = testFoundValue
             };
 
-            var actualTechnique = BasicTechnique.CreateOccupiedTechnique(testValue, testIndex);
+            var actualTechnique = BasicTechnique.CreateOccupiedTechnique(testFoundValue);
 
             AssertITechniqueEqual(expectedTechnique, actualTechnique);
         }
@@ -39,16 +41,18 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             var testValue = 3;
             var testIndex = 9;
+            var testFoundValue = FoundValue.CreateGivenValue(testIndex, testValue);
             var cells = new Cell[] { new Cell(0), new Cell(1), new Cell(9), new Cell(10) };
             var box = new Box(cells, 0);
             var expectedTechnique = new TestTechnique()
             {
                 Complexity = 1,
                 IndexValueMap = cells.Indexes().ToDictionary(testIndex, testValue),
-                AffectedIndexes = cells.Indexes().Except(testIndex)
+                AffectedIndexes = cells.Indexes().Except(testIndex),
+                ClickableModel = testFoundValue
             };
 
-            var actualTechnique = BasicTechnique.CreateSetTechnique(testValue, testIndex, box.Indexes());
+            var actualTechnique = BasicTechnique.CreateSetTechnique(testFoundValue, box.Indexes());
 
             AssertITechniqueEqual(expectedTechnique, actualTechnique);
         }

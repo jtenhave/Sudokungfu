@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 
 namespace Sudokungfu.SudokuSolver.Techniques
 {
@@ -11,12 +10,9 @@ namespace Sudokungfu.SudokuSolver.Techniques
     /// </summary>
     public class BasicTechnique : ITechnique
     {
-        #region ISudokuModel
+        private ISudokuModel _clickableModel;
 
-        /// <summary>
-        /// Not used by <see cref="ITechnique"/>.
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
+        #region ISudokuModel
 
         /// <summary>
         /// Indexes of the cells that are part of the technique and the values that go in them.
@@ -34,27 +30,30 @@ namespace Sudokungfu.SudokuSolver.Techniques
         public IEnumerable<int> AffectedIndexes { get; protected set; }
 
         /// <summary>
-        /// Not used by <see cref="ITechnique"/>.
+        /// Not used by <see cref="BasicTechnique"/>.
         /// </summary>
-        public bool IsInputEnabled
+        public ISudokuModel ClickableModel
         {
             get
             {
-                return false;
-            }
-        }
+                if (_clickableModel == this)
+                {
+                    return new BasicTechnique()
+                    {
+                        IndexValueMap = IndexValueMap,
+                        Complexity = Complexity,
+                        AffectedIndexes = AffectedIndexes
+                    };
+                }
 
-        /// <summary>
-        /// Not used by <see cref="ITechnique"/>.
-        /// </summary>
-        public bool IsSolving
-        {
-            get
+                return _clickableModel;
+            }
+            protected set
             {
-                return false;
+                _clickableModel = value;
             }
         }
-
+        
         #endregion
 
         #region ITechnique
@@ -78,15 +77,15 @@ namespace Sudokungfu.SudokuSolver.Techniques
         /// Creates a <see cref="BasicTechnique"/> that represents a possible value being eliminated from a cell
         /// because that cell already contains a value.
         /// </summary>
-        /// <param name="value">Value that the cell contains.</param>
-        /// <param name="index">Index of the cell.</param>
-        public static BasicTechnique CreateOccupiedTechnique(int value, int index)
+        /// <param name="value">Found value that creates this occupied technique.</param>
+        public static BasicTechnique CreateOccupiedTechnique(FoundValue value)
         {
             return new BasicTechnique()
             {
                 Complexity = 0,
-                IndexValueMap = index.ToDictionary(value),
-                AffectedIndexes = index.ToEnumerable(),
+                IndexValueMap = value.Index.ToDictionary(value.Value),
+                AffectedIndexes = value.Index.ToEnumerable(),
+                ClickableModel = value
             };
         }
 
@@ -95,16 +94,16 @@ namespace Sudokungfu.SudokuSolver.Techniques
         /// because one of that cells member sets already contains the value.
         /// </summary>
         /// <param name="value">Value that already exists in one of the member sets.</param>
-        /// <param name="index">Index of the cell that holds the value.</param>
         /// <param name="setIndexes">Indxes of the member set cells.</param>
 
-        public static BasicTechnique CreateSetTechnique(int value, int index, IEnumerable<int> setIndexes)
+        public static BasicTechnique CreateSetTechnique(FoundValue value, IEnumerable<int> setIndexes)
         {
             var technique = new BasicTechnique()
             {
                 Complexity = 1,
-                IndexValueMap = setIndexes.ToDictionary(index, value),
-                AffectedIndexes = setIndexes.Except(index),
+                IndexValueMap = setIndexes.ToDictionary(value.Index, value.Value),
+                AffectedIndexes = setIndexes.Except(value.Index),
+                ClickableModel = value
             };
 
             return technique;
