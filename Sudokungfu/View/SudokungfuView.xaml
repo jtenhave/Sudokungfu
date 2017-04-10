@@ -25,7 +25,7 @@
         </Grid.ColumnDefinitions>
         <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="{x:Static Properties:Resources.SudokuWindowTitle}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="45" FontFamily="Arial"/>
         <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Content="{x:Static Properties:Resources.CopyrightMessage}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15" FontFamily="Arial"/>
-        <ItemsControl Height="450" Width="450" IsEnabled="{Binding IsEnabled}" ItemsSource="{Binding Cells}" Grid.Row="1" Grid.Column="0" Margin="5 0 5 0">
+        <ItemsControl Height="450" Width="450" ItemsSource="{Binding Cells}" Grid.Row="1" Grid.Column="0" Margin="5 0 5 0">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel />
@@ -42,7 +42,7 @@
                              HorizontalContentAlignment="Center" 
                              VerticalContentAlignment="Center">
                         <TextBox.InputBindings>
-                            <MouseBinding Command="" MouseAction="LeftClick"/>
+                            <MouseBinding Command="{Binding Path=ClickCommand}" MouseAction="LeftDoubleClick"/>
                         </TextBox.InputBindings>
                         
                         <!-- Set the TextBox template due to WPF bug using BorderBrush with styles. -->
@@ -71,6 +71,7 @@
                     <RowDefinition Height="40"/>
                     <RowDefinition Height="40"/>
                     <RowDefinition Height="40"/>
+                    <RowDefinition Height="60"/>
                     <RowDefinition Height="40"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
@@ -91,6 +92,15 @@
                 </Border>
                 <Border BorderThickness="1 0 0 1" BorderBrush="Black" Grid.Row="2" Grid.Column="1">
                     <Button x:Name="SolveButton" Content="Solve Current" Margin="8" Command="{Binding SolveCommand}"/>
+                </Border>
+                <Border BorderThickness="0 0 0 1" BorderBrush="Black" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">
+                    <Label Content="Details Browser:" Margin="5 30 5 0"/>
+                </Border>
+                <Border BorderThickness="0 1 0 1" BorderBrush="Black" Grid.Row="4" Grid.Column="0">
+                    <Button x:Name="BackButton" Content="Back" Margin="8" Command="{Binding BackCommand}"/>
+                </Border>
+                <Border BorderThickness="1 1 0 1" BorderBrush="Black" Grid.Row="4" Grid.Column="1">
+                    <Button x:Name="CloseButton" Content="Close" Margin="8" Command="{Binding CloseCommand}"/>
                 </Border>
             </Grid>
         </Border>

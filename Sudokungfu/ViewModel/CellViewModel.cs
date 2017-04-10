@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace Sudokungfu.ViewModel
@@ -22,7 +23,23 @@ namespace Sudokungfu.ViewModel
         private FontStyle _fontStyle;
         private int _fontSize;
 
+        private Action<int> _clicked;
+
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Gets the click command.
+        /// </summary>
+        public ICommand ClickCommand
+        {
+            get
+            {
+                return DelegateCommand.Create(() =>
+                {
+                    _clicked(Index);
+                });
+            }
+        }
 
         /// <summary>
         /// Gets the index of the cell. 
@@ -130,7 +147,7 @@ namespace Sudokungfu.ViewModel
         /// Creates a new <see cref="CellViewModel"/>
         /// </summary>
         /// <param name="index">Index of the cell.</param>
-        public CellViewModel(int index)
+        public CellViewModel(int index, Action<int> clicked)
         {
             if (!index.IsSudokuIndex())
             {
@@ -138,6 +155,7 @@ namespace Sudokungfu.ViewModel
             }
 
             Index = index;
+            _clicked = clicked;
 
             SetDefaultCellProperties();
         }

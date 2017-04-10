@@ -22,9 +22,9 @@ namespace Sudokungfu.ViewModel
         private int _shownValues;
         private int _givenValues;
         private bool _isSolving;
-        private bool _isEnabled;
         private List<ISudokuModel> _sudoku;
-        private Stack<ISudokuModel> _models;
+        private Stack<ISudokuModel> _clickedModels;
+        private Dictionary<int, ISudokuModel> _clickableModels;
 
         private Func<bool> _clearConfirm;
         private Action _error;
@@ -35,6 +35,8 @@ namespace Sudokungfu.ViewModel
         private DelegateCommand _nextCommand;
         private DelegateCommand _prevCommand;
         private DelegateCommand _solveCommand;
+        private DelegateCommand _backCommand;
+        private DelegateCommand _closeCommand;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -59,28 +61,8 @@ namespace Sudokungfu.ViewModel
                     _isSolving = value;
                     OnPropertyChanged(nameof(IsSolving));
 
-                    IsEnabled = !value;
                     _enterCommand.CanExecuteValue = !value;
                     _clearCommand.CanExecuteValue = !value;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Whether input is enabled for the Suokdu.
-        /// </summary>
-        public bool IsEnabled
-        {
-            get
-            {
-                return _isEnabled;
-            }
-            set
-            {
-                if (value != _isEnabled)
-                {
-                    _isEnabled = value;
-                    OnPropertyChanged(nameof(IsEnabled));
                 }
             }
         }
@@ -139,7 +121,29 @@ namespace Sudokungfu.ViewModel
                 return _solveCommand;
             }
         }
- 
+
+        /// <summary>
+        /// Gets the back command.
+        /// </summary>
+        public ICommand BackCommand
+        {
+            get
+            {
+                return _backCommand;
+            }
+        }
+
+        /// <summary>
+        /// Gets the close command.
+        /// </summary>
+        public ICommand CloseCommand
+        {
+            get
+            {
+                return _closeCommand;
+            }
+        }
+
         /// <summary>
         /// Creates a <see cref="SudokungfuViewModel"/>.
         /// </summary>
@@ -149,9 +153,9 @@ namespace Sudokungfu.ViewModel
         public SudokungfuViewModel(Func<bool> clearConfirm, Action invalid, Action error)
         {
             _shownValues = Constants.CELL_COUNT;
-            _models = new Stack<ISudokuModel>();
+            _clickedModels = new Stack<ISudokuModel>();
+            _clickableModels = new Dictionary<int, ISudokuModel>();
             _isSolving = false;
-            _isEnabled = true;
 
             _clearConfirm = clearConfirm;
             _invalid = invalid;
@@ -160,15 +164,16 @@ namespace Sudokungfu.ViewModel
             // Initialize the cell view models.
             for (int i = 0; i < Constants.CELL_COUNT; i++)
             {
-                var cellViewModel = new CellViewModel(i);
-                Cells.Add(new CellViewModel(i));
+                Cells.Add(new CellViewModel(i, ClickAction));
             }
             
             _clearCommand = DelegateCommand.Create(ClearAction);
             _enterCommand = DelegateCommand.CreateAsync(EnterAction);
-            _nextCommand = DelegateCommand.Create(NextAction);
-            _prevCommand = DelegateCommand.Create(PreviousAction);
-            _solveCommand = DelegateCommand.Create(() => ShowValues(Constants.CELL_COUNT));
+            _nextCommand = DelegateCommand.Create(NextAction, false);
+            _prevCommand = DelegateCommand.Create(PreviousAction, false);
+            _solveCommand = DelegateCommand.Create(() => ShowValues(Constants.CELL_COUNT), false);
+            _closeCommand = DelegateCommand.Create(CloseAction, false);
+            _backCommand = DelegateCommand.Create(BackAction, false);
         }
 
         /// <summary>
@@ -178,10 +183,11 @@ namespace Sudokungfu.ViewModel
         {
             if (_clearConfirm())
             {
-                foreach (var cell in Cells)
-                {
-                    cell.SetDefaultCellProperties();
-                }
+                _sudoku = null;
+                _enterCommand.CanExecuteValue = true;
+                _nextCommand.CanExecuteValue = _prevCommand.CanExecuteValue = _solveCommand.CanExecuteValue = false;
+
+                RefreshCellViewModels();
             }
         }
 
@@ -213,6 +219,8 @@ namespace Sudokungfu.ViewModel
                 return;
             }
 
+            _enterCommand.CanExecuteValue = false;
+
             _sudoku = sudoku;
             _givenValues = _sudoku.Count(v => v.Details.Count() == 0);
             _shownValues = 0;
@@ -227,7 +235,8 @@ namespace Sudokungfu.ViewModel
         {
             if (_shownValues < Constants.CELL_COUNT)
             {
-                _shownValues++;
+                _nextCommand.CanExecuteValue = _solveCommand.CanExecuteValue = ++_shownValues < Constants.CELL_COUNT;
+                _prevCommand.CanExecuteValue = _shownValues > _givenValues;
                 RefreshCellViewModels();
             }
         }
@@ -239,9 +248,47 @@ namespace Sudokungfu.ViewModel
         {
             if (_shownValues > _givenValues)
             {
-                _shownValues--;
+                _prevCommand.CanExecuteValue = --_shownValues > _givenValues;
+                _nextCommand.CanExecuteValue = _solveCommand.CanExecuteValue = true;
+
                 RefreshCellViewModels();
             }
+        }
+
+        /// <summary>
+        /// Action to perform when the cell click command is invoked.
+        /// </summary>
+        /// <param name="index">Index of the clicked cell.</param>
+        private void ClickAction(int index)
+        {
+            if (_clickableModels.ContainsKey(index))
+            {
+                _clickedModels.Push(_clickableModels[index]);
+                _closeCommand.CanExecuteValue = true;
+                _backCommand.CanExecuteValue = true;
+                RefreshCellViewModels();
+            }
+        }
+
+        /// <summary>
+        /// Action to perform when the close browser command is invoked.
+        /// </summary>
+        private void CloseAction()
+        {
+            _closeCommand.CanExecuteValue = false;
+            _backCommand.CanExecuteValue = false;
+            _clickedModels.Clear();
+            RefreshCellViewModels();
+        }
+
+        /// <summary>
+        /// Action to perform when the back browser command is invoked.
+        /// </summary>
+        private void BackAction()
+        {
+            _clickedModels.Pop();
+            _backCommand.CanExecuteValue = _clickedModels.Any();
+            RefreshCellViewModels();
         }
 
         private void ShowValues(int count)
@@ -254,20 +301,77 @@ namespace Sudokungfu.ViewModel
 
         private void RefreshCellViewModels()
         {
+            _clickableModels.Clear();
+
             if (_sudoku == null)
             {
+                foreach(var cell in Cells)
+                {
+                    cell.SetDefaultCellProperties();
+                }
+
                 return;
             }
 
-            if (_models.Any())
+            if (_clickedModels.Any())
             {
-                // TODO show details.
+                var model = _clickedModels.Peek();
+                foreach (var cell in Cells)
+                {
+                    var detailModels = model.Details.Where(d => d.IndexValueMap.ContainsKey(cell.Index));
+                    var detailModel = detailModels.FirstOrDefault(d => d.IndexValueMap[cell.Index].Any());
+
+                    if (model.IndexValueMap.ContainsKey(cell.Index))
+                    {
+                        if (model.IndexValueMap[cell.Index].Any())
+                        {
+                            cell.Value = model.IndexValueMap[cell.Index].First().ToString();
+                            cell.Background = Brushes.LightGreen;
+                        }
+                        else if (detailModel != null)
+                        {
+                            cell.Value = detailModel.IndexValueMap[cell.Index].First().ToString();
+                            cell.Background = Brushes.Salmon;
+
+                            if (detailModel.ClickableModel.Details.Any())
+                            {
+                                _clickableModels.Add(cell.Index, detailModel.ClickableModel);
+                            }
+                        }
+                        else
+                        {
+                            cell.Value = string.Empty;
+                            cell.Background = Brushes.Salmon;
+                        }
+                    }
+                    else if (detailModel != null)
+                    {
+                        cell.Value = detailModel.IndexValueMap[cell.Index].First().ToString();
+                        cell.Background = Brushes.LightSalmon;
+
+                        if (detailModel.ClickableModel.Details.Any())
+                        {
+                            _clickableModels.Add(cell.Index, detailModel.ClickableModel);
+                        } 
+                    }
+
+                    else if (detailModels.Any())
+                    {
+                        cell.Value = string.Empty;
+                        cell.Background = Brushes.LightSalmon;
+                    }
+                    else
+                    {
+                        cell.Value = string.Empty;
+                        cell.Background = Brushes.DarkGray;
+                    }
+                }
             }
             else
             {
                 foreach (var cell in Cells)
                 {
-                    var cellModel = _sudoku.First(m => m.IndexValueMap.Keys.Contains(cell.Index) && m.IndexValueMap[cell.Index].Any());
+                    var cellModel = _sudoku.First(m => m.IndexValueMap.ContainsKey(cell.Index) && m.IndexValueMap[cell.Index].Any());
                     if (_sudoku.IndexOf(cellModel) >= _shownValues)
                     {
                         cell.Background = Brushes.White;
@@ -278,8 +382,13 @@ namespace Sudokungfu.ViewModel
                         var value = cellModel.IndexValueMap[cell.Index].First().ToString();
                         cell.FontSize = FONT_SIZE_DEFAULT;
                         cell.FontStyle = FontStyles.Normal;
-                        cell.Background = value != "0" && !cellModel.Details.Any() ? Brushes.LightGray : Brushes.White;
+                        cell.Background = !cellModel.Details.Any() ? Brushes.LightGray : Brushes.White;
                         cell.Value = value;
+
+                        if (cellModel.ClickableModel != null)
+                        {
+                            _clickableModels.Add(cell.Index, cellModel.ClickableModel);
+                        }
                     }
                 }
             }
