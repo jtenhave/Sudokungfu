@@ -67,16 +67,12 @@ namespace Sudokungfu.SudokuSolver.Techniques
         public static ThreeSpotClosureTechnique CreateThreeSpotClosureTechnique(KeyValuePair<int, IEnumerable<int>> valueA, KeyValuePair<int, IEnumerable<int>> valueB, KeyValuePair<int, IEnumerable<int>> valueC, IEnumerable<int> setIndexes, IEnumerable<int> affectedIndexes)
         {
             var values = new KeyValuePair<int, IEnumerable<int>>[] { valueA, valueB, valueC };
-            var technique = new ThreeSpotClosureTechnique()
+            return new ThreeSpotClosureTechnique()
             {
                 Complexity = DEFAULT_COMPLEXITY,
                 IndexValueMap = setIndexes.ToDictionary(i => i, i => values.Where(v => v.Value.Contains(i)).Select(v => v.Key)),
                 AffectedIndexes = affectedIndexes
             };
-
-            technique.ClickableModel = technique;
-
-            return technique;
         }
     }
 }

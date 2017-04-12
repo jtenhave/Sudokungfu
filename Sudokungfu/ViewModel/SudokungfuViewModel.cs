@@ -325,17 +325,21 @@ namespace Sudokungfu.ViewModel
                     {
                         if (model.IndexValueMap[cell.Index].Any())
                         {
-                            cell.Value = model.IndexValueMap[cell.Index].First().ToString();
+                            cell.SetCellValues(model.IndexValueMap[cell.Index]);
                             cell.Background = Brushes.LightGreen;
                         }
                         else if (detailModel != null)
                         {
-                            cell.Value = detailModel.IndexValueMap[cell.Index].First().ToString();
-                            cell.Background = Brushes.Salmon;
+                            cell.SetCellValues(detailModel.IndexValueMap[cell.Index]);
 
                             if (detailModel.ClickableModel.Details.Any())
                             {
                                 _clickableModels.Add(cell.Index, detailModel.ClickableModel);
+                                cell.Background = Brushes.Salmon;
+                            }
+                            else
+                            {
+                                cell.Background = Brushes.DarkSalmon;
                             }
                         }
                         else
@@ -346,13 +350,17 @@ namespace Sudokungfu.ViewModel
                     }
                     else if (detailModel != null)
                     {
-                        cell.Value = detailModel.IndexValueMap[cell.Index].First().ToString();
-                        cell.Background = Brushes.LightSalmon;
+                        cell.SetCellValues(detailModel.IndexValueMap[cell.Index]);
 
                         if (detailModel.ClickableModel.Details.Any())
                         {
                             _clickableModels.Add(cell.Index, detailModel.ClickableModel);
-                        } 
+                            cell.Background = Brushes.LightSalmon;
+                        }
+                        else
+                        {
+                            cell.Background = Brushes.DarkSalmon;
+                        }
                     }
 
                     else if (detailModels.Any())
@@ -379,11 +387,9 @@ namespace Sudokungfu.ViewModel
                     }
                     else
                     {
-                        var value = cellModel.IndexValueMap[cell.Index].First().ToString();
-                        cell.FontSize = FONT_SIZE_DEFAULT;
+                        cell.SetCellValues(cellModel.IndexValueMap[cell.Index]);
                         cell.FontStyle = FontStyles.Normal;
                         cell.Background = !cellModel.Details.Any() ? Brushes.LightGray : Brushes.White;
-                        cell.Value = value;
 
                         if (cellModel.ClickableModel != null)
                         {

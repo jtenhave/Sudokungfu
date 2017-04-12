@@ -24,24 +24,28 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
             var row = new Row(cells, 0);
             var expectedCells = new List<Cell>() { cells[0], cells[2] };
             var expectedComplexity = 2;
-            var expectedIndexValueMap = box.Indexes().Union(row.Indexes()).ToDictionary(i => i, i => expectedCells.Indexes().Contains(i) ? testValue.ToEnumerable() : Enumerable.Empty<int>());
+            var expectedIndexValueMap = box.Indexes().ToDictionary(i => i, i => expectedCells.Indexes().Contains(i) ? testValue.ToEnumerable() : Enumerable.Empty<int>());
             var expectedAffectedIndexes = row.Cells.Except(box.Cells).Indexes();
+            var testTechnique = new TestTechnique()
+            {
+                AffectedIndexes = box.Cells.Except(expectedCells).Indexes()
+            };
             var expectedTechnique = new TestTechnique()
             {
                 Complexity = expectedComplexity,
                 IndexValueMap = expectedIndexValueMap,
                 AffectedIndexes = expectedAffectedIndexes,
+                Details = testTechnique.ToEnumerable(),
                 ClickableModel = new TestTechnique()
                 {
                     Complexity = expectedComplexity,
                     IndexValueMap = expectedIndexValueMap,
                     AffectedIndexes = expectedAffectedIndexes,
+                    Details = testTechnique.ToEnumerable()
                 }
             };
 
-            var testTechnique = new TestTechnique();
-
-            EliminatePossibleValues(testTechnique, cells, testValue, 1, 9, 10, 11, 18, 19, 20);
+            EliminatePossibleValues(testTechnique, cells, testValue,  1, 9, 10, 11, 18, 19, 20);
             PossibleSpotOverlapTechnique.Apply(cells, new Set[] { box, row });
 
             Assert.IsTrue(row.PossibleSpots[testValue].SetEqual(expectedCells));
@@ -60,22 +64,26 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
             var row = new Row(cells, 0);
             var expectedCells = new List<Cell>() { cells[0], cells[1], cells[2] };
             var expectedComplexity = 2;
-            var expectedIndexValueMap = box.Indexes().Union(row.Indexes()).ToDictionary(i => i, i => expectedCells.Indexes().Contains(i) ? testValue.ToEnumerable() : Enumerable.Empty<int>());
+            var expectedIndexValueMap = box.Indexes().ToDictionary(i => i, i => expectedCells.Indexes().Contains(i) ? testValue.ToEnumerable() : Enumerable.Empty<int>());
             var expectedAffectedIndexes = row.Cells.Except(box.Cells).Indexes();
+            var testTechnique = new TestTechnique()
+            {
+                AffectedIndexes = box.Cells.Except(expectedCells).Indexes()
+            };
             var expectedTechnique = new TestTechnique()
             {
                 Complexity = expectedComplexity,
                 IndexValueMap = expectedIndexValueMap,
                 AffectedIndexes = expectedAffectedIndexes,
+                Details = testTechnique.ToEnumerable(),
                 ClickableModel = new TestTechnique()
                 {
                     Complexity = expectedComplexity,
                     IndexValueMap = expectedIndexValueMap,
                     AffectedIndexes = expectedAffectedIndexes,
+                    Details = testTechnique.ToEnumerable()
                 }
             };
-
-            var testTechnique = new TestTechnique();
 
             EliminatePossibleValues(testTechnique, cells, testValue, 9, 10, 11, 18, 19, 20);
             PossibleSpotOverlapTechnique.Apply(cells, new Set[] { box, row });

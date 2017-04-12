@@ -134,7 +134,7 @@ namespace Sudokungfu.Test.SudokuSolver
             };
             var unusedTechnique = new TestTechnique()
             {
-                AffectedIndexes = new List<int>() { 1, 3 },
+                AffectedIndexes = new List<int>() { 1, 3, 5, 6, 7 },
                 Complexity = 0
             };
             var expectedTechniqueB = new TestTechnique()

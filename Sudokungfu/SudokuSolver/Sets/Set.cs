@@ -4,6 +4,7 @@ using System.Linq;
 namespace Sudokungfu.SudokuSolver.Sets
 {
     using Extensions;
+    using Techniques;
 
     /// <summary>
     /// Class that represents a set of nine values in a Sudoku.
@@ -58,6 +59,45 @@ namespace Sudokungfu.SudokuSolver.Sets
         public bool IsSubset(IEnumerable<Cell> cells)
         {
             return cells.All(c => Cells.Contains(c));
+        }
+
+        public IEnumerable<ITechnique> FindMinTechniques(IEnumerable<Cell> cells, int value)
+        {
+            var finalTechniques = new List<ITechnique>();
+
+            var techniques = Cells
+                .Except(cells)
+                .SelectMany(c => c.EliminationTechniques[value])
+                .ToList();
+
+            var uncoveredIndexes = this.Indexes()
+                .Except(cells.Indexes())
+                .Except(finalTechniques.SelectMany(t => t.AffectedIndexes));
+
+            var sortedTechniques = techniques
+                .Where(t => t.AffectedIndexes.Intersect(uncoveredIndexes).Any())
+                .OrderBy(t => t.Complexity)
+                .ThenByDescending(t => t
+                    .AffectedIndexes
+                    .Intersect(uncoveredIndexes)
+                    .Except(techniques
+                        .Except(t)
+                        .SelectMany(u => u
+                            .AffectedIndexes
+                            .Intersect(uncoveredIndexes)))
+                    .Count())
+                .ThenByDescending(t => t
+                    .AffectedIndexes
+                    .Intersect(uncoveredIndexes)
+                    .Count());
+
+            // Apply techniques until all indexes have been covered.
+            while (uncoveredIndexes.Any() && sortedTechniques.Any())
+            {
+                finalTechniques.Add(sortedTechniques.First());
+            }
+
+            return finalTechniques;
         }
     }
 }

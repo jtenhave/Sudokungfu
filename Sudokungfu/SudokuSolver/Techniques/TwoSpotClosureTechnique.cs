@@ -37,10 +37,8 @@ namespace Sudokungfu.SudokuSolver.Techniques
                         {
                             var valueA = possibleSpotsA.Key;
                             var valueB = possibleSpotsB.Key;
-                            var indexes = twoValueSpotsUnion.Indexes();
-                            var setIndexes = set.Indexes();
 
-                            var technique = CreateTwoSpotClosureTechnique(valueA, valueB, indexes, setIndexes, twoValueSpotsUnion.Indexes());
+                            var technique = CreateTwoSpotClosureTechnique(valueA, valueB, twoValueSpotsUnion, set, twoValueSpotsUnion.Indexes());
 
                             foreach (var cell in twoValueSpotsUnion)
                             {
@@ -63,19 +61,18 @@ namespace Sudokungfu.SudokuSolver.Techniques
         /// <param name="indexes">Indexes of the closure.</param>
         /// <param name="setIndexes">Indexes of the cells in the set with a closure.</param>
         /// <param name="affectedIndexes">Indexes of cells that had values eliminated by this technique.</param>
-        public static TwoSpotClosureTechnique CreateTwoSpotClosureTechnique(int valueA, int valueB, IEnumerable<int> indexes, IEnumerable<int> setIndexes, IEnumerable<int> affectedIndexes)
+        private static TwoSpotClosureTechnique CreateTwoSpotClosureTechnique(int valueA, int valueB, IEnumerable<Cell> cells, Set set, IEnumerable<int> affectedIndexes)
         {
+            var techniquesA = set.FindMinTechniques(cells, valueA);
+            var techniquesB = set.FindMinTechniques(cells, valueB);
             var values = new int[] { valueA, valueB };
-            var technique = new TwoSpotClosureTechnique()
+            return new TwoSpotClosureTechnique()
             {
                 Complexity = DEFAULT_COMPLEXITY,
-                IndexValueMap = setIndexes.ToDictionary(i => i, i => indexes.Contains(i) ?  values : Enumerable.Empty<int>()),
-                AffectedIndexes = affectedIndexes
+                IndexValueMap = set.Indexes().ToDictionary(i => i, i => cells.Indexes().Contains(i) ? values : Enumerable.Empty<int>()),
+                AffectedIndexes = affectedIndexes,
+                Details = techniquesA.Concat(techniquesB)
             };
-
-            technique.ClickableModel = technique;
-
-            return technique;
         }
     }
 }

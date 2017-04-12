@@ -15,6 +15,10 @@ namespace Sudokungfu.SudokuSolver
     /// </summary>
     public class Solver
     {
+        private const int ONE_VALUE_FONT_SIZE = 36;
+        private const int TWO_VALUE_FONT_SIZE = 26;
+        private const int THREE_VALUE_FONT_SIZE = 16;
+
         private List<Cell> _cells;
         private List<Set> _sets;
         private List<ISudokuModel> _foundValues;
@@ -106,15 +110,17 @@ namespace Sudokungfu.SudokuSolver
                    .SelectMany(s => s
                        .PossibleSpots
                        .Where(v => v.Value.Count() == 1)
-                       .Select(v => FoundValue.CreateFoundInSetValue(v.Value.First(), v.Key, s)))
-                    .OrderBy(v => v.TechniqueComplexity)
-                    .ThenBy(v => v.TechniqueCount);
+                       .Select(v => FoundValue.CreateFoundInSetValue(v.Value.First(), v.Key, s)));
 
             var foundOnlyPossibleValues = _cells
                 .Where(c => c.PossibleValues.Count() == 1)
                 .Select(c => FoundValue.CreateOnlyPossiblValue(c, c.PossibleValues.First()));
 
-            var foundValues = foundValuesFromSets.Zipper(foundOnlyPossibleValues);
+            var foundValues = foundValuesFromSets
+                .Concat(foundOnlyPossibleValues)
+                .OrderBy(v => v.TechniqueComplexity)
+                .ThenBy(v => v.TechniqueCount);
+
             return foundValues.FirstOrDefault();
         }
 

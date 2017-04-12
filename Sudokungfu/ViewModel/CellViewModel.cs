@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -16,7 +18,9 @@ namespace Sudokungfu.ViewModel
     /// </remarks>
     public class CellViewModel : INotifyPropertyChanged
     {
-        private const int FONT_SIZE_DEFAULT = 36;
+        private const int ONE_VALUE_SIZE_DEFAULT = 36;
+        private const int TWO_VALUE_SIZE_DEFAULT = 26;
+        private const int THREE_VALUE_SIZE_DEFAULT = 16;
 
         private string _value;
         private Brush _background;
@@ -163,8 +167,30 @@ namespace Sudokungfu.ViewModel
         public void SetDefaultCellProperties()
         {
             Value = string.Empty;
-            FontSize = FONT_SIZE_DEFAULT;
+            FontSize = ONE_VALUE_SIZE_DEFAULT;
             Background = Brushes.White;
+        }
+
+        /// <summary>
+        /// Sets the value to display in the cell. Sets the font size accordingly.
+        /// </summary>
+        /// <param name="values">Values that will go in the cell.</param>
+        public void SetCellValues(IEnumerable<int> values)
+        {
+            _value = string.Join("", values);
+            OnPropertyChanged(nameof(Value));
+            switch (values.Count())
+            {
+                case 3:
+                    FontSize = THREE_VALUE_SIZE_DEFAULT;
+                    break;
+                case 2:
+                    FontSize = TWO_VALUE_SIZE_DEFAULT;
+                    break;
+                default:
+                    FontSize = ONE_VALUE_SIZE_DEFAULT;
+                    break;
+            }
         }
 
         /// <summary>

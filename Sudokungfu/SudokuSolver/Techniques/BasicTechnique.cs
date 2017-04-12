@@ -30,30 +30,25 @@ namespace Sudokungfu.SudokuSolver.Techniques
         public IEnumerable<int> AffectedIndexes { get; protected set; }
 
         /// <summary>
-        /// Not used by <see cref="BasicTechnique"/>.
+        /// Model that will be displayed when this technique is clicked.
         /// </summary>
         public ISudokuModel ClickableModel
         {
             get
             {
-                if (_clickableModel == this)
+                if (_clickableModel != null)
                 {
-                    return new BasicTechnique()
-                    {
-                        IndexValueMap = IndexValueMap,
-                        Complexity = Complexity,
-                        AffectedIndexes = AffectedIndexes
-                    };
+                    return _clickableModel;
                 }
 
-                return _clickableModel;
+                return this;
             }
             protected set
             {
                 _clickableModel = value;
             }
         }
-        
+
         #endregion
 
         #region ITechnique

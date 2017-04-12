@@ -34,11 +34,9 @@ namespace Sudokungfu.SudokuSolver.Techniques
                     foreach (var overlappingSet in overlappingSets)
                     {
                         var value = possibleSpots.Key;
-                        var indexes = possibleSpots.Value.Indexes();
-                        var setIndexes = sourceSet.Cells.Union(overlappingSet.Cells).Indexes();
                         var affectedCells = overlappingSet.Cells.Except(sourceSet.Cells);
 
-                        var technique = CreatePossibleSpotOverlapTechnique(value, indexes, setIndexes, affectedCells.Indexes());
+                        var technique = CreatePossibleSpotOverlapTechnique(value, possibleSpots.Value, sourceSet, affectedCells.Indexes());
           
                         foreach (var cell in affectedCells)
                         {
@@ -56,19 +54,16 @@ namespace Sudokungfu.SudokuSolver.Techniques
         /// <param name="indexes">Indexes of the overlapping cells.</param>
         /// <param name="setindexes">Indexes of the cells in the sets that overlap.</param>
         /// <param name="affectedIndexes">Indexes of cells that had values eliminated by this technique.</param>
-        public static PossibleSpotOverlapTechnique CreatePossibleSpotOverlapTechnique(int value, IEnumerable<int> indexes, IEnumerable<int> setindexes, IEnumerable<int> affectedIndexes)
+        private static PossibleSpotOverlapTechnique CreatePossibleSpotOverlapTechnique(int value, IEnumerable<Cell> cells, Set set, IEnumerable<int> affectedIndexes)
         {
-            var technique = new PossibleSpotOverlapTechnique()
+            var techniques = set.FindMinTechniques(cells, value);
+            return new PossibleSpotOverlapTechnique()
             {
                 Complexity = DEFAULT_COMPLEXITY,
-                IndexValueMap = setindexes.ToDictionary(i => i, i => indexes.Contains(i) ? value.ToEnumerable() : Enumerable.Empty<int>()),
-                AffectedIndexes = affectedIndexes
+                IndexValueMap = set.Indexes().ToDictionary(i => i, i => cells.Indexes().Contains(i) ? value.ToEnumerable() : Enumerable.Empty<int>()),
+                AffectedIndexes = affectedIndexes,
+                Details = techniques,
             };
-
-            technique.ClickableModel = technique;
-
-            return technique;
-
         }
     }
 }

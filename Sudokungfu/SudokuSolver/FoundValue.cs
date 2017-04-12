@@ -133,7 +133,7 @@ namespace Sudokungfu.SudokuSolver
         /// <param name="set">Set where the value was found.</param>
         public static FoundValue CreateFoundInSetValue(Cell cell, int value, Set set)
         {
-            var techniques = FindMinTechniques(cell, value, set);
+            var techniques = set.FindMinTechniques(cell.ToEnumerable(), value);
             var indexValueMap = set.Cells.Indexes().ToDictionary(cell.Index, value);
 
             return new FoundValue()
@@ -169,50 +169,14 @@ namespace Sudokungfu.SudokuSolver
                 }
             };
         }
-
-        private static IEnumerable<ITechnique> FindMinTechniques(Cell cell, int value, Set set)
-        {
-            var finalTechniques = new List<ITechnique>();
-
-            var techniques = set
-                .Cells
-                .Except(cell)
-                .SelectMany(c => c.EliminationTechniques[value])
-                .ToList();
-
-            var uncoveredIndexes = set
-                .Indexes()
-                .Except(cell.Index)
-                .Except(finalTechniques.SelectMany(t => t.AffectedIndexes));
-
-            var sortedTechniques = techniques
-                .Where(t => t.AffectedIndexes.Intersect(uncoveredIndexes).Any())
-                .OrderBy(t => t.Complexity)
-                .ThenByDescending(t => t
-                    .AffectedIndexes
-                    .Except(techniques.Except(t).SelectMany(u => u.AffectedIndexes))
-                    .Count())
-                .ThenByDescending(t => t
-                    .AffectedIndexes
-                    .Intersect(uncoveredIndexes)
-                    .Count());
-
-            // Apply techniques until all indexes have been covered.
-            while (uncoveredIndexes.Any() && sortedTechniques.Any())
-            {
-                finalTechniques.Add(sortedTechniques.First());
-            }
-
-            return finalTechniques;
-        }
-
+         
         private static IEnumerable<ITechnique> FindMinTechniques(Cell cell, int value)
         {
             return Constants.ALL_VALUES.Except(value)
                 .Select(v => cell
                     .EliminationTechniques[v]
-                    .FirstOrDefault())
-                .Where(t => t != null);
+                    .First())
+                .ToList();
         }
     }
 }

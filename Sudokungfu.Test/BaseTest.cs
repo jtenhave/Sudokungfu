@@ -45,7 +45,7 @@ namespace Sudokungfu.Test
         /// </summary>
         /// <param name="expected">Expected model.</param>
         /// <param name="actual">Actual model.</param>
-        public static void AssertISudokuModelEqual(ISudokuModel expected, ISudokuModel actual)
+        public static void AssertISudokuModelEqual(ISudokuModel expected, ISudokuModel actual, bool isClickableModel = false)
         {
             if (expected == null)
             {
@@ -98,14 +98,17 @@ namespace Sudokungfu.Test
                 }
             }
 
-            if (expected.ClickableModel == null)
+            if (!isClickableModel)
             {
-                Assert.IsNull(actual.ClickableModel);
-            }
-            else
-            {
-                AssertISudokuModelEqual(expected.ClickableModel, actual.ClickableModel);
-            }
+                if (expected.ClickableModel == null)
+                {
+                    Assert.IsNull(actual.ClickableModel);
+                }
+                else
+                {
+                    AssertISudokuModelEqual(expected.ClickableModel, actual.ClickableModel, true);
+                }
+            }  
         }
 
         /// <summary>
