@@ -1,21 +1,53 @@
-﻿using Sudokungfu.SudokuSolver.Sets;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Sudokungfu.SudokuSolver.Techniques
 {
     using Extensions;
+    using Model;
+    using Sets;
 
     /// <summary>
     /// Class that represents the 'Possible Spot Overlap' technique.
     /// </summary>
-    public class PossibleSpotOverlapTechnique : BasicTechnique
+    public class PossibleSpotOverlapTechnique : TechniqueBase
     {
-        private const int DEFAULT_COMPLEXITY = 2;
+        private const int COMPLEXITY = 2;
+        private readonly IEnumerable<ISudokuModel> _techniques;
 
-        private PossibleSpotOverlapTechnique()
+        /// <summary>
+        /// Details that make up this technique.
+        /// </summary>
+        public override IEnumerable<ISudokuModel> Details
         {
-            
+            get
+            {
+                return _techniques;
+            }
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="PossibleSpotOverlapTechnique"/>.
+        /// </summary>
+        /// <param name="value">Possible value.</param>
+        /// <param name="cells">Cells that are overlapping.</param>
+        /// <param name="set">Set with the possible value.</param>
+        /// <param name="affectedCells">Cells affected by the technique.</param>
+        private PossibleSpotOverlapTechnique(int value, IEnumerable<Cell> cells, Set set, IEnumerable<Cell> affectedCells) : base(COMPLEXITY)
+        {
+            _techniques = set.FindMinTechniques(cells, value);
+
+            foreach (var index in set.Indexes)
+            {
+                _indexValueMap[index] = Enumerable.Empty<int>();
+            }
+
+            foreach (var index in cells.Indexes())
+            {
+                _indexValueMap[index] = value.ToEnumerable();
+            }          
+
+            _affectedIndexes.AddRange(affectedCells.Indexes());
         }
 
         /// <summary>
@@ -36,7 +68,7 @@ namespace Sudokungfu.SudokuSolver.Techniques
                         var value = possibleSpots.Key;
                         var affectedCells = overlappingSet.Cells.Except(sourceSet.Cells);
 
-                        var technique = CreatePossibleSpotOverlapTechnique(value, possibleSpots.Value, sourceSet, affectedCells.Indexes());
+                        var technique = new PossibleSpotOverlapTechnique(value, possibleSpots.Value, sourceSet, affectedCells);
           
                         foreach (var cell in affectedCells)
                         {
@@ -45,25 +77,6 @@ namespace Sudokungfu.SudokuSolver.Techniques
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Creates a <see cref="PossibleSpotOverlapTechnique"/>.
-        /// </summary>
-        /// <param name="value">Value that must go in the overlapping cells.</param>
-        /// <param name="indexes">Indexes of the overlapping cells.</param>
-        /// <param name="setindexes">Indexes of the cells in the sets that overlap.</param>
-        /// <param name="affectedIndexes">Indexes of cells that had values eliminated by this technique.</param>
-        private static PossibleSpotOverlapTechnique CreatePossibleSpotOverlapTechnique(int value, IEnumerable<Cell> cells, Set set, IEnumerable<int> affectedIndexes)
-        {
-            var techniques = set.FindMinTechniques(cells, value);
-            return new PossibleSpotOverlapTechnique()
-            {
-                Complexity = DEFAULT_COMPLEXITY,
-                IndexValueMap = set.Indexes().ToDictionary(i => i, i => cells.Indexes().Contains(i) ? value.ToEnumerable() : Enumerable.Empty<int>()),
-                AffectedIndexes = affectedIndexes,
-                Details = techniques,
-            };
-        }
+        }      
     }
 }

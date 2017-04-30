@@ -60,6 +60,14 @@
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Extensions\IntExtensions.cs" />
     <Compile Include="Model\ISudokuModel.cs" />
+    <Compile Include="SudokuSolver\FoundValues\FoundInSetValue.cs" />
+    <Compile Include="SudokuSolver\FoundValues\FoundValueBase.cs" />
+    <Compile Include="SudokuSolver\FoundValues\GivenValue.cs" />
+    <Compile Include="SudokuSolver\FoundValues\OnlyPossibleValue.cs" />
+    <Compile Include="SudokuSolver\Techniques\PossibleSpotShadowTechnique.cs" />
+    <Compile Include="SudokuSolver\Techniques\TechniqueBase.cs" />
+    <Compile Include="SudokuSolver\Techniques\OccupiedTechnique.cs" />
+    <Compile Include="SudokuSolver\Techniques\SetTechnique.cs" />
     <Compile Include="ViewModel\DelegateCommand.cs" />
     <Compile Include="ViewModel\SudokungfuViewModel.cs" />
     <Compile Include="View\CellBorderConverter.cs" />
@@ -74,9 +82,6 @@
     </Compile>
     <Compile Include="Constants.cs" />
     <Compile Include="SudokuSolver\SolverExtensions.cs" />
-    <Compile Include="SudokuSolver\Techniques\BasicTechnique.cs" />
-    <Compile Include="SudokuSolver\FoundValue.cs" />
-    <Compile Include="SudokuSolver\Techniques\ITechnique.cs" />
     <Compile Include="SudokuSolver\Sets\Box.cs" />
     <Compile Include="SudokuSolver\Sets\Column.cs" />
     <Compile Include="SudokuSolver\Sets\Row.cs" />

@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 
 namespace Sudokungfu.Test
@@ -8,6 +7,8 @@ namespace Sudokungfu.Test
     using Model;
     using Sudokungfu.Extensions;
     using Sudokungfu.SudokuSolver;
+    using Sudokungfu.SudokuSolver.FoundValues;
+    using Sudokungfu.SudokuSolver.Sets;
     using Sudokungfu.SudokuSolver.Techniques;
 
     /// <summary>
@@ -30,14 +31,31 @@ namespace Sudokungfu.Test
         }
 
         /// <summary>
-        /// Compares two <see cref="ITechnique"/> and asserts they are equal.
+        /// Asserts two sequences are equal sets.
         /// </summary>
-        /// <param name="expected">Expected technique.</param>
-        /// <param name="actual">Actual technique.</param>
-        public static void AssertITechniqueEqual(ITechnique expected, ITechnique actual)
+        /// <param name="first">First sequence.</param>
+        /// <param name="second">Second sequence.</param>
+        public static void AssertSetEqual<T>(IEnumerable<T> first, IEnumerable<T> second)
         {
-            Assert.AreEqual(expected.Complexity, actual.Complexity);
-            AssertISudokuModelEqual(expected, actual);
+            var secondList = second.ToList();
+            Assert.AreEqual(first.Count(), second.Count(), "length");
+
+            foreach (var item in first)
+            {
+                if (secondList.Contains(item))
+                {
+                    secondList.Remove(item);
+                }
+                else
+                {
+                    Assert.Fail($"Second enumerable does not contain element: {item}");
+                }
+            }
+
+            if (secondList.Any())
+            {
+                Assert.Fail($"Second enumerable contained {secondList.Count} unexpected elements: {string.Join(", ", secondList)}");
+            }
         }
 
         /// <summary>
@@ -111,7 +129,7 @@ namespace Sudokungfu.Test
             }  
         }
 
-        /// <summary>
+       /* /// <summary>
         /// Eliminates a value from a group of cells using a technique.
         /// </summary>
         /// <param name="technique">Technique to use.</param>
@@ -124,36 +142,14 @@ namespace Sudokungfu.Test
             {
                 cells[i].EliminatePossibleValue(value, technique);
             }
-        }
+        }*/
     }
 
     /// <summary>
-    /// Implementation of <see cref="ISudokuModel"/> for testing purposes.
+    ///  Implementation of <see cref="ISudokuModel"/> for testing purposes.
     /// </summary>
-    internal class TestSudokuModel : ISudokuModel
+    internal class TestModel : ISudokuModel
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public IEnumerable<int> AffectedIndexes { get; set; } = Enumerable.Empty<int>();
-
-        public IEnumerable<ISudokuModel> Details { get; set; } = Enumerable.Empty<ISudokuModel>();
-
-        public IDictionary<int, IEnumerable<int>> IndexValueMap { get; set; }
-
-        public ISudokuModel ClickableModel { get; set; }
-
-        public bool IsInputEnabled { get; set; }
-
-        public bool IsSolving { get; set; }
-    }
-
-    /// <summary>
-    ///  Implementation of <see cref="ITechnique"/> for testing purposes.
-    /// </summary>
-    internal class TestTechnique : ITechnique
-    {
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public IDictionary<int, IEnumerable<int>> IndexValueMap { get; set; }
 
         public IEnumerable<ISudokuModel> Details { get; set; }
@@ -162,10 +158,57 @@ namespace Sudokungfu.Test
 
         public ISudokuModel ClickableModel { get; set; }
 
-        public bool IsInputEnabled { get; set; }
-
-        public bool IsSolving { get; set; }
-
         public int Complexity { get; set; }
+    }
+
+    /// <summary>
+    ///  Sub-class of <see cref="FoundValueBase"/> for testing purposes.
+    /// </summary>
+    internal class TestFoundValue : FoundValueBase
+    {
+        public TestFoundValue() : base(0, 0)
+        {
+        }
+
+        public TestFoundValue(int index, int value) : base (index, value)
+        {
+        }
+    }
+
+    /// <summary>
+    ///  Sub-class of <see cref="Set"/> for testing purposes.
+    /// </summary>
+    internal class TestSet : Set
+    {
+        public TestSet() : base(BaseTest.GetAllCells(), 0)
+        {
+
+        }
+
+        protected override bool IsCellInSet(Cell cell)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    ///  Sub-class of <see cref="TechniqueBase"/> for testing purposes.
+    /// </summary>
+    internal class TestTechnique : TechniqueBase
+    {
+        public TestTechnique(int defaultComplexity) : base(defaultComplexity)
+        {
+
+        }
+
+        public IEnumerable<ISudokuModel> Techniques { get; set; }
+
+        public override IEnumerable<ISudokuModel> Details
+        {
+            get
+            {
+                return Techniques;
+            }
+        }
     }
 }

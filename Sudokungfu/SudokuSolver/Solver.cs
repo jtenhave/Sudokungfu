@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Sudokungfu.SudokuSolver
 {
     using Extensions;
+    using FoundValues;
     using Model;
     using Sets;
-    using System.Threading.Tasks;
     using Techniques;
 
     /// <summary>
@@ -76,7 +77,7 @@ namespace Sudokungfu.SudokuSolver
             {
                 if (values.ElementAt(cell.Index) != 0)
                 {
-                    var foundValue = FoundValue.CreateGivenValue(cell.Index, values.ElementAt(cell.Index));
+                    var foundValue = new GivenValue(cell.Index, values.ElementAt(cell.Index));
                     InsertValue(foundValue);
                 }
             }
@@ -104,22 +105,22 @@ namespace Sudokungfu.SudokuSolver
         /// Check all sets to see if a value has been found.
         /// </summary>
         /// <returns>The found value.</returns>
-        private FoundValue FindValue()
+        private FoundValueBase FindValue()
         {
-            var foundValuesFromSets = _sets
+            IEnumerable<FoundValueBase> foundValuesFromSets = _sets
                    .SelectMany(s => s
                        .PossibleSpots
                        .Where(v => v.Value.Count() == 1)
-                       .Select(v => FoundValue.CreateFoundInSetValue(v.Value.First(), v.Key, s)));
+                       .Select(v => new FoundInSetValue(v.Value.First(), v.Key, s)));
 
-            var foundOnlyPossibleValues = _cells
+            IEnumerable<FoundValueBase> foundOnlyPossibleValues = _cells
                 .Where(c => c.PossibleValues.Count() == 1)
-                .Select(c => FoundValue.CreateOnlyPossiblValue(c, c.PossibleValues.First()));
+                .Select(c => new OnlyPossibleValue(c, c.PossibleValues.First()));
 
             var foundValues = foundValuesFromSets
                 .Concat(foundOnlyPossibleValues)
-                .OrderBy(v => v.TechniqueComplexity)
-                .ThenBy(v => v.TechniqueCount);
+                .OrderBy(v => v.Complexity)
+                .ThenBy(v => v.Details.Count());
 
             return foundValues.FirstOrDefault();
         }
@@ -128,7 +129,7 @@ namespace Sudokungfu.SudokuSolver
         /// Inserts a value into a cell.
         /// </summary>
         /// <param name="value">Found value to insert into the Sudoku</param>
-        private void InsertValue(FoundValue value)
+        private void InsertValue(FoundValueBase value)
         {
             _cells[value.Index].InsertValue(value);
             _foundValues.Add(value);

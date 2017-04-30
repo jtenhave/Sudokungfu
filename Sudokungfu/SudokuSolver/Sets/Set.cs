@@ -4,7 +4,7 @@ using System.Linq;
 namespace Sudokungfu.SudokuSolver.Sets
 {
     using Extensions;
-    using Techniques;
+    using Model;
 
     /// <summary>
     /// Class that represents a set of nine values in a Sudoku.
@@ -12,7 +12,7 @@ namespace Sudokungfu.SudokuSolver.Sets
     public abstract class Set
     {
         /// <summary>
-        /// The cells in this set.
+        /// Cells in this set.
         /// </summary>
         public IEnumerable<Cell> Cells { get; private set; }
 
@@ -32,6 +32,17 @@ namespace Sudokungfu.SudokuSolver.Sets
                     .SelectMany(c => c.PossibleValues)
                     .Distinct()
                     .ToDictionary(i => i, i => Cells.Where(c => c.PossibleValues.Contains(i)));
+            }
+        }
+
+        /// <summary>
+        /// Indexes of cells in this set.
+        /// </summary>
+        public IEnumerable<int> Indexes
+        {
+            get
+            {
+                return Cells.Select(c => c.Index);
             }
         }
 
@@ -61,16 +72,21 @@ namespace Sudokungfu.SudokuSolver.Sets
             return cells.All(c => Cells.Contains(c));
         }
 
-        public IEnumerable<ITechnique> FindMinTechniques(IEnumerable<Cell> cells, int value)
+        /// <summary>
+        /// Calculates the techniques used to find a value in this set.
+        /// </summary>
+        /// <param name="cells">Cells that techniques should be calculated for.</param>
+        /// <param name="value">Value to calculate techniques for.</param>
+        public IEnumerable<ISudokuModel> FindMinTechniques(IEnumerable<Cell> cells, int value)
         {
-            var finalTechniques = new List<ITechnique>();
+            var finalTechniques = new List<ISudokuModel>();
 
             var techniques = Cells
                 .Except(cells)
                 .SelectMany(c => c.EliminationTechniques[value])
                 .ToList();
 
-            var uncoveredIndexes = this.Indexes()
+            var uncoveredIndexes = this.Indexes
                 .Except(cells.Indexes())
                 .Except(finalTechniques.SelectMany(t => t.AffectedIndexes));
 

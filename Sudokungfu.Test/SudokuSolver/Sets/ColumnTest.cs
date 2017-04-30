@@ -33,7 +33,7 @@ namespace Sudokungfu.Test.SudokuSolver.Sets
             for (int i = 0; i < Constants.SET_SIZE; i++)
             {
                 var column = new Column(cells, i);
-                Assert.IsTrue(column.Indexes().SetEqual(expectedIndexes[i]));
+                Assert.IsTrue(column.Indexes.SetEqual(expectedIndexes[i]));
             }
         }
     }

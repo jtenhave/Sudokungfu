@@ -4,6 +4,8 @@ using System.Linq;
 namespace Sudokungfu.SudokuSolver
 {
     using Extensions;
+    using FoundValues;
+    using Model;
     using Sets;
     using Techniques;
 
@@ -14,7 +16,7 @@ namespace Sudokungfu.SudokuSolver
     {
         private HashSet<int> _possibleValues;
 
-        private Dictionary<int, List<ITechnique>> _eliminationTechniques;
+        private Dictionary<int, List<ISudokuModel>> _eliminationTechniques;
 
         /// <summary>
         /// Index of the cell.
@@ -40,7 +42,7 @@ namespace Sudokungfu.SudokuSolver
         /// <summary>
         /// Techniques used to eliminate values from this cell.
         /// </summary>
-        public IDictionary<int, IEnumerable<ITechnique>> EliminationTechniques
+        public IDictionary<int, IEnumerable<ISudokuModel>> EliminationTechniques
         {
             get
             {
@@ -55,7 +57,7 @@ namespace Sudokungfu.SudokuSolver
         public Cell(int index)
         {
             _possibleValues = new HashSet<int>(Constants.ALL_VALUES);
-            _eliminationTechniques = _possibleValues.ToDictionary(v => v, v => new List<ITechnique>());
+            _eliminationTechniques = _possibleValues.ToDictionary(v => v, v => new List<ISudokuModel>());
 
             Index = index;
             Sets = new List<Set>();
@@ -66,7 +68,7 @@ namespace Sudokungfu.SudokuSolver
         /// </summary>
         /// <param name="value">Value to eliminate.</param>
         /// <param name="technique">Technique used to eliminate the value.</param>
-        public void EliminatePossibleValue(int value, ITechnique technique)
+        public void EliminatePossibleValue(int value, ISudokuModel technique)
         {
             if (_possibleValues.Any())
             {
@@ -90,9 +92,9 @@ namespace Sudokungfu.SudokuSolver
         /// Inserts a value into this cell.
         /// </summary>
         /// <param name="value">Value to insert.</param>
-        public void InsertValue(FoundValue value)
+        public void InsertValue(FoundValueBase value)
         {
-            var occupiedTechnique = BasicTechnique.CreateOccupiedTechnique(value);
+            var occupiedTechnique = new OccupiedTechnique(value);
             foreach(var v in Constants.ALL_VALUES.Except(value.Value))
             {
                 EliminatePossibleValue(v, occupiedTechnique);
@@ -102,9 +104,20 @@ namespace Sudokungfu.SudokuSolver
 
             foreach (var set in Sets)
             {
-                var setTechnique = BasicTechnique.CreateSetTechnique(value, set.Indexes());
+                var setTechnique = new SetTechnique(value, set);
                 set.Cells.Except(this).ForEach(c => c.EliminatePossibleValue(value.Value, setTechnique));
             }
+        }
+
+        /// <summary>
+        /// Calculates the techniques used to find a value in this cell.
+        /// </summary>
+        /// <param name="value">Value to calculate techniques for.</param>
+        public IEnumerable<ISudokuModel> FindMinTechniques(int value)
+        {
+            return Constants.ALL_VALUES.Except(value)
+                .Select(v => EliminationTechniques[v].First())
+                .ToList();
         }
     }
 }

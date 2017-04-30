@@ -1,21 +1,49 @@
-﻿using Sudokungfu.SudokuSolver.Sets;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Sudokungfu.SudokuSolver.Techniques
 {
     using Extensions;
+    using Model;
+    using Sets;
 
     /// <summary>
     /// Class that represents the 'Three Spot Closure' technique.
     /// </summary>
-    public class ThreeSpotClosureTechnique : BasicTechnique
+    public class ThreeSpotClosureTechnique : TechniqueBase
     {
-        private const int DEFAULT_COMPLEXITY = 3;
+        private const int COMPLEXITY = 3;
+        private readonly IEnumerable<ISudokuModel> _techniques;
 
-        private ThreeSpotClosureTechnique()
+        /// <summary>
+        /// Details that make up this technique.
+        /// </summary>
+        public override IEnumerable<ISudokuModel> Details
         {
+            get
+            {
+                return _techniques;
+            }
+        }
 
+        private ThreeSpotClosureTechnique(KeyValuePair<int, IEnumerable<Cell>> valueA, KeyValuePair<int, IEnumerable<Cell>> valueB, KeyValuePair<int, IEnumerable<Cell>> valueC, Set set) : base (COMPLEXITY)
+        {
+            _techniques = set.FindMinTechniques(valueA.Value, valueA.Key)
+                .Concat(set.FindMinTechniques(valueB.Value, valueB.Key))
+                .Concat(set.FindMinTechniques(valueC.Value, valueC.Key));
+
+            var values = new KeyValuePair<int, IEnumerable<Cell>>[] { valueA, valueB, valueC };
+            foreach (var index in set.Indexes)
+            {
+                _indexValueMap[index] = values.Where(v => v.Value.Indexes().Contains(index)).Select(v => v.Key);
+            }
+
+            var affectedIndexes = valueA.Value.Indexes()
+                .Concat(valueB.Value.Indexes())
+                .Concat(valueC.Value.Indexes())
+                .Distinct();
+
+            _affectedIndexes.AddRange(affectedIndexes);
         }
 
         /// <summary>
@@ -37,11 +65,11 @@ namespace Sudokungfu.SudokuSolver.Techniques
                             var threeValueSpotsUnion = possibleSpotsA.Value.Union(possibleSpotsB.Value).Union(possibleSpotsC.Value);
                             if (threeValueSpotsUnion.Count() == 3)
                             {
-                                var valueA = new KeyValuePair<int, IEnumerable<int>>(possibleSpotsA.Key, possibleSpotsA.Value.Indexes());
-                                var valueB = new KeyValuePair<int, IEnumerable<int>>(possibleSpotsB.Key, possibleSpotsB.Value.Indexes());
-                                var valueC = new KeyValuePair<int, IEnumerable<int>>(possibleSpotsC.Key, possibleSpotsC.Value.Indexes());
+                                var valueA = new KeyValuePair<int, IEnumerable<Cell>>(possibleSpotsA.Key, possibleSpotsA.Value);
+                                var valueB = new KeyValuePair<int, IEnumerable<Cell>>(possibleSpotsB.Key, possibleSpotsB.Value);
+                                var valueC = new KeyValuePair<int, IEnumerable<Cell>>(possibleSpotsC.Key, possibleSpotsC.Value);
 
-                                var technique = CreateThreeSpotClosureTechnique(valueA, valueB, valueC, set.Indexes(), threeValueSpotsUnion.Indexes());
+                                var technique = new ThreeSpotClosureTechnique(valueA, valueB, valueC, set);
                                 foreach (var cell in threeValueSpotsUnion)
                                 {
                                     foreach (var value in cell.PossibleValues.Except(possibleSpotsA.Key, possibleSpotsB.Key, possibleSpotsC.Key).ToList())
@@ -54,25 +82,6 @@ namespace Sudokungfu.SudokuSolver.Techniques
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Creates a <see cref="ThreeSpotClosureTechnique"/>.
-        /// </summary>
-        /// <param name="valueA">Value in the closure and cells which the value can go in.</param>
-        /// <param name="valueB">Value in the closure and cells which the value can go in.</param>
-        /// <param name="valueC">Value in the closure and cells which the value can go in.</param>
-        /// <param name="setIndexes">Indexes of the cells in the set with a closure.</param>
-        /// <param name="affectedIndexes">Indexes of cells that had values eliminated by this technique.</param>
-        public static ThreeSpotClosureTechnique CreateThreeSpotClosureTechnique(KeyValuePair<int, IEnumerable<int>> valueA, KeyValuePair<int, IEnumerable<int>> valueB, KeyValuePair<int, IEnumerable<int>> valueC, IEnumerable<int> setIndexes, IEnumerable<int> affectedIndexes)
-        {
-            var values = new KeyValuePair<int, IEnumerable<int>>[] { valueA, valueB, valueC };
-            return new ThreeSpotClosureTechnique()
-            {
-                Complexity = DEFAULT_COMPLEXITY,
-                IndexValueMap = setIndexes.ToDictionary(i => i, i => values.Where(v => v.Value.Contains(i)).Select(v => v.Key)),
-                AffectedIndexes = affectedIndexes
-            };
-        }
-    }
+        }       
+    } 
 }

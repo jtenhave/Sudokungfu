@@ -4,18 +4,52 @@ using System.Linq;
 namespace Sudokungfu.SudokuSolver.Techniques
 {
     using Extensions;
+    using Model;
     using Sets;
 
     /// <summary>
     /// Class that represents the 'Two Spot Closure' technique.
     /// </summary>
-    public class TwoSpotClosureTechnique : BasicTechnique
+    public class TwoSpotClosureTechnique : TechniqueBase
     {
-        private const int DEFAULT_COMPLEXITY = 2;
+        private const int COMPLEXITY = 2;
+        private readonly IEnumerable<ISudokuModel> _techniques;
 
-        private TwoSpotClosureTechnique()
+        /// <summary>
+        /// Details that make up this technique.
+        /// </summary>
+        public override IEnumerable<ISudokuModel> Details
         {
+            get
+            {
+                return _techniques;
+            }
+        }
 
+        /// <summary>
+        /// Creates a new <see cref="TwoSpotClosureTechnique"/>.
+        /// </summary>
+        /// <param name="valueA">First value.</param>
+        /// <param name="valueB">Second value.</param>
+        /// <param name="cells">Cells where the values go.</param>
+        /// <param name="set">Set that contains the cells.</param>
+        private TwoSpotClosureTechnique(int valueA, int valueB, IEnumerable<Cell> cells, Set set) : base (COMPLEXITY)
+        {
+            _techniques = set.FindMinTechniques(cells, valueA)
+                .Concat(set.FindMinTechniques(cells, valueB));
+
+            foreach (var index in set.Indexes)
+            {
+                _indexValueMap[index] = Enumerable.Empty<int>();
+            }
+
+            var values = new int[] { valueA, valueB };
+            foreach (var index in cells.Indexes())
+            {
+                _indexValueMap[index] = values;
+            }
+
+            _affectedIndexes.AddRange(cells.Indexes());
         }
 
         /// <summary>
@@ -38,7 +72,7 @@ namespace Sudokungfu.SudokuSolver.Techniques
                             var valueA = possibleSpotsA.Key;
                             var valueB = possibleSpotsB.Key;
 
-                            var technique = CreateTwoSpotClosureTechnique(valueA, valueB, twoValueSpotsUnion, set, twoValueSpotsUnion.Indexes());
+                            var technique = new TwoSpotClosureTechnique(valueA, valueB, twoValueSpotsUnion, set);
 
                             foreach (var cell in twoValueSpotsUnion)
                             {
@@ -51,28 +85,6 @@ namespace Sudokungfu.SudokuSolver.Techniques
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Creates a <see cref="TwoSpotClosureTechnique"/>.
-        /// </summary>
-        /// <param name="valueA">Value in the closure.</param>
-        /// <param name="valueB">Value in the closure.</param>
-        /// <param name="indexes">Indexes of the closure.</param>
-        /// <param name="setIndexes">Indexes of the cells in the set with a closure.</param>
-        /// <param name="affectedIndexes">Indexes of cells that had values eliminated by this technique.</param>
-        private static TwoSpotClosureTechnique CreateTwoSpotClosureTechnique(int valueA, int valueB, IEnumerable<Cell> cells, Set set, IEnumerable<int> affectedIndexes)
-        {
-            var techniquesA = set.FindMinTechniques(cells, valueA);
-            var techniquesB = set.FindMinTechniques(cells, valueB);
-            var values = new int[] { valueA, valueB };
-            return new TwoSpotClosureTechnique()
-            {
-                Complexity = DEFAULT_COMPLEXITY,
-                IndexValueMap = set.Indexes().ToDictionary(i => i, i => cells.Indexes().Contains(i) ? values : Enumerable.Empty<int>()),
-                AffectedIndexes = affectedIndexes,
-                Details = techniquesA.Concat(techniquesB)
-            };
-        }
+        } 
     }
 }

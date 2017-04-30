@@ -23,6 +23,11 @@ namespace Sudokungfu.Model
         IEnumerable<int> AffectedIndexes { get; }
 
         /// <summary>
+        /// Complexity of the model.
+        /// </summary>
+        int Complexity { get; }
+
+        /// <summary>
         /// Model that will be displayed when this model is clicked.
         /// </summary>
         ISudokuModel ClickableModel { get; }

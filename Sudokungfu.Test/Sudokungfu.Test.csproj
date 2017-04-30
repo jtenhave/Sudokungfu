@@ -53,17 +53,19 @@
   </Choose>
   <ItemGroup>
     <Compile Include="BaseTest.cs" />
-    <Compile Include="Extensions\IEnumerableExtensionsTest.cs" />
     <Compile Include="SudokuGrid\CellBorderConverterTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SudokuSolver\Techniques\BasicTechniqueTest.cs" />
     <Compile Include="SudokuSolver\CellTest.cs" />
     <Compile Include="SudokuSolver\FoundValueTest.cs" />
     <Compile Include="SudokuSolver\Sets\BoxTest.cs" />
     <Compile Include="SudokuSolver\Sets\ColumnTest.cs" />
     <Compile Include="SudokuSolver\Sets\RowTest.cs" />
     <Compile Include="SudokuSolver\Sets\SetTest.cs" />
+    <Compile Include="SudokuSolver\Techniques\PossibleSpotsShadowTechniqueTest.cs" />
+    <Compile Include="SudokuSolver\Techniques\SetTechniqueTest.cs" />
+    <Compile Include="SudokuSolver\Techniques\OccupiedTechnqiueTest.cs" />
     <Compile Include="SudokuSolver\Techniques\PossibleSpotOverlapTechniqueTest.cs" />
+    <Compile Include="SudokuSolver\Techniques\TechniqueBaseTest.cs" />
     <Compile Include="SudokuSolver\Techniques\ThreeSpotClosureTechniqueTest.cs" />
     <Compile Include="SudokuSolver\Techniques\TwoSpotClosureTechniqueTest.cs" />
   </ItemGroup>
