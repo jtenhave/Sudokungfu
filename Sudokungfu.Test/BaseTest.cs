@@ -173,6 +173,14 @@ namespace Sudokungfu.Test
         public TestFoundValue(int index, int value) : base (index, value)
         {
         }
+
+        public IEnumerable<ISudokuModel> Techniques
+        {
+            set
+            {
+                _techniques.AddRange(value);
+            }
+        }
     }
 
     /// <summary>

@@ -41,16 +41,6 @@ namespace Sudokungfu.Extensions
         }
 
         /// <summary>
-        /// Creates a dictionary from an enumerable with all items as keys and one key with a value.
-        /// </summary>
-        /// <param name="key">Key with a value.</param>
-        /// <param name="value">Value.</param>
-        public static IDictionary<int, IEnumerable<int>> ToDictionary(this IEnumerable<int> enumerable, int key, int value)
-        {
-            return enumerable.ToDictionary(i => i, i => i == key ? value.ToEnumerable() : Enumerable.Empty<int>());
-        }
-
-        /// <summary>
         /// Compares two sequences and returns true if they are equal sets.
         /// </summary>
         /// <param name="first">First sequence.</param>

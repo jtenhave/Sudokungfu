@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
-using System;
 using System.Linq;
 
 namespace Sudokungfu.SudokuSolver.FoundValues
 {
-    
     using Model;
 
+    /// <summary>
+    /// Class that represents a value found in the Sudoku.
+    /// </summary>
     public class FoundValueBase : ISudokuModel
     {
         private int _index;
@@ -14,6 +15,11 @@ namespace Sudokungfu.SudokuSolver.FoundValues
         protected readonly List<ISudokuModel> _techniques;
         protected readonly IDictionary<int, IEnumerable<int>> _indexValueMap;
 
+        /// <summary>
+        /// Creates a new <see cref="FoundValueBase"/>.
+        /// </summary>
+        /// <param name="index">Index of the value.</param>
+        /// <param name="value">Value.</param>
         protected FoundValueBase(int index, int value)
         {
             _index = index;

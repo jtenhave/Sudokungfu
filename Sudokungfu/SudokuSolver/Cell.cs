@@ -116,7 +116,8 @@ namespace Sudokungfu.SudokuSolver
         public IEnumerable<ISudokuModel> FindMinTechniques(int value)
         {
             return Constants.ALL_VALUES.Except(value)
-                .Select(v => EliminationTechniques[v].First())
+                .Select(v => EliminationTechniques[v].FirstOrDefault())
+                .Where(v => v != null)
                 .ToList();
         }
     }
