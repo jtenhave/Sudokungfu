@@ -59,7 +59,6 @@
     <Compile Include="SudokuSolver\FoundValues\FoundValueBaseTest.cs" />
     <Compile Include="SudokuSolver\FoundValues\FoundValueInSetTest.cs" />
     <Compile Include="SudokuSolver\FoundValues\OnlyPossibleValueTest.cs" />
-    <Compile Include="SudokuSolver\FoundValueTest.cs" />
     <Compile Include="SudokuSolver\Sets\BoxTest.cs" />
     <Compile Include="SudokuSolver\Sets\ColumnTest.cs" />
     <Compile Include="SudokuSolver\Sets\RowTest.cs" />
