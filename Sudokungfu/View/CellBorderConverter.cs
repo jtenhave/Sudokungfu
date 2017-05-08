@@ -4,8 +4,6 @@ using System.Windows.Data;
 
 namespace Sudokungfu.View
 {
-    using Extensions;
-
     /// <summary>
     /// Class for the border converter that makes the cell grid appear like a Sudoku grid.
     /// </summary>
@@ -23,15 +21,6 @@ namespace Sudokungfu.View
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var cellIndex = value as int?;
-            if (!cellIndex.HasValue)
-            {
-                throw new ArgumentNullException("value must be an int");
-            }
-
-            if (!cellIndex.Value.IsSudokuIndex())
-            {
-                throw new ArgumentOutOfRangeException("value must be between 0 and 80");
-            }
 
             var mod = cellIndex % Constants.SET_SIZE;
             var div = cellIndex / Constants.SET_SIZE;

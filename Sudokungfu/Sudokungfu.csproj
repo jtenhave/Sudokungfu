@@ -58,7 +58,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
-    <Compile Include="Extensions\IntExtensions.cs" />
     <Compile Include="Model\ISudokuModel.cs" />
     <Compile Include="SudokuSolver\FoundValues\FoundInSetValue.cs" />
     <Compile Include="SudokuSolver\FoundValues\FoundValueBase.cs" />

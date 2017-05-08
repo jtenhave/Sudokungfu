@@ -18,11 +18,6 @@ namespace Sudokungfu.View
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var isSolving = value as bool?;
-            if (!isSolving.HasValue)
-            {
-                throw new ArgumentNullException("value must be a bool");
-            }
-
             return isSolving.Value ? Cursors.Wait : Cursors.Arrow;
         }
 

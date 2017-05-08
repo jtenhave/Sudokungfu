@@ -53,46 +53,6 @@ namespace Sudokungfu.Test.SudokuGrid
         }
 
         /// <summary>
-        /// Test with argument that is null.
-        /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void TestNullArgument()
-        {
-            _cellBorderConverter.Convert(null, null, null, null);
-        }
-
-        /// <summary>
-        /// Test with argument that is not an int.
-        /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void TestWrongTypeArgument()
-        {
-            _cellBorderConverter.Convert("test", null, null, null);
-        }
-
-        /// <summary>
-        /// Test with argument below the expected range.
-        /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
-        public void TestArgumentOutOfRangeBelow()
-        {
-            _cellBorderConverter.Convert(-1, null, null, null);
-        }
-
-        /// <summary>
-        /// Test with argument above the expected range.
-        /// </summary>
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
-        public void TestArgumentOutOfRangeAbove()
-        {
-            _cellBorderConverter.Convert(Constants.CELL_COUNT, null, null, null);
-        }
-
-        /// <summary>
         /// Test that the correct borders are generated when creating a Sudoku grid. This test works by
         /// generating the borders for all cells in the grid and encoding the border values to characters.
         /// The expected sequence of characters was generated from a grid with correct borders based on 

@@ -63,7 +63,7 @@ namespace Sudokungfu.ViewModel
             set
             {
                 int i = 0;
-                if (string.IsNullOrWhiteSpace(value) || (int.TryParse(value, out i) && i.IsSudokuValue()))
+                if (string.IsNullOrWhiteSpace(value) || int.TryParse(value, out i))
                 {
                     _value = i == 0 ? string.Empty : value;
                     OnPropertyChanged(nameof(Value));
@@ -153,17 +153,15 @@ namespace Sudokungfu.ViewModel
         /// <param name="index">Index of the cell.</param>
         public CellViewModel(int index, Action<int> clicked)
         {
-            if (!index.IsSudokuIndex())
-            {
-                throw new ArgumentOutOfRangeException("index must be between 0 and 80");
-            }
-
             Index = index;
             _clicked = clicked;
 
             SetDefaultCellProperties();
         }
 
+        /// <summary>
+        /// Sets default properties for the cell.
+        /// </summary>
         public void SetDefaultCellProperties()
         {
             Value = string.Empty;

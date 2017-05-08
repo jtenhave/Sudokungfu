@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 namespace Sudokungfu.SudokuSolver
 {
-    using Extensions;
     using FoundValues;
     using Model;
     using Sets;
@@ -53,11 +52,6 @@ namespace Sudokungfu.SudokuSolver
         /// <returns>The result.</returns>
         public static async Task<List<ISudokuModel>> Solve(IEnumerable<int> values)
         {
-            if (values.Count() != Constants.CELL_COUNT || values.Any(v => !v.IsSudokuValue()))
-            {
-                throw new ArgumentException("values: Must contains 81 valid values.");
-            }
-
             return await Task.Run(() =>
             {
                 var sudokuSolver = new Solver();
