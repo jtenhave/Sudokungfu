@@ -2,19 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sudokungfu.Test.SudokuSolver.Techniques
+namespace Sudokungfu.Test.SudokuSolver.Techniques.Advanced
 {
     using Model;
     using Sudokungfu.Extensions;
     using Sudokungfu.SudokuSolver;
     using Sudokungfu.SudokuSolver.Sets;
     using Sudokungfu.SudokuSolver.Techniques;
+    using Sudokungfu.SudokuSolver.Techniques.Advanced;
 
     /// <summary>
-    /// Test class for <see cref="TwoSpotClosureTechnique"/>.
+    /// Test class for <see cref="TwoSpotClosureFactory"/>.
     /// </summary>
     [TestClass]
-    public class TwoSpotClosureTechniqueTest : BaseTest
+    public class TwoSpotClosureFactoryTest : BaseTest
     {
         private List<Cell> _cells;
         private Box _box;
@@ -35,7 +36,8 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             var closureCells = SetupClosure();
 
-            TwoSpotClosureTechnique.Apply(_cells, new Set[] { _box });
+            var factory = new TwoSpotClosureFactory(_cells, new Set[] { _box });
+            factory.Apply();
 
             foreach (var cell in closureCells)
             {
@@ -50,20 +52,21 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             var closureCells = SetupClosure();
 
-            TwoSpotClosureTechnique.Apply(_cells, new Set[] { _box });
+            var factory = new TwoSpotClosureFactory(_cells, new Set[] { _box });
+            factory.Apply();
 
             ISudokuModel technique = null;
             foreach (var cell in closureCells)
             {
                 foreach (var value in Constants.ALL_VALUES.Except(new int[] { _valueA, _valueB }))
                 {
-                    Assert.IsTrue(cell.EliminationTechniques.ContainsKey(value));
-                    Assert.AreEqual(1, cell.EliminationTechniques[value].Count());
+                    Assert.IsTrue(cell.Techniques.ContainsKey(value));
+                    Assert.AreEqual(1, cell.Techniques[value].Count());
 
-                    var cellTechnique = cell.EliminationTechniques[value].First();
+                    var cellTechnique = cell.Techniques[value].First();
                     technique = technique ?? cellTechnique;
 
-                    Assert.IsTrue(cellTechnique is TwoSpotClosureTechnique);
+                    Assert.AreEqual(TwoSpotClosureFactory.COMPLEXITY, technique.Complexity);
                     Assert.AreSame(technique, cellTechnique);
                 }              
             }
@@ -74,10 +77,11 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             var closureCells = SetupClosure();
 
-            TwoSpotClosureTechnique.Apply(_cells, new Set[] { _box });
+            var factory = new TwoSpotClosureFactory(_cells, new Set[] { _box });
+            factory.Apply();
 
-            var technique = _cells[0].EliminationTechniques[7].First();
-            Assert.IsTrue(technique is TwoSpotClosureTechnique);
+            var technique = _cells[0].Techniques[7].First();
+            Assert.AreEqual(TwoSpotClosureFactory.COMPLEXITY, technique.Complexity);
 
             AssertSetEqual(closureCells.Indexes(), technique.AffectedIndexes);
         }
@@ -87,10 +91,11 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             var closureCells = SetupClosure();
 
-            TwoSpotClosureTechnique.Apply(_cells, new Set[] { _box });
+            var factory = new TwoSpotClosureFactory(_cells, new Set[] { _box });
+            factory.Apply();
 
-            var technique = _cells[0].EliminationTechniques[7].First();
-            Assert.IsTrue(technique is TwoSpotClosureTechnique);
+            var technique = _cells[0].Techniques[7].First();
+            Assert.AreEqual(TwoSpotClosureFactory.COMPLEXITY, technique.Complexity);
 
             var expectedValues = new int[] { _valueA, _valueB };
             AssertSetEqual(_box.Indexes, technique.IndexValueMap.Keys);
@@ -102,11 +107,12 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         private IEnumerable<Cell> SetupClosure()
         {
             var closureCells = new Cell[] { _cells[0], _cells[1] };
-            var testTechnique = new TestTechnique(0);
+            var testTechnique = new Technique();
+            testTechnique.Complexity = int.MaxValue;
             foreach (var cell in _box.Cells.Except(closureCells))
             {
-                cell.EliminatePossibleValue(_valueA, testTechnique);
-                cell.EliminatePossibleValue(_valueB, testTechnique);
+                cell.ApplyTechnique(_valueA, testTechnique);
+                cell.ApplyTechnique(_valueB, testTechnique);
             }
 
             return closureCells;

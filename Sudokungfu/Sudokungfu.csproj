@@ -63,11 +63,15 @@
     <Compile Include="SudokuSolver\FoundValues\FoundValueBase.cs" />
     <Compile Include="SudokuSolver\FoundValues\GivenValue.cs" />
     <Compile Include="SudokuSolver\FoundValues\OnlyPossibleValue.cs" />
-    <Compile Include="SudokuSolver\Techniques\PossibleSpotShadowTechnique.cs" />
-    <Compile Include="SudokuSolver\Techniques\TechniqueBase.cs" />
-    <Compile Include="SudokuSolver\Techniques\OccupiedTechnique.cs" />
-    <Compile Include="SudokuSolver\Techniques\SetTechnique.cs" />
+    <Compile Include="SudokuSolver\Techniques\Advanced\AdvancedTechniqueFactoryBase.cs" />
+    <Compile Include="SudokuSolver\Techniques\Advanced\ThreeSpotOverlapFactory.cs" />
+    <Compile Include="SudokuSolver\Techniques\Advanced\TwoSpotOverlapFactory.cs" />
+    <Compile Include="SudokuSolver\Techniques\Advanced\PossibleSpotShadowFactory.cs" />
+    <Compile Include="SudokuSolver\Techniques\Advanced\ThreeSpotClosureFactory.cs" />
+    <Compile Include="SudokuSolver\Techniques\Advanced\TwoSpotClosureFactory.cs" />
+    <Compile Include="SudokuSolver\Techniques\Technique.cs" />
     <Compile Include="ViewModel\DelegateCommand.cs" />
+    <Compile Include="ViewModel\ISudokungfuViewModel.cs" />
     <Compile Include="ViewModel\SudokungfuViewModel.cs" />
     <Compile Include="View\CellBorderConverter.cs" />
     <Compile Include="ViewModel\CellViewModel.cs" />
@@ -88,9 +92,6 @@
     <Compile Include="SudokuSolver\Cell.cs" />
     <Compile Include="SudokuSolver\Solver.cs" />
     <Compile Include="SudokuSolver\Techniques\AdvancedTechniqueManager.cs" />
-    <Compile Include="SudokuSolver\Techniques\PossibleSpotOverlapTechnique.cs" />
-    <Compile Include="SudokuSolver\Techniques\ThreeSpotClosureTechnique.cs" />
-    <Compile Include="SudokuSolver\Techniques\TwoSpotClosureTechnique.cs" />
     <Compile Include="View\CursorConverter.cs" />
     <Compile Include="View\SudokungfuView.xaml.cs">
       <DependentUpon>SudokungfuView.xaml</DependentUpon>

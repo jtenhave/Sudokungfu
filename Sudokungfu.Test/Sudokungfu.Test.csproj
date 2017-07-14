@@ -53,6 +53,9 @@
   </Choose>
   <ItemGroup>
     <Compile Include="BaseTest.cs" />
+    <Compile Include="SudokuSolver\FoundValues\GivenValueTest.cs" />
+    <Compile Include="SudokuSolver\Techniques\Advanced\AdvancedTechniqueFactoryBaseTest.cs" />
+    <Compile Include="SudokuSolver\Techniques\Advanced\ThreeSpotOverlapFactoryTest.cs" />
     <Compile Include="View\CellBorderConverterTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SudokuSolver\CellTest.cs" />
@@ -63,13 +66,11 @@
     <Compile Include="SudokuSolver\Sets\ColumnTest.cs" />
     <Compile Include="SudokuSolver\Sets\RowTest.cs" />
     <Compile Include="SudokuSolver\Sets\SetTest.cs" />
-    <Compile Include="SudokuSolver\Techniques\PossibleSpotsShadowTechniqueTest.cs" />
-    <Compile Include="SudokuSolver\Techniques\SetTechniqueTest.cs" />
-    <Compile Include="SudokuSolver\Techniques\OccupiedTechnqiueTest.cs" />
-    <Compile Include="SudokuSolver\Techniques\PossibleSpotOverlapTechniqueTest.cs" />
-    <Compile Include="SudokuSolver\Techniques\TechniqueBaseTest.cs" />
-    <Compile Include="SudokuSolver\Techniques\ThreeSpotClosureTechniqueTest.cs" />
-    <Compile Include="SudokuSolver\Techniques\TwoSpotClosureTechniqueTest.cs" />
+    <Compile Include="SudokuSolver\Techniques\Advanced\PossibleSpotShadowTechniqueTest.cs" />
+    <Compile Include="SudokuSolver\Techniques\Advanced\TwoSpotOverlapFactoryTest.cs" />
+    <Compile Include="SudokuSolver\Techniques\TechniqueTest.cs" />
+    <Compile Include="SudokuSolver\Techniques\Advanced\ThreeSpotClosureFactoryTest.cs" />
+    <Compile Include="SudokuSolver\Techniques\Advanced\TwoSpotClosureFactoryTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sudokungfu\Sudokungfu.csproj">

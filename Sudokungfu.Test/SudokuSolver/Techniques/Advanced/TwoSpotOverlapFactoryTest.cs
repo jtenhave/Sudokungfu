@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sudokungfu.Test.SudokuSolver.Techniques
+namespace Sudokungfu.Test.SudokuSolver.Techniques.Advanced
 {
-    using Model;
-    using Sudokungfu.Extensions;
+    using Sudokungfu.Model;
     using Sudokungfu.SudokuSolver;
     using Sudokungfu.SudokuSolver.Sets;
     using Sudokungfu.SudokuSolver.Techniques;
+    using Sudokungfu.SudokuSolver.Techniques.Advanced;
 
     /// <summary>
-    /// Test class for <see cref="PossibleSpotOverlapTechnique"/>.
+    /// Test class for <see cref="TwoSpotOverlapFactory"/>.
     /// </summary>
     [TestClass]
-    public class PossibleSpotOverlapTechniqueTest : BaseTest
+    public class TwoSpotOverlapFactoryTest : BaseTest
     {
         private List<Cell> _cells;
         private Box _box;
@@ -31,11 +31,12 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         }
 
         [TestMethod]
-        public void TestNotOverlapping_FourCells()
+        public void TestNotOverlapping_ThreeCells()
         {
-            SetupOverlapping(10, 11, 18, 19, 20);
+            SetupOverlapping(9, 10, 11, 18, 19, 20);
 
-            PossibleSpotOverlapTechnique.Apply(_cells, new Set[] { _box, _row });
+            var factory = new TwoSpotOverlapFactory(_cells, new Set[] { _box, _row });
+            factory.Apply();
 
             var affectedCells = _row.Cells.Except(_box.Cells);
             foreach (var cell in affectedCells)
@@ -49,7 +50,8 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             SetupOverlapping(1, 2, 9, 10, 11, 18, 19, 20);
 
-            PossibleSpotOverlapTechnique.Apply(_cells, new Set[] { _box, _row });
+            var factory = new TwoSpotOverlapFactory(_cells, new Set[] { _box, _row });
+            factory.Apply();
 
             var affectedCells = _row.Cells.Except(_box.Cells);
             foreach (var cell in affectedCells)
@@ -59,25 +61,12 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         }
 
         [TestMethod]
-        public void TestEliminateAffectedCells_TwoOverlapping()
+        public void TestEliminateAffectedCells()
         {
             SetupTwoOverlapping();
 
-            PossibleSpotOverlapTechnique.Apply(_cells, new Set[] { _box, _row });
-
-            var affectedCells = _row.Cells.Except(_box.Cells);
-            foreach (var cell in affectedCells)
-            {
-                Assert.IsFalse(cell.PossibleValues.Contains(_value));
-            }
-        }
-
-        [TestMethod]
-        public void TestEliminateAffectedCells_ThreeOverlapping()
-        {
-            SetupThreeOverlapping();
-
-            PossibleSpotOverlapTechnique.Apply(_cells, new Set[] { _box, _row });
+            var factory = new TwoSpotOverlapFactory(_cells, new Set[] { _box, _row });
+            factory.Apply();
 
             var affectedCells = _row.Cells.Except(_box.Cells);
             foreach (var cell in affectedCells)
@@ -91,12 +80,13 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             SetupTwoOverlapping();
 
-            PossibleSpotOverlapTechnique.Apply(_cells, new Set[] { _box, _row });
+            var factory = new TwoSpotOverlapFactory(_cells, new Set[] { _box, _row });
+            factory.Apply();
 
             var cell = _cells[1];
-            Assert.IsTrue(cell.EliminationTechniques.ContainsKey(_value));
-            Assert.AreEqual(1, cell.EliminationTechniques[_value].Count());
-            Assert.IsFalse(cell.EliminationTechniques[_value].First() is PossibleSpotOverlapTechnique);
+            Assert.IsTrue(cell.Techniques.ContainsKey(_value));
+            Assert.AreEqual(1, cell.Techniques[_value].Count());
+            Assert.AreEqual(int.MaxValue, cell.Techniques[_value].First().Complexity);
         }
 
         [TestMethod]
@@ -104,19 +94,20 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             SetupTwoOverlapping();
 
-            PossibleSpotOverlapTechnique.Apply(_cells, new Set[] { _box, _row });
+            var factory = new TwoSpotOverlapFactory(_cells, new Set[] { _box, _row });
+            factory.Apply();
 
             ISudokuModel technique = null;
             var affectedCells = _row.Cells.Except(_box.Cells);
             foreach (var cell in affectedCells)
             {
-                Assert.IsTrue(cell.EliminationTechniques.ContainsKey(_value));
-                Assert.AreEqual(1, cell.EliminationTechniques[_value].Count());
+                Assert.IsTrue(cell.Techniques.ContainsKey(_value));
+                Assert.AreEqual(1, cell.Techniques[_value].Count());
 
-                var cellTechnique = cell.EliminationTechniques[_value].First();
+                var cellTechnique = cell.Techniques[_value].First();
                 technique = technique ?? cellTechnique;
 
-                Assert.IsTrue(cellTechnique is PossibleSpotOverlapTechnique);
+                Assert.AreEqual(TwoSpotOverlapFactory.COMPLEXITY, cellTechnique.Complexity);
                 Assert.AreSame(technique, cellTechnique);
             }
         }
@@ -126,10 +117,11 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             SetupTwoOverlapping();
 
-            PossibleSpotOverlapTechnique.Apply(_cells, new Set[] { _box, _row });
+            var factory = new TwoSpotOverlapFactory(_cells, new Set[] { _box, _row });
+            factory.Apply();
 
-            var technique = _cells[4].EliminationTechniques[_value].First();
-            Assert.IsTrue(technique is PossibleSpotOverlapTechnique);
+            var technique = _cells[4].Techniques[_value].First();
+            Assert.AreEqual(TwoSpotOverlapFactory.COMPLEXITY, technique.Complexity);
 
             var expectedAffectedIndexes = _row.Cells.Except(_box.Cells).Indexes();
             AssertSetEqual(expectedAffectedIndexes, technique.AffectedIndexes);
@@ -140,10 +132,11 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             SetupTwoOverlapping();
 
-            PossibleSpotOverlapTechnique.Apply(_cells, new Set[] { _box, _row });
+            var factory = new TwoSpotOverlapFactory(_cells, new Set[] { _box, _row });
+            factory.Apply();
 
-            var technique = _cells[4].EliminationTechniques[_value].First();
-            Assert.IsTrue(technique is PossibleSpotOverlapTechnique);
+            var technique = _cells[4].Techniques[_value].First();
+            Assert.AreEqual(TwoSpotOverlapFactory.COMPLEXITY, technique.Complexity);
 
             AssertSetEqual(_box.Indexes, technique.IndexValueMap.Keys);
             foreach (var key in technique.IndexValueMap.Keys)
@@ -165,17 +158,13 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
             SetupOverlapping(1, 9, 10, 11, 18, 19, 20);
         }
 
-        private void SetupThreeOverlapping()
-        {
-            SetupOverlapping(9, 10, 11, 18, 19, 20);
-        }
-
         private void SetupOverlapping(params int[] indexes)
         {
-            var testTechnique = new TestTechnique(0);
+            var testTechnique = new Technique();
+            testTechnique.Complexity = int.MaxValue;
             foreach (var index in indexes)
             {
-                _cells[index].EliminatePossibleValue(_value, testTechnique);
+                _cells[index].ApplyTechnique(_value, testTechnique);
             }
         }
     }
