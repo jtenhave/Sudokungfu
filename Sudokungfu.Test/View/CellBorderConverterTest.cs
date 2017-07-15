@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Linq;
 using System.Text;
 
@@ -8,14 +7,11 @@ namespace Sudokungfu.Test.SudokuGrid
     using View;
 
     /// <summary>
-    /// Test class for <see cref="CellBorderConverter"/>
+    /// Test class for <see cref="CellBorderConverter"/>.
     /// </summary>
     [TestClass]
     public class CellBorderConverterTest
     {
-        /// <summary>
-        /// Test class that reprsents a WPF border value.
-        /// </summary>
         private class BorderValues
         {
             public int Right;
@@ -23,9 +19,6 @@ namespace Sudokungfu.Test.SudokuGrid
             public int Left;
             public int Bottom;
 
-            /// <summary>
-            /// Creates a new <see cref="BorderValues"/> from a WPF border string.
-            /// </summary>
             public static BorderValues FromString(string border)
             {
                 var borderValues = new BorderValues();
@@ -43,9 +36,6 @@ namespace Sudokungfu.Test.SudokuGrid
 
         private static CellBorderConverter _cellBorderConverter;
 
-        /// <summary>
-        /// Run before all tests in the class.
-        /// </summary>
         [ClassInitialize]
         public static void Setup(TestContext context)
         {
@@ -75,22 +65,12 @@ namespace Sudokungfu.Test.SudokuGrid
             Assert.AreEqual(expectedEncodedSequence, actualEncodedSequence.ToString());
         }
 
-        /// <summary>
-        /// Generates a <see cref="BorderValues"/> based on a cell index.
-        /// </summary>
-        /// <param name="index">The cell index.</param>
-        /// <returns>The <see cref="BorderValues"/></returns>
         private static BorderValues GetBorderValues(int index)
         {
             var wpfBorder = _cellBorderConverter.Convert(index, null, null, null);
             return BorderValues.FromString(wpfBorder.ToString());
         }
 
-        /// <summary>
-        /// Encode a border value to a character.
-        /// </summary>
-        /// <param name="value">The border value.</param>
-        /// <returns>The encoded character.</returns>
         private static string EncodeBorderValue(int value)
         {
             if (value == CellBorderConverter.NO_WIDTH)

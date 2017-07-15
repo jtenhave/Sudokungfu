@@ -37,8 +37,7 @@
                              Height="50" 
                              Text="{Binding Path=Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                              MaxLength="1" 
-                             FontSize="{Binding Path=FontSize, UpdateSourceTrigger=PropertyChanged}" 
-                             FontStyle="{Binding Path=FontStyle, UpdateSourceTrigger=PropertyChanged}"
+                             FontSize="{Binding Path=FontSize, UpdateSourceTrigger=PropertyChanged}"
                              HorizontalContentAlignment="Center" 
                              VerticalContentAlignment="Center">
                         <TextBox.InputBindings>

@@ -9,12 +9,10 @@ namespace Sudokungfu.View
     /// </summary>
     public partial class SudokungfuView : Window
     {
-        private SudokungfuViewModel _viewModel;
-
         public SudokungfuView()
         {
             InitializeComponent();
-            DataContext = _viewModel = new SudokungfuViewModel(ClearConfirm, Invalid, Error);
+            DataContext = new SudokungfuViewModel(ClearConfirm, Invalid, Error);
         }
 
         /// <summary>
