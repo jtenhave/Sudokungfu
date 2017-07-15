@@ -87,7 +87,7 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques.Advanced
         }
    
         [TestMethod]
-        public void TestTechniqueProperties_IndexValueMap()
+        public void TestTechniqueProperties_CellValueMap()
         {
             var closureCells = SetupClosure();
 
@@ -98,21 +98,22 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques.Advanced
             Assert.AreEqual(TwoSpotClosureFactory.COMPLEXITY, technique.Complexity);
 
             var expectedValues = new int[] { _valueA, _valueB };
-            AssertSetEqual(_box.Indexes, technique.IndexValueMap.Keys);
+            AssertSetEqual(_box.Cells, technique.CellValueMap.Keys);
 
-            AssertSetEqual(expectedValues, technique.IndexValueMap[0]);
-            AssertSetEqual(expectedValues, technique.IndexValueMap[1]);
+            AssertSetEqual(expectedValues, technique.CellValueMap[_cells[0]]);
+            AssertSetEqual(expectedValues, technique.CellValueMap[_cells[1]]);
         }
 
         private IEnumerable<Cell> SetupClosure()
         {
             var closureCells = new Cell[] { _cells[0], _cells[1] };
             var testTechnique = new Technique();
+            testTechnique.Values.Add(_valueA);
+            testTechnique.Values.Add(_valueB);
             testTechnique.Complexity = int.MaxValue;
             foreach (var cell in _box.Cells.Except(closureCells))
             {
-                cell.ApplyTechnique(_valueA, testTechnique);
-                cell.ApplyTechnique(_valueB, testTechnique);
+                cell.ApplyTechnique(testTechnique);
             }
 
             return closureCells;

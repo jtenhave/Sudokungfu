@@ -112,7 +112,7 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         }
 
         [TestMethod]
-        public void TestTechniqueProperties_IndexValueMap_TripleDoubleClosure()
+        public void TestTechniqueProperties_CellValueMap_TripleDoubleClosure()
         {
             var closureCells = SetupTripleDoubleClosure();
 
@@ -126,7 +126,7 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
             var expectedValues2 = new int[] { _valueA, _valueC };
             var expectedValues3 = new int[] { _valueA, _valueB };
 
-            AssertSetEqual(_box.Indexes, technique.IndexValueMap.Keys);
+            AssertSetEqual(_box.Cells, technique.CellValueMap.Keys);
 
             AssertSetEqual(expectedValues1, technique.IndexValueMap[0]);
             AssertSetEqual(expectedValues2, technique.IndexValueMap[1]);
@@ -134,7 +134,7 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         }
 
         [TestMethod]
-        public void TestTechniqueProperties_IndexValueMap_SingleTripleClosure()
+        public void TestTechniqueProperties_CellValueMap_SingleTripleClosure()
         {
             var closureCells = SetupSingleTripleClosure();
 
@@ -145,28 +145,29 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
             Assert.AreEqual(ThreeSpotClosureFactory.COMPLEXITY, technique.Complexity);
 
             var expectedValues = new int[] { _valueA, _valueB, _valueC };
-            AssertSetEqual(_box.Indexes, technique.IndexValueMap.Keys);
+            AssertSetEqual(_box.Cells, technique.CellValueMap.Keys);
 
-            AssertSetEqual(expectedValues, technique.IndexValueMap[0]);
-            AssertSetEqual(expectedValues, technique.IndexValueMap[1]);
-            AssertSetEqual(expectedValues, technique.IndexValueMap[2]);
+            AssertSetEqual(expectedValues, technique.CellValueMap[_cells[0]]);
+            AssertSetEqual(expectedValues, technique.CellValueMap[_cells[1]]);
+            AssertSetEqual(expectedValues, technique.CellValueMap[_cells[2]]);
         }
 
         private IEnumerable<Cell> SetupTripleDoubleClosure()
         {
-            var closureCells = new Cell[] { _cells[0], _cells[1], _cells[2] };
-            var testTechnique = new Technique();
-            testTechnique.Complexity = int.MaxValue;
-            foreach (var cell in _box.Cells.Except(closureCells))
-            {
-                cell.ApplyTechnique(_valueA, testTechnique);
-                cell.ApplyTechnique(_valueB, testTechnique);
-                cell.ApplyTechnique(_valueC, testTechnique);
-            }
+            var closureCells = SetupSingleTripleClosure().ToList();
+            var testTechniqueA = new Technique();
+            var testTechniqueB = new Technique();
+            var testTechniqueC = new Technique();
+            testTechniqueA.Values.Add(_valueA);
+            testTechniqueB.Values.Add(_valueB);
+            testTechniqueC.Values.Add(_valueC);
+            testTechniqueA.Complexity = int.MaxValue;
+            testTechniqueB.Complexity = int.MaxValue;
+            testTechniqueC.Complexity = int.MaxValue;
 
-            _cells[0].ApplyTechnique(_valueA, testTechnique);
-            _cells[1].ApplyTechnique(_valueB, testTechnique);
-            _cells[2].ApplyTechnique(_valueC, testTechnique);
+            closureCells[0].ApplyTechnique(testTechniqueA);
+            closureCells[1].ApplyTechnique(testTechniqueB);
+            closureCells[2].ApplyTechnique(testTechniqueC);
 
             return closureCells;
         }
@@ -175,12 +176,13 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             var closureCells = new Cell[] { _cells[0], _cells[1], _cells[2] };
             var testTechnique = new Technique();
+            testTechnique.Values.Add(_valueA);
+            testTechnique.Values.Add(_valueB);
+            testTechnique.Values.Add(_valueC);
             testTechnique.Complexity = int.MaxValue;
             foreach (var cell in _box.Cells.Except(closureCells))
             {
-                cell.ApplyTechnique(_valueA, testTechnique);
-                cell.ApplyTechnique(_valueB, testTechnique);
-                cell.ApplyTechnique(_valueC, testTechnique);
+                cell.ApplyTechnique(testTechnique);
             }
 
             return closureCells;

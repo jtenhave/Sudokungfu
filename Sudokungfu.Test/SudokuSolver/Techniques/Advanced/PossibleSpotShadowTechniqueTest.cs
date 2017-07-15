@@ -111,7 +111,7 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques.Advanced
         }
 
         [TestMethod]
-        public void TestTechniqueProperties_IndexValueMap()
+        public void TestTechniqueProperties_CellValueMap()
         {
             var columns = SetupShadow();
 
@@ -121,17 +121,17 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques.Advanced
             var technique = _cells[11].Techniques[_value].First();
             Assert.AreEqual(PossibleSpotShadowFactory.COMPLEXITY, technique.Complexity);
 
-            AssertSetEqual(_rowA.Indexes.Concat(_rowB.Indexes), technique.IndexValueMap.Keys);
-            foreach (var key in technique.IndexValueMap.Keys)
+            AssertSetEqual(_rowA.Cells.Concat(_rowB.Cells), technique.CellValueMap.Keys);
+            foreach (var key in technique.CellValueMap.Keys)
             {
-                if (key == 2 || key == 7 || key == 38 || key == 43)
+                if (key == _cells[2] || key == _cells[7] || key == _cells[38] || key == _cells[43])
                 {
-                    Assert.AreEqual(1, technique.IndexValueMap[key].Count());
-                    Assert.AreEqual(_value, technique.IndexValueMap[key].First());
+                    Assert.AreEqual(1, technique.CellValueMap[key].Count());
+                    Assert.AreEqual(_value, technique.CellValueMap[key].First());
                 }
                 else
                 {
-                    Assert.AreEqual(0, technique.IndexValueMap[key].Count());
+                    Assert.AreEqual(0, technique.CellValueMap[key].Count());
                 }
             }
         }
@@ -139,12 +139,13 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques.Advanced
         private IEnumerable<int> SetupShadow()
         {
             var testTechnique = new Technique();
+            testTechnique.Values.Add(_value);
             testTechnique.Complexity = int.MaxValue;
             var columns = new List<int> { 2, 7 };
 
             foreach (var cell in _rowA.Cells.Concat(_rowB.Cells).Where(c => !columns.Contains(Column(c))))
             {
-                cell.ApplyTechnique(_value, testTechnique);
+                cell.ApplyTechnique(testTechnique);
             }
 
             return columns;

@@ -21,7 +21,7 @@ namespace Sudokungfu.SudokuSolver.Sets
         /// </summary>
         protected override bool IsCellInSet(Cell cell)
         {
-            return cell.Index / Constants.SET_SIZE == Index;
+            return cell.Index / Constants.SET_SIZE == _index;
         }
     }
 }

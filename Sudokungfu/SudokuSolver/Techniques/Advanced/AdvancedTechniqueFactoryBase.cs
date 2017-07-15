@@ -54,10 +54,7 @@ namespace Sudokungfu.SudokuSolver.Techniques.Advanced
 
                     foreach (var cell in technique.AffectedCells)
                     {
-                        foreach (var value in technique.Values)
-                        {
-                            cell.ApplyTechnique(value, technique);
-                        }
+                        cell.ApplyTechnique(technique);
                     }
                 }
             }

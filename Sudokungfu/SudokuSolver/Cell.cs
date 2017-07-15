@@ -5,7 +5,6 @@ namespace Sudokungfu.SudokuSolver
 {
     using Extensions;
     using FoundValues;
-    using Model;
     using Sets;
     using Techniques;
 
@@ -14,9 +13,39 @@ namespace Sudokungfu.SudokuSolver
     /// </summary>
     public class Cell
     {
-        private HashSet<int> _possibleValues;
+        private class TechniqueList : List<Technique>
+        {
+            private int _complexity;
 
-        private Dictionary<int, List<ISudokuModel>> _eliminationTechniques;
+            public TechniqueList() : base()
+            {
+                _complexity = int.MaxValue;
+            }
+
+            public void AddTechnique(Technique technique)
+            {
+                if (technique.Complexity > _complexity)
+                {
+                    return;
+                }
+
+                if (technique.Complexity < _complexity)
+                {
+                    Clear();       
+                    _complexity = technique.Complexity;
+                }
+
+                Add(technique);
+            }
+        }
+
+        private int OCCUPIED_COMPLEXITY = 0;
+
+        private int SET_COMPLEXITY = 1;
+
+        private Dictionary<int, TechniqueList> _committedTechniques;
+
+        private Dictionary<int, TechniqueList> _appliedTechniques;
 
         /// <summary>
         /// Index of the cell.
@@ -35,18 +64,18 @@ namespace Sudokungfu.SudokuSolver
         {
             get
             {
-                return _possibleValues;
+                return Constants.ALL_VALUES.Except(_appliedTechniques.Keys);
             }
         }
 
         /// <summary>
         /// Techniques used to eliminate values from this cell.
         /// </summary>
-        public IDictionary<int, IEnumerable<ISudokuModel>> EliminationTechniques
+        public IDictionary<int, IEnumerable<Technique>> Techniques
         {
             get
             {
-                return _eliminationTechniques.ToDictionary(k => k.Key, k => k.Value.AsEnumerable());
+                return _appliedTechniques.ToDictionary(k => k.Key, k => k.Value.OrderBy(t => t.Complexity).AsEnumerable());
             }
         }
 
@@ -56,36 +85,36 @@ namespace Sudokungfu.SudokuSolver
         /// <param name="index">The index of the cell.</param>
         public Cell(int index)
         {
-            _possibleValues = new HashSet<int>(Constants.ALL_VALUES);
-            _eliminationTechniques = _possibleValues.ToDictionary(v => v, v => new List<ISudokuModel>());
+            _committedTechniques = new Dictionary<int, TechniqueList>();
+            _appliedTechniques = new Dictionary<int, TechniqueList>();
 
             Index = index;
             Sets = new List<Set>();
         }
 
         /// <summary>
-        /// Eliminates a possible value from this cell.
+        /// Applies a technique to the cell.
         /// </summary>
-        /// <param name="value">Value to eliminate.</param>
-        /// <param name="technique">Technique used to eliminate the value.</param>
-        public void EliminatePossibleValue(int value, ISudokuModel technique)
+        /// <param name="technique">Technique to apply.</param>
+        public void ApplyTechnique(Technique technique)
         {
-            if (_possibleValues.Any())
+            foreach (var value in technique.Values)
             {
-                _possibleValues.Remove(value);
-
-                var currentDifficulty = _eliminationTechniques[value].FirstOrDefault()?.Complexity ?? technique.Complexity;
-                if (technique.Complexity < currentDifficulty)
+                if (!_appliedTechniques.ContainsKey(value))
                 {
-                    _eliminationTechniques[value].Clear();
-                }
-                else if (technique.Complexity > currentDifficulty)
-                {
-                    return;
+                    _appliedTechniques[value] = new TechniqueList();
                 }
 
-                _eliminationTechniques[value].Add(technique);
-            }
+                _appliedTechniques[value].AddTechnique(technique);
+            }            
+        }
+
+        /// <summary>
+        /// Resets the applied techniques.
+        /// </summary>
+        public void ResetAppliedTechniques()
+        {            
+            _appliedTechniques = new Dictionary<int, TechniqueList>(_committedTechniques);
         }
 
         /// <summary>
@@ -94,31 +123,56 @@ namespace Sudokungfu.SudokuSolver
         /// <param name="value">Value to insert.</param>
         public void InsertValue(FoundValueBase value)
         {
-            var occupiedTechnique = new OccupiedTechnique(value);
-            foreach(var v in Constants.ALL_VALUES.Except(value.Value))
-            {
-                EliminatePossibleValue(v, occupiedTechnique);
-            }
-
-            _possibleValues.Remove(value.Value);
+            var occupiedTechnique = CreateOccupiedTechnique(value);
+            CommitTechnique(occupiedTechnique);
 
             foreach (var set in Sets)
             {
-                var setTechnique = new SetTechnique(value, set);
-                set.Cells.Except(this).ForEach(c => c.EliminatePossibleValue(value.Value, setTechnique));
+                var setTechnique = CreateSetTechnique(value, set);
+                set.Cells.Except(this).ForEach(c => c.CommitTechnique(setTechnique));
+            }
+
+            _committedTechniques[value.Value] = new TechniqueList();
+            ResetAppliedTechniques();
+        }
+
+        private void CommitTechnique(Technique technique)
+        {
+            foreach (var value in technique.Values)
+            {
+                if (!_committedTechniques.ContainsKey(value))
+                {
+                    _committedTechniques[value] = new TechniqueList();
+                }
+
+                _committedTechniques[value].AddTechnique(technique);
+
             }
         }
 
-        /// <summary>
-        /// Calculates the techniques used to find a value in this cell.
-        /// </summary>
-        /// <param name="value">Value to calculate techniques for.</param>
-        public IEnumerable<ISudokuModel> FindMinTechniques(int value)
+        private Technique CreateOccupiedTechnique(FoundValueBase foundValue)
         {
-            return Constants.ALL_VALUES.Except(value)
-                .Select(v => EliminationTechniques[v].FirstOrDefault())
-                .Where(v => v != null)
-                .ToList();
+            var technique = new Technique();
+            technique.Complexity = OCCUPIED_COMPLEXITY;
+            technique.ClickableModel = foundValue;
+            technique.AffectedCells.Add(this);
+            technique.CellValueMap[this] = foundValue.Value.ToEnumerable();
+            technique.Values.AddRange(Constants.ALL_VALUES.Except(foundValue.Value));
+
+            return technique;
+        }
+
+        private Technique CreateSetTechnique(FoundValueBase foundValue, Set set)
+        {
+            var technique = new Technique();
+            technique.Complexity = SET_COMPLEXITY;
+            technique.ClickableModel = foundValue;
+            technique.AffectedCells.AddRange(set.Cells.Except(this));
+            technique.CellValueMap[this] = foundValue.Value.ToEnumerable();
+            technique.AffectedCells.ForEach(c => technique.CellValueMap[c] = Enumerable.Empty<int>());
+            technique.Values.Add(foundValue.Value);
+
+            return technique;
         }
     }
 }

@@ -128,7 +128,7 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques.Advanced
         }
 
         [TestMethod]
-        public void TestTechniqueProperties_IndexValueMap()
+        public void TestTechniqueProperties_CellValueMap()
         {
             SetupTwoOverlapping();
 
@@ -138,17 +138,17 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques.Advanced
             var technique = _cells[4].Techniques[_value].First();
             Assert.AreEqual(TwoSpotOverlapFactory.COMPLEXITY, technique.Complexity);
 
-            AssertSetEqual(_box.Indexes, technique.IndexValueMap.Keys);
-            foreach (var key in technique.IndexValueMap.Keys)
+            AssertSetEqual(_box.Cells, technique.CellValueMap.Keys);
+            foreach (var key in technique.CellValueMap.Keys)
             {
-                if (key == 0 || key == 2)
+                if (key == _cells[0] || key == _cells[2])
                 {
-                    Assert.AreEqual(1, technique.IndexValueMap[key].Count());
-                    Assert.AreEqual(_value, technique.IndexValueMap[key].First());
+                    Assert.AreEqual(1, technique.CellValueMap[key].Count());
+                    Assert.AreEqual(_value, technique.CellValueMap[key].First());
                 }
                 else
                 {
-                    Assert.AreEqual(0, technique.IndexValueMap[key].Count());
+                    Assert.AreEqual(0, technique.CellValueMap[key].Count());
                 }
             }    
         }
@@ -161,10 +161,11 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques.Advanced
         private void SetupOverlapping(params int[] indexes)
         {
             var testTechnique = new Technique();
+            testTechnique.Values.Add(_value);
             testTechnique.Complexity = int.MaxValue;
             foreach (var index in indexes)
             {
-                _cells[index].ApplyTechnique(_value, testTechnique);
+                _cells[index].ApplyTechnique(testTechnique);
             }
         }
     }
