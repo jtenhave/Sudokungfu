@@ -151,7 +151,7 @@ namespace Sudokungfu.Test.SudokuSolver
 
             var cell = new Cell(0);
             cell.ApplyTechnique(expectedTechnique);
-            cell.InsertValue(new TestFoundValue(0, 5));
+            cell.InsertValue(new FoundValue(cell, 5));
             
             Assert.IsFalse(cell.Techniques[expectedValue].Contains(expectedTechnique));
         }
@@ -161,9 +161,9 @@ namespace Sudokungfu.Test.SudokuSolver
         {
             var expectedValue = 3;
             var expectedIndex = 23;
-            var expectedFoundValue = new TestFoundValue(expectedIndex, expectedValue);
-
             var cell = new Cell(expectedIndex);
+            var expectedFoundValue = new FoundValue(cell, expectedValue);
+
             cell.InsertValue(expectedFoundValue);
 
             ISudokuModel technique = null;
@@ -186,7 +186,7 @@ namespace Sudokungfu.Test.SudokuSolver
             var box = new Box(cells, 0);
 
             var expectedCell = cells.First();
-            expectedCell.InsertValue(new TestFoundValue(expectedCell.Index, expectedValue));
+            expectedCell.InsertValue(new FoundValue(expectedCell, expectedValue));
 
             ISudokuModel rowTechnique = null;
             foreach (var cell in row.Cells.Except(expectedCell).Reverse())
@@ -223,8 +223,8 @@ namespace Sudokungfu.Test.SudokuSolver
         public void TestOccupiedClickableModel()
         {
             var expectedIndex = 0;
-            var expectedClickableModel = new TestFoundValue(expectedIndex, 4);
             var cell = new Cell(expectedIndex);
+            var expectedClickableModel = new FoundValue(cell, 4);
             cell.InsertValue(expectedClickableModel);
 
             var technique = cell.Techniques[5].First();
@@ -238,7 +238,7 @@ namespace Sudokungfu.Test.SudokuSolver
             var expectedValue = 4;
 
             var cell = new Cell(expectedIndex);
-            cell.InsertValue(new TestFoundValue(expectedIndex, expectedValue));
+            cell.InsertValue(new FoundValue(cell, expectedValue));
 
             var technique = cell.Techniques[5].First();
             Assert.AreEqual(1, technique.IndexValueMap.Count());
@@ -253,7 +253,7 @@ namespace Sudokungfu.Test.SudokuSolver
             var expectedIndex = 34;
 
             var cell = new Cell(expectedIndex);
-            cell.InsertValue(new TestFoundValue(expectedIndex, 4));
+            cell.InsertValue(new FoundValue(cell, 4));
 
             var technique = cell.Techniques[5].First();
             Assert.AreEqual(1, technique.AffectedIndexes.Count());
@@ -269,7 +269,7 @@ namespace Sudokungfu.Test.SudokuSolver
             var cell = cells.First();
             cell.Sets.Add(box);
 
-            var expectedClickableModel = new TestFoundValue(cell.Index, expectedValue);
+            var expectedClickableModel = new FoundValue(cell, expectedValue);
             cell.InsertValue(expectedClickableModel);
 
             var memberCell = cells.ElementAt(1);
@@ -282,14 +282,13 @@ namespace Sudokungfu.Test.SudokuSolver
         [TestMethod]
         public void TestSetCellValueMap()
         {
-
             var expectedValue = 4;
             var cells = GetAllCells();
             var box = new Box(cells, 0);
             var cell = cells.First();
             cell.Sets.Add(box);
 
-            var expectedClickableModel = new TestFoundValue(cell.Index, expectedValue);
+            var expectedClickableModel = new FoundValue(cell, expectedValue);
             cell.InsertValue(expectedClickableModel);
 
             var memberCell = cells.ElementAt(1);

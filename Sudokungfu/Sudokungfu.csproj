@@ -59,10 +59,7 @@
     </ApplicationDefinition>
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Model\ISudokuModel.cs" />
-    <Compile Include="SudokuSolver\FoundValues\FoundInSetValue.cs" />
-    <Compile Include="SudokuSolver\FoundValues\FoundValueBase.cs" />
-    <Compile Include="SudokuSolver\FoundValues\GivenValue.cs" />
-    <Compile Include="SudokuSolver\FoundValues\OnlyPossibleValue.cs" />
+    <Compile Include="SudokuSolver\FoundValue.cs" />
     <Compile Include="SudokuSolver\Techniques\Advanced\AdvancedTechniqueFactoryBase.cs" />
     <Compile Include="SudokuSolver\Techniques\Advanced\ThreeSpotOverlapFactory.cs" />
     <Compile Include="SudokuSolver\Techniques\Advanced\TwoSpotOverlapFactory.cs" />

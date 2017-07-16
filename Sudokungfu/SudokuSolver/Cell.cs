@@ -4,7 +4,6 @@ using System.Linq;
 namespace Sudokungfu.SudokuSolver
 {
     using Extensions;
-    using FoundValues;
     using Sets;
     using Techniques;
 
@@ -121,7 +120,7 @@ namespace Sudokungfu.SudokuSolver
         /// Inserts a value into this cell.
         /// </summary>
         /// <param name="value">Value to insert.</param>
-        public void InsertValue(FoundValueBase value)
+        public void InsertValue(FoundValue value)
         {
             var occupiedTechnique = CreateOccupiedTechnique(value);
             CommitTechnique(occupiedTechnique);
@@ -150,7 +149,7 @@ namespace Sudokungfu.SudokuSolver
             }
         }
 
-        private Technique CreateOccupiedTechnique(FoundValueBase foundValue)
+        private Technique CreateOccupiedTechnique(FoundValue foundValue)
         {
             var technique = new Technique();
             technique.Complexity = OCCUPIED_COMPLEXITY;
@@ -162,7 +161,7 @@ namespace Sudokungfu.SudokuSolver
             return technique;
         }
 
-        private Technique CreateSetTechnique(FoundValueBase foundValue, Set set)
+        private Technique CreateSetTechnique(FoundValue foundValue, Set set)
         {
             var technique = new Technique();
             technique.Complexity = SET_COMPLEXITY;
