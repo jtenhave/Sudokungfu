@@ -46,6 +46,11 @@ namespace Sudokungfu.SudokuSolver.Sets
         }
 
         /// <summary>
+        /// Type of the set.
+        /// </summary>
+        public abstract string Type { get; }
+
+        /// <summary>
         /// Returns true if a cell is in this set.
         /// </summary>
         protected abstract bool IsCellInSet(Cell cell);

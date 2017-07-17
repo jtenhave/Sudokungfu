@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Sudokungfu.ViewModel
 {
@@ -13,12 +14,20 @@ namespace Sudokungfu.ViewModel
     /// <summary>
     /// Class that represents the view model for Sudokungfu.
     /// </summary>
-    public class SudokungfuViewModel : INotifyPropertyChanged, ISudokungfuViewModel
+    public class SudokungfuViewModel : INotifyPropertyChanged
     {
+        private readonly Dictionary<int, int> FONT_SIZE_MAP = new Dictionary<int, int>()
+        {
+            { 1, 36 },
+            { 2, 26 },
+            { 3, 16 },
+        };
+
+        private string _description = "";
         private int _shownValues;
         private int _givenValues;
         private bool _isSolving;
-        private List<ISudokuModel> _sudoku;
+        private List<FoundValue> _sudoku;
         private Stack<ISudokuModel> _clickedModels;
 
         private Func<bool> _clearConfirm;
@@ -140,12 +149,22 @@ namespace Sudokungfu.ViewModel
         }
 
         /// <summary>
-        /// Gets the number of values currently shown.
+        /// Gets the description for the current detail being displayed.
         /// </summary>
-        public int ShownValues {
+        public string Description
+        {
             get
             {
-                return _shownValues;
+                return _description;
+            }
+
+            set
+            {
+                if (_description != value)
+                {
+                    _description = value;
+                    OnPropertyChanged(nameof(Description));
+                }
             }
         }
 
@@ -168,7 +187,12 @@ namespace Sudokungfu.ViewModel
             // Initialize the cell view models.
             for (int i = 0; i < Constants.CELL_COUNT; i++)
             {
-                Cells.Add(new CellViewModel(i, this));
+                var cell = new CellViewModel(i);
+                Cells.Add(cell);
+                cell.CellClicked += (sender, args) =>
+                {
+                    CellClicked(args.ClickedModel);
+                };
             }
             
             _clearCommand = DelegateCommand.Create(ClearAction);
@@ -191,7 +215,7 @@ namespace Sudokungfu.ViewModel
                 _enterCommand.CanExecuteValue = true;
                 _nextCommand.CanExecuteValue = _prevCommand.CanExecuteValue = _solveCommand.CanExecuteValue = false;
 
-                RefreshCellViewModels();
+                DrawDefault();
             }
         }
 
@@ -201,7 +225,7 @@ namespace Sudokungfu.ViewModel
         private async Task EnterAction()
         {
             IsSolving = true;
-            List<ISudokuModel> sudoku = null;
+            List<FoundValue> sudoku = null;
 
             try
             {
@@ -224,12 +248,13 @@ namespace Sudokungfu.ViewModel
             }
 
             _enterCommand.CanExecuteValue = false;
+            _nextCommand.CanExecuteValue = true;
+            _solveCommand.CanExecuteValue = true;
 
             _sudoku = sudoku;
-            _givenValues = _sudoku.Count(v => v.Details.Count() == 0);
-            _shownValues = 0;
+            _givenValues = _shownValues = _sudoku.Count(v => !v.Details.Any());
 
-            ShowValues(_givenValues);
+            DrawSudoku();
         }
 
         /// <summary>
@@ -237,11 +262,12 @@ namespace Sudokungfu.ViewModel
         /// </summary>
         private void NextAction()
         {
-            if (_shownValues < Constants.CELL_COUNT && !_clickedModels.Any())
+            if (_shownValues < Constants.CELL_COUNT)
             {
                 _nextCommand.CanExecuteValue = _solveCommand.CanExecuteValue = ++_shownValues < Constants.CELL_COUNT;
                 _prevCommand.CanExecuteValue = _shownValues > _givenValues;
-                RefreshCellViewModels();
+
+                DrawValue(_sudoku[_shownValues - 1]);
             }
         }
 
@@ -250,12 +276,12 @@ namespace Sudokungfu.ViewModel
         /// </summary>
         private void PreviousAction()
         {
-            if (_shownValues > _givenValues && !_clickedModels.Any())
+            if (_shownValues > _givenValues)
             {
                 _prevCommand.CanExecuteValue = --_shownValues > _givenValues;
                 _nextCommand.CanExecuteValue = _solveCommand.CanExecuteValue = true;
 
-                RefreshCellViewModels();
+                DrawEmpty(_sudoku[_shownValues]);
             }
         }
 
@@ -264,9 +290,9 @@ namespace Sudokungfu.ViewModel
         /// </summary>
         private void SolveAction()
         {
-            if (!_clickedModels.Any())
+            while (_shownValues < Constants.CELL_COUNT)
             {
-                ShowValues(Constants.CELL_COUNT);
+                NextAction();
             }
         }
 
@@ -275,10 +301,16 @@ namespace Sudokungfu.ViewModel
         /// </summary>
         private void CloseAction()
         {
-            _closeCommand.CanExecuteValue = false;
-            _backCommand.CanExecuteValue = false;
-            _clickedModels.Clear();
-            RefreshCellViewModels();
+            _nextCommand.CanExecuteValue = _solveCommand.CanExecuteValue = _shownValues < Constants.CELL_COUNT;
+            _prevCommand.CanExecuteValue = _shownValues > _givenValues;
+
+             _closeCommand.CanExecuteValue = false;
+             _backCommand.CanExecuteValue = false;
+             _clickedModels.Clear();
+
+            Description = "";
+
+            DrawSudoku();
         }
 
         /// <summary>
@@ -288,44 +320,122 @@ namespace Sudokungfu.ViewModel
         {
             _clickedModels.Pop();
             _backCommand.CanExecuteValue = _clickedModels.Any();
-            RefreshCellViewModels();
-        }
-
-        private void ShowValues(int count)
-        {
-            while (_shownValues < count)
+            if (_clickedModels.Any())
             {
-                NextAction();
+                DrawDetails(_clickedModels.Peek());
+            }
+            else
+            {
+                CloseAction();
             }
         }
 
-        public void CellClicked(ISudokuModel model)
+        private void CellClicked(ISudokuModel model)
         {
+            _nextCommand.CanExecuteValue = false;
+            _prevCommand.CanExecuteValue = false;
+            _solveCommand.CanExecuteValue = false;
+
+
             _clickedModels.Push(model);
             _closeCommand.CanExecuteValue = true;
             _backCommand.CanExecuteValue = true;
-            RefreshCellViewModels();
+
+            DrawDetails(_clickedModels.Peek());
         }
 
-        private void RefreshCellViewModels()
+        private void DrawDefault(Brush brush = null)
         {
             foreach (var cell in Cells)
             {
-                if (_clickedModels.Any())
+                cell.SetDefaultCellProperties();
+                if (brush != null)
                 {
-                    cell.SetCellProperties(_clickedModels.Peek());
-                }
-                else
-                {
-                    cell.SetCellProperties(_sudoku);
+                    cell.Background = brush;
                 }
             }
         }
 
-        /// <summary>
-        /// Notifies listeners of the PropertyChanged event that a property value has changed.
-        /// </summary>
-        /// <param name="propertyName">The name of the property that changed.</param>
+        private void DrawSudoku()
+        {
+            DrawDefault();
+            for (int i = 0; i < _shownValues; i++)
+            {
+                DrawValue(_sudoku[i]);
+            }
+        }
+
+        private void DrawValue(FoundValue foundValue)
+        {
+            var cellModel = Cells.Find(c => c.Index == foundValue.Cell.Index);
+            cellModel.FoundValue = foundValue;
+        }
+
+        private void DrawEmpty(FoundValue foundValue)
+        {
+            var cellModel = Cells.Find(c => c.FoundValue == foundValue);
+            cellModel.SetDefaultCellProperties();
+        }
+
+        private void DrawDetails(ISudokuModel model)
+        {
+            DrawDefault(Brushes.DarkGray);
+
+            var affectedIndexes = model.Details.SelectMany(d => d.IndexValueMap.Keys.Concat(d.AffectedIndexes).Distinct());
+            foreach (var index in affectedIndexes)
+            {
+                Cells.Find(c => c.Index == index).Background = Brushes.LightSalmon;
+            }
+
+            var setIndexes = model.IndexValueMap.Keys;
+            foreach (var index in setIndexes)
+            {
+                Cells.Find(c => c.Index == index).Background = Brushes.Salmon;
+            }
+
+            foreach (var technique in model.Details)
+            {
+                var techniqueValueIndexes = technique.IndexValueMap.Keys.Where(key => technique.IndexValueMap[key].Any());
+                foreach (var index in techniqueValueIndexes)
+                {
+                    var values = technique.IndexValueMap[index];
+                    var cell = Cells.Find(c => c.Index == index);
+                    cell.FontSize = GetFontSize(values.Count(), techniqueValueIndexes.Count() > 1);
+                    cell.Value = string.Join("", values);
+                    if (technique.ClickableModel.Details.Any())
+                    {
+                        cell.ClickableModel = technique.ClickableModel;
+                    }
+                    else
+                    {
+                        cell.Background = Brushes.DarkSalmon;
+                    }
+                }
+            }
+
+            var valueIndexes = model.IndexValueMap.Keys.Where(key => model.IndexValueMap[key].Any());
+            foreach (var index in valueIndexes)
+            {
+                var values = model.IndexValueMap[index];
+                var cell = Cells.Find(c => c.Index == index);
+                cell.FontSize = GetFontSize(values.Count(), valueIndexes.Count() > 1);
+                cell.Value = string.Join("", values);
+                cell.Background = Brushes.LightGreen;              
+            }
+
+            Description = model.Description;
+        }
+
+        private int GetFontSize(int valueCount, bool hasMultipleCells)
+        {
+            if (valueCount == 1 && hasMultipleCells)
+            {
+                return FONT_SIZE_MAP[2];
+            }
+
+            return FONT_SIZE_MAP[valueCount];
+        }
+
         private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

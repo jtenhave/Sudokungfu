@@ -81,6 +81,7 @@ namespace Sudokungfu.SudokuSolver.Techniques.Advanced
                             sourceSet.Cells.Concat(shadowSet.Cells).ForEach(c => technique.CellValueMap[c] = Enumerable.Empty<int>());
                             cellsA.Concat(cellsB).ForEach(c => technique.CellValueMap[c] = value.ToEnumerable());
                             technique.Complexity = COMPLEXITY;
+                            technique.Description = "Possible Spot Shadow technique.";
                             techniques.Add(technique);
 
                             yield return technique;

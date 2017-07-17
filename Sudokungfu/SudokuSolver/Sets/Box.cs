@@ -60,6 +60,17 @@ namespace Sudokungfu.SudokuSolver.Sets
         }
 
         /// <summary>
+        /// Type of the set.
+        /// </summary>
+        public override string Type
+        {
+            get
+            {
+                return "box";
+            }
+        }
+
+        /// <summary>
         /// Creates a new <see cref="Box"/>
         /// </summary>
         /// <param name="grid">The Sudoku grid to create the box from.</param>

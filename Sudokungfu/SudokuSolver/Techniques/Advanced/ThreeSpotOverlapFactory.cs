@@ -27,6 +27,14 @@ namespace Sudokungfu.SudokuSolver.Techniques.Advanced
             }
         }
 
+        protected override string Description
+        {
+            get
+            {
+                return "Three Spot Overlap technique.";
+            }
+        }
+
         /// <summary>
         /// Creates a new <see cref="ThreeSpotOverlapFactory"/>.
         /// </summary>

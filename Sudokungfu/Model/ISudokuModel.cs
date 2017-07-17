@@ -31,5 +31,10 @@ namespace Sudokungfu.Model
         /// Model that will be displayed when this model is clicked.
         /// </summary>
         ISudokuModel ClickableModel { get; }
+
+        /// <summary>
+        /// Description of the model.
+        /// </summary>
+        string Description { get; set; }
     }
 }

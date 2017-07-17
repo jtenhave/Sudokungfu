@@ -88,6 +88,11 @@ namespace Sudokungfu.SudokuSolver
             }
         }
 
+        /// <summary>
+        /// Description of the found value.
+        /// </summary>
+        public string Description { get; set; }
+
         #endregion
 
         /// <summary>

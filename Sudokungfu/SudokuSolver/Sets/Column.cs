@@ -8,6 +8,17 @@ namespace Sudokungfu.SudokuSolver.Sets
     public class Column : Set
     {
         /// <summary>
+        /// Type of the set.
+        /// </summary>
+        public override string Type
+        {
+            get
+            {
+                return "column";
+            }
+        }
+
+        /// <summary>
         /// Creates a new <see cref="Column"/>
         /// </summary>
         /// <param name="grid">The Sudoku grid to create the column from.</param>

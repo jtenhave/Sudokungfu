@@ -29,6 +29,14 @@ namespace Sudokungfu.SudokuSolver.Techniques.Advanced
             }
         }
 
+        protected virtual string Description
+        {
+            get
+            {
+                return "Two Spot Overlap technique.";
+            }
+        }
+
         /// <summary>
         /// Creates a new <see cref="TwoSpotOverlapFactory"/>.
         /// </summary>
@@ -58,6 +66,7 @@ namespace Sudokungfu.SudokuSolver.Techniques.Advanced
                         sourceSet.Cells.ForEach(c => technique.CellValueMap[c] = Enumerable.Empty<int>());
                         cells.ForEach(c => technique.CellValueMap[c] = value.ToEnumerable());
                         technique.Complexity = Complexity;
+                        technique.Description = Description;
 
                         yield return technique;
                     }

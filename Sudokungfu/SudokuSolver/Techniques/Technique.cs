@@ -89,6 +89,11 @@ namespace Sudokungfu.SudokuSolver.Techniques
             }
         }
 
+        /// <summary>
+        /// Description of the technique.
+        /// </summary>
+        public string Description { get; set; }
+
         #endregion
 
         /// <summary>

@@ -47,6 +47,7 @@ namespace Sudokungfu.SudokuSolver.Techniques.Advanced
                             set.Cells.ForEach(c => technique.CellValueMap[c] = Enumerable.Empty<int>());
                             affectedCells.ForEach(c => technique.CellValueMap[c] = values);
                             technique.Complexity = COMPLEXITY;
+                            technique.Description = "Two Spot Closure technique.";
 
                             yield return technique;
                         }

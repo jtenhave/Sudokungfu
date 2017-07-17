@@ -68,7 +68,6 @@
     <Compile Include="SudokuSolver\Techniques\Advanced\TwoSpotClosureFactory.cs" />
     <Compile Include="SudokuSolver\Techniques\Technique.cs" />
     <Compile Include="ViewModel\DelegateCommand.cs" />
-    <Compile Include="ViewModel\ISudokungfuViewModel.cs" />
     <Compile Include="ViewModel\SudokungfuViewModel.cs" />
     <Compile Include="View\CellBorderConverter.cs" />
     <Compile Include="ViewModel\CellViewModel.cs" />

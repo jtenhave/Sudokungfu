@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
@@ -7,6 +7,27 @@ using System.Windows.Media;
 namespace Sudokungfu.ViewModel
 {
     using Model;
+    using Sudokungfu.SudokuSolver;
+
+    /// <summary>
+    /// Class that represents event args for a click event on a <see cref="Cell"/>.
+    /// </summary>
+    public class ClickedEventArgs: EventArgs 
+    {
+        /// <summary>
+        /// Model that will be displayed as a result of the click event.
+        /// </summary>
+        public ISudokuModel ClickedModel { get; private set; }
+
+        /// <summary>
+        /// Creates a new <see cref="ClickedEventArgs"/>.
+        /// </summary>
+        /// <param name="model"></param>
+        public ClickedEventArgs(ISudokuModel model)
+        {
+            ClickedModel = model;
+        }
+    }
 
     /// <summary>
     /// Class for the view model of a cell in the Sudoku grid.
@@ -24,11 +45,11 @@ namespace Sudokungfu.ViewModel
         private Brush _background;
         private int _fontSize;
 
-        private List<ISudokuModel> _clickableModels;
         private DelegateCommand _clickCommand;
-        private ISudokungfuViewModel _viewModel;
+        private FoundValue _foundValue;
 
         public event PropertyChangedEventHandler PropertyChanged;
+        public event EventHandler<ClickedEventArgs> CellClicked;
 
         /// <summary>
         /// Gets the click command.
@@ -40,6 +61,11 @@ namespace Sudokungfu.ViewModel
                 return _clickCommand;
             }
         }
+
+        /// <summary>
+        /// Model that will be shown when the cell is clicked.
+        /// </summary>
+        public ISudokuModel ClickableModel { get; set; }
 
         /// <summary>
         /// Gets the index of the cell. 
@@ -59,7 +85,12 @@ namespace Sudokungfu.ViewModel
             set
             {
                 int i = 0;
-                if (string.IsNullOrWhiteSpace(value) || int.TryParse(value, out i))
+                if (value.Length > 1)
+                {
+                    _value = value;
+                    OnPropertyChanged(nameof(Value));
+                }
+                else if (string.IsNullOrWhiteSpace(value) || int.TryParse(value, out i))
                 {
                     _value = i == 0 ? string.Empty : value;
                     OnPropertyChanged(nameof(Value));
@@ -124,160 +155,68 @@ namespace Sudokungfu.ViewModel
         }
 
         /// <summary>
-        /// Creates a new <see cref="CellViewModel"/>
+        /// Found value that belongs in the cell.
+        /// </summary>
+        public FoundValue FoundValue
+        {
+            get
+            {
+                return _foundValue;
+            }
+            set
+            {
+                _foundValue = value;
+                SetDefaultCellProperties();
+
+                if (_foundValue != null)
+                {
+                    Value = _foundValue.Value.ToString();
+                    if (_foundValue.Details.Any())
+                    {
+                        ClickableModel = _foundValue.ClickableModel;
+                    }
+                    else
+                    {
+                        Background = Brushes.LightGray;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="CellViewModel"/>.
         /// </summary>
         /// <param name="index">Index of the cell.</param>
-        public CellViewModel(int index, ISudokungfuViewModel viewModel)
+        public CellViewModel(int index)
         {
             Index = index;
-            _clickCommand = DelegateCommand.Create(ClickAction);
-            _clickableModels = new List<ISudokuModel>();
-            _viewModel = viewModel;
+            _clickCommand = DelegateCommand.Create(OnCellClicked);
 
             SetDefaultCellProperties();
-        }
-
-        public void SetCellProperties(IEnumerable<ISudokuModel> sudoku)
-        {
-            SetDefaultCellProperties();
-
-            if (sudoku == null)
-            {
-                return;
-            }
-
-            var cellModel = sudoku.First(m => m.IndexValueMap.ContainsKey(Index) && m.IndexValueMap[Index].Any());
-            if (sudoku.ToList().IndexOf(cellModel) >= _viewModel.ShownValues)
-            {
-                return;
-            }
-
-            SetCellValues(cellModel.IndexValueMap[Index]);
-            if (cellModel.Details.Any())
-            {
-                _clickableModels.Add(cellModel.ClickableModel);
-            }
-            else
-            {
-                Background = Brushes.LightGray;
-            }
-        }
-
-        public void SetCellProperties(ISudokuModel model)
-        {
-            SetDefaultCellProperties();
-
-            var affectingTechniques = model.Details.Where(t => t.IndexValueMap.ContainsKey(Index) || t.AffectedIndexes.Contains(Index));
-            var techniques = model.Details
-                .Where(t => t.IndexValueMap.ContainsKey(Index))
-                .Where(t => t.IndexValueMap[Index].Any()).Distinct();
-
-            if (model.IndexValueMap.ContainsKey(Index))
-            {
-                if (model.IndexValueMap[Index].Any())
-                {
-                    var values = model.IndexValueMap[Index];
-                    var size = ONE_VALUE_SIZE_DEFAULT;
-                    if (values.Count() == 2)
-                    {
-                        size = TWO_VALUE_SIZE_DEFAULT;
-                    }
-                    else if (values.Count() == 3)
-                    {
-                        size = THREE_VALUE_SIZE_DEFAULT;
-                    }
-
-                    SetCellValues(model.IndexValueMap[Index], size);
-                    Background = Brushes.LightGreen;
-                }
-                else if (techniques.Any())
-                {
-                    SetClickableTechniques(techniques);
-                    Background = _clickableModels.Any() ? Brushes.Salmon : Brushes.DarkSalmon;
-                }
-                else
-                {
-                    Background = Brushes.Salmon;
-                }
-            }
-            else if (techniques.Any())
-            {
-                SetClickableTechniques(techniques);
-                Background = _clickableModels.Any() ? Brushes.LightSalmon : Brushes.DarkSalmon;
-            }
-
-            else if (affectingTechniques.Any())
-            {
-                Background = Brushes.LightSalmon;
-            }
-            else
-            {
-                Background = Brushes.DarkGray;
-            }
-        }
-
-        private void SetClickableTechniques(IEnumerable<ISudokuModel> techniques)
-        {
-            var size = ONE_VALUE_SIZE_DEFAULT;
-            var values = new List<int>();
-
-            foreach (var technique in techniques)
-            {
-                var techValues = technique.IndexValueMap[Index];
-                if ((techValues.Count() == 3 || technique.IndexValueMap.Count(kvp => kvp.Value.Any()) > 2) && size > THREE_VALUE_SIZE_DEFAULT)
-                {
-                    size = THREE_VALUE_SIZE_DEFAULT;
-                }
-                else if ((techValues.Count() == 2 || technique.IndexValueMap.Count(kvp => kvp.Value.Any()) == 2) && size > TWO_VALUE_SIZE_DEFAULT)
-                {
-                    size = TWO_VALUE_SIZE_DEFAULT;
-                }
-            }
-
-             SetCellValues(techniques.SelectMany(t => t.IndexValueMap[Index]), size);
-            _clickableModels.AddRange(techniques.Select(t => t.ClickableModel).Where(t => t.Details.Any()));
         }
 
         /// <summary>
         /// Sets default properties for the cell.
         /// </summary>
-        private void SetDefaultCellProperties()
+        public void SetDefaultCellProperties()
         {
             Value = string.Empty;
             FontSize = ONE_VALUE_SIZE_DEFAULT;
             Background = Brushes.White;
-            _clickableModels.Clear();
+            ClickableModel = null;
         }
 
-        /// <summary>
-        /// Action to perform when the cell is clicked.
-        /// </summary>
-        private void ClickAction()
-        {
-            if (_clickableModels.Any())
-            {
-                _viewModel.CellClicked(_clickableModels.First());
-            }
-        }
-
-        /// <summary>
-        /// Sets the value to display in the cell. Sets the font size accordingly.
-        /// </summary>
-        /// <param name="values">Values that will go in the cell.</param>
-        private void SetCellValues(IEnumerable<int> values, int size = ONE_VALUE_SIZE_DEFAULT)
-        {
-            _value = string.Join("", values);
-            OnPropertyChanged(nameof(Value));
-            FontSize = size;
-        }
-
-        /// <summary>
-        /// Notifies listeners of the PropertyChanged event that a property value has changed.
-        /// </summary>
-        /// <param name="propertyName">The name of the property that changed.</param>
         private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private void OnCellClicked()
+        {
+            if (ClickableModel != null)
+            {
+                CellClicked?.Invoke(this, new ClickedEventArgs(ClickableModel));
+            }
         }
     }
 }

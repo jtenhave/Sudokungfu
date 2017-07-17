@@ -16,7 +16,7 @@ namespace Sudokungfu.SudokuSolver
     {
         private List<Cell> _cells;
         private List<Set> _sets;
-        private List<ISudokuModel> _foundValues;
+        private List<FoundValue> _foundValues;
 
         /// <summary>
         /// Create a new <see cref="Solver"/>
@@ -25,7 +25,7 @@ namespace Sudokungfu.SudokuSolver
         {
             _cells = new List<Cell>();
             _sets = new List<Set>();
-            _foundValues = new List<ISudokuModel>();
+            _foundValues = new List<FoundValue>();
 
             for (int i = 0; i < Constants.CELL_COUNT; i++)
             {
@@ -45,7 +45,7 @@ namespace Sudokungfu.SudokuSolver
         /// </summary>
         /// <param name="values">The intial values in the Sudoku.</param>
         /// <returns>The result.</returns>
-        public static async Task<List<ISudokuModel>> Solve(IEnumerable<int> values)
+        public static async Task<List<FoundValue>> Solve(IEnumerable<int> values)
         {
             return await Task.Run(() =>
             {
@@ -59,7 +59,7 @@ namespace Sudokungfu.SudokuSolver
         /// </summary>
         /// <param name="values">The intial values in the Sudoku.</param>
         /// <returns>The result.</returns>
-        private List<ISudokuModel> SolveInternal(IEnumerable<int> values)
+        private List<FoundValue> SolveInternal(IEnumerable<int> values)
         {
             // Insert the intial values.
             foreach (var cell in _cells)
@@ -154,8 +154,7 @@ namespace Sudokungfu.SudokuSolver
             }
 
             foundValue.CellValueMap[cell] = value.ToEnumerable();
-
-
+            foundValue.Description = $"Value found in {set.Type}.";
 
             return foundValue;
         }
@@ -170,6 +169,7 @@ namespace Sudokungfu.SudokuSolver
 
             foundValue.CellValueMap[cell] = value.ToEnumerable();
             foundValue.Complexity = foundValue.Complexity + 1;
+            foundValue.Description = "Only possible value for this cell.";
 
             return foundValue;
         }
