@@ -8,6 +8,17 @@ namespace Sudokungfu.SudokuSolver.Sets
     public class Row : Set
     {
         /// <summary>
+        /// Type of the set.
+        /// </summary>
+        public override string Type
+        {
+            get
+            {
+                return "row";
+            }
+        }
+
+        /// <summary>
         /// Creates a new <see cref="Row"/>
         /// </summary>
         /// <param name="grid">The Sudoku grid to create the row from.</param>
@@ -21,7 +32,7 @@ namespace Sudokungfu.SudokuSolver.Sets
         /// </summary>
         protected override bool IsCellInSet(Cell cell)
         {
-            return cell.Index / Constants.SET_SIZE == Index;
+            return cell.Index / Constants.SET_SIZE == _index;
         }
     }
 }

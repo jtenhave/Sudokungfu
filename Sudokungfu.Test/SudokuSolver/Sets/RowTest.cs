@@ -1,10 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sudokungfu.Test.SudokuSolver.Sets
 {
     using Sudokungfu.Extensions;
-    using Sudokungfu.SudokuSolver;
     using Sudokungfu.SudokuSolver.Sets;
 
     /// <summary>
@@ -16,6 +16,7 @@ namespace Sudokungfu.Test.SudokuSolver.Sets
         [TestMethod]
         public void TestRowCellPicking()
         {
+            var cells = GetAllCells().ToList();
             var expectedIndexes = new List<List<int>>()
             {
                 new List<int>() { 0, 1, 2, 3, 4, 5, 6, 7, 8 },
@@ -29,11 +30,11 @@ namespace Sudokungfu.Test.SudokuSolver.Sets
                 new List<int>() { 72, 73, 74, 75, 76, 77, 78, 79, 80 }
             };
 
-            var cells = GetAllCells();
+            var expectedCells = expectedIndexes.Select(row => row.Select(index => cells[index])).ToList();
             for (int i = 0; i < Constants.SET_SIZE; i++)
             {
                 var row = new Row(cells, i);
-                Assert.IsTrue(row.Indexes.SetEqual(expectedIndexes[i]));
+                Assert.IsTrue(row.Cells.SetEqual(expectedCells[i]));
             }
         }
     }

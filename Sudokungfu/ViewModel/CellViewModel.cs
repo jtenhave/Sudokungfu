@@ -1,14 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 
 namespace Sudokungfu.ViewModel
 {
-    using Extensions;
+    using Model;
+    using Sudokungfu.SudokuSolver;
+
+    /// <summary>
+    /// Class that represents event args for a click event on a <see cref="Cell"/>.
+    /// </summary>
+    public class ClickedEventArgs: EventArgs 
+    {
+        /// <summary>
+        /// Model that will be displayed as a result of the click event.
+        /// </summary>
+        public ISudokuModel ClickedModel { get; private set; }
+
+        /// <summary>
+        /// Creates a new <see cref="ClickedEventArgs"/>.
+        /// </summary>
+        /// <param name="model"></param>
+        public ClickedEventArgs(ISudokuModel model)
+        {
+            ClickedModel = model;
+        }
+    }
 
     /// <summary>
     /// Class for the view model of a cell in the Sudoku grid.
@@ -18,18 +37,19 @@ namespace Sudokungfu.ViewModel
     /// </remarks>
     public class CellViewModel : INotifyPropertyChanged
     {
-        private const int ONE_VALUE_SIZE_DEFAULT = 36;
-        private const int TWO_VALUE_SIZE_DEFAULT = 26;
-        private const int THREE_VALUE_SIZE_DEFAULT = 16;
+        public const int ONE_VALUE_SIZE_DEFAULT = 36;
+        public const int TWO_VALUE_SIZE_DEFAULT = 26;
+        public const int THREE_VALUE_SIZE_DEFAULT = 16;
 
         private string _value;
         private Brush _background;
-        private FontStyle _fontStyle;
         private int _fontSize;
 
-        private Action<int> _clicked;
+        private DelegateCommand _clickCommand;
+        private FoundValue _foundValue;
 
         public event PropertyChangedEventHandler PropertyChanged;
+        public event EventHandler<ClickedEventArgs> CellClicked;
 
         /// <summary>
         /// Gets the click command.
@@ -38,12 +58,14 @@ namespace Sudokungfu.ViewModel
         {
             get
             {
-                return DelegateCommand.Create(() =>
-                {
-                    _clicked(Index);
-                });
+                return _clickCommand;
             }
         }
+
+        /// <summary>
+        /// Model that will be shown when the cell is clicked.
+        /// </summary>
+        public ISudokuModel ClickableModel { get; set; }
 
         /// <summary>
         /// Gets the index of the cell. 
@@ -63,7 +85,12 @@ namespace Sudokungfu.ViewModel
             set
             {
                 int i = 0;
-                if (string.IsNullOrWhiteSpace(value) || int.TryParse(value, out i))
+                if (value.Length > 1)
+                {
+                    _value = value;
+                    OnPropertyChanged(nameof(Value));
+                }
+                else if (string.IsNullOrWhiteSpace(value) || int.TryParse(value, out i))
                 {
                     _value = i == 0 ? string.Empty : value;
                     OnPropertyChanged(nameof(Value));
@@ -108,26 +135,6 @@ namespace Sudokungfu.ViewModel
         }
 
         /// <summary>
-        /// Gets the font style of the cell.
-        /// </summary>
-        public FontStyle FontStyle
-        {
-            get
-            {
-                return _fontStyle;
-            }
-
-            set
-            {
-                if (_fontStyle != value)
-                {
-                    _fontStyle = value;
-                    OnPropertyChanged(nameof(FontStyle));
-                }
-            }
-        }
-
-        /// <summary>
         /// Gets the font size of cell.
         /// </summary>
         public int FontSize
@@ -148,13 +155,42 @@ namespace Sudokungfu.ViewModel
         }
 
         /// <summary>
-        /// Creates a new <see cref="CellViewModel"/>
+        /// Found value that belongs in the cell.
+        /// </summary>
+        public FoundValue FoundValue
+        {
+            get
+            {
+                return _foundValue;
+            }
+            set
+            {
+                _foundValue = value;
+                SetDefaultCellProperties();
+
+                if (_foundValue != null)
+                {
+                    Value = _foundValue.Value.ToString();
+                    if (_foundValue.Details.Any())
+                    {
+                        ClickableModel = _foundValue.ClickableModel;
+                    }
+                    else
+                    {
+                        Background = Brushes.LightGray;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="CellViewModel"/>.
         /// </summary>
         /// <param name="index">Index of the cell.</param>
-        public CellViewModel(int index, Action<int> clicked)
+        public CellViewModel(int index)
         {
             Index = index;
-            _clicked = clicked;
+            _clickCommand = DelegateCommand.Create(OnCellClicked);
 
             SetDefaultCellProperties();
         }
@@ -167,37 +203,20 @@ namespace Sudokungfu.ViewModel
             Value = string.Empty;
             FontSize = ONE_VALUE_SIZE_DEFAULT;
             Background = Brushes.White;
+            ClickableModel = null;
         }
 
-        /// <summary>
-        /// Sets the value to display in the cell. Sets the font size accordingly.
-        /// </summary>
-        /// <param name="values">Values that will go in the cell.</param>
-        public void SetCellValues(IEnumerable<int> values)
-        {
-            _value = string.Join("", values);
-            OnPropertyChanged(nameof(Value));
-            switch (values.Count())
-            {
-                case 3:
-                    FontSize = THREE_VALUE_SIZE_DEFAULT;
-                    break;
-                case 2:
-                    FontSize = TWO_VALUE_SIZE_DEFAULT;
-                    break;
-                default:
-                    FontSize = ONE_VALUE_SIZE_DEFAULT;
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// Notifies listeners of the PropertyChanged event that a property value has changed.
-        /// </summary>
-        /// <param name="propertyName">The name of the property that changed.</param>
         private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private void OnCellClicked()
+        {
+            if (ClickableModel != null)
+            {
+                CellClicked?.Invoke(this, new ClickedEventArgs(ClickableModel));
+            }
         }
     }
 }

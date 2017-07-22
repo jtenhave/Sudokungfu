@@ -1,21 +1,21 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sudokungfu.Test.SudokuSolver.Techniques
+namespace Sudokungfu.Test.SudokuSolver.Techniques.Advanced
 {
     using Model;
     using Sudokungfu.Extensions;
     using Sudokungfu.SudokuSolver;
     using Sudokungfu.SudokuSolver.Sets;
     using Sudokungfu.SudokuSolver.Techniques;
+    using Sudokungfu.SudokuSolver.Techniques.Advanced;
 
     /// <summary>
-    /// Test class for <see cref="PossibleSpotShadowTechnique"/>.
+    /// Test class for <see cref="PossibleSpotShadowFactory"/>.
     /// </summary>
     [TestClass]
-    public class PossibleSpotsShadowTechniqueTest : BaseTest
+    public class PossibleSpotShadowTechniqueTest : BaseTest
     {
         private List<Cell> _cells;
         private Row _rowA;
@@ -36,7 +36,8 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             var columns = SetupShadow();
 
-            PossibleSpotShadowTechnique.Apply(_cells, new Set[] { _rowA, _rowB });
+            var factory = new PossibleSpotShadowFactory(_cells, new Set[] { _rowA, _rowB });
+            factory.Apply();
 
             var affectedCells = _cells.Where(c => columns.Contains(Column(c)))
                 .Except(_rowA.Cells)
@@ -53,7 +54,8 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             var columns = SetupShadow();
 
-            PossibleSpotShadowTechnique.Apply(_cells, new Set[] { _rowA, _rowB });
+            var factory = new PossibleSpotShadowFactory(_cells, new Set[] { _rowA, _rowB });
+            factory.Apply();
 
             var unAffectedCells = _cells.Where(c => columns.Contains(Column(c)))
                 .Intersect(_rowA.Cells.Concat(_rowB.Cells));
@@ -70,7 +72,8 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             var columns = SetupShadow();
 
-            PossibleSpotShadowTechnique.Apply(_cells, new Set[] { _rowA, _rowB });
+            var factory = new PossibleSpotShadowFactory(_cells, new Set[] { _rowA, _rowB });
+            factory.Apply();
 
             ISudokuModel technique = null;
             var affectedCells = _cells.Where(c => columns.Contains(Column(c)))
@@ -78,13 +81,13 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
                .Except(_rowB.Cells);
             foreach (var cell in affectedCells)
             {
-                Assert.IsTrue(cell.EliminationTechniques.ContainsKey(_value));
-                Assert.AreEqual(1, cell.EliminationTechniques[_value].Count());
+                Assert.IsTrue(cell.Techniques.ContainsKey(_value));
+                Assert.AreEqual(1, cell.Techniques[_value].Count());
 
-                var cellTechnique = cell.EliminationTechniques[_value].First();
+                var cellTechnique = cell.Techniques[_value].First();
                 technique = technique ?? cellTechnique;
 
-                Assert.IsTrue(cellTechnique is PossibleSpotShadowTechnique);
+                Assert.AreEqual(PossibleSpotShadowFactory.COMPLEXITY, technique.Complexity);
                 Assert.AreSame(technique, cellTechnique);
             }
         }
@@ -94,10 +97,11 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             var columns = SetupShadow();
 
-            PossibleSpotShadowTechnique.Apply(_cells, new Set[] { _rowA, _rowB });
+            var factory = new PossibleSpotShadowFactory(_cells, new Set[] { _rowA, _rowB });
+            factory.Apply();
 
-            var technique = _cells[11].EliminationTechniques[_value].First();
-            Assert.IsTrue(technique is PossibleSpotShadowTechnique);
+            var technique = _cells[11].Techniques[_value].First();
+            Assert.AreEqual(PossibleSpotShadowFactory.COMPLEXITY, technique.Complexity);
 
             var expectedAffectedIndexes = _cells.Where(c => columns.Contains(Column(c)))
                 .Except(_rowA.Cells)
@@ -107,38 +111,41 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         }
 
         [TestMethod]
-        public void TestTechniqueProperties_IndexValueMap()
+        public void TestTechniqueProperties_CellValueMap()
         {
             var columns = SetupShadow();
 
-            PossibleSpotShadowTechnique.Apply(_cells, new Set[] { _rowA, _rowB });
+            var factory = new PossibleSpotShadowFactory(_cells, new Set[] { _rowA, _rowB });
+            factory.Apply();
 
-            var technique = _cells[11].EliminationTechniques[_value].First();
-            Assert.IsTrue(technique is PossibleSpotShadowTechnique);
+            var technique = _cells[11].Techniques[_value].First();
+            Assert.AreEqual(PossibleSpotShadowFactory.COMPLEXITY, technique.Complexity);
 
-            AssertSetEqual(_rowA.Indexes.Concat(_rowB.Indexes), technique.IndexValueMap.Keys);
-            foreach (var key in technique.IndexValueMap.Keys)
+            AssertSetEqual(_rowA.Cells.Concat(_rowB.Cells), technique.CellValueMap.Keys);
+            foreach (var key in technique.CellValueMap.Keys)
             {
-                if (key == 2 || key == 7 || key == 38 || key == 43)
+                if (key == _cells[2] || key == _cells[7] || key == _cells[38] || key == _cells[43])
                 {
-                    Assert.AreEqual(1, technique.IndexValueMap[key].Count());
-                    Assert.AreEqual(_value, technique.IndexValueMap[key].First());
+                    Assert.AreEqual(1, technique.CellValueMap[key].Count());
+                    Assert.AreEqual(_value, technique.CellValueMap[key].First());
                 }
                 else
                 {
-                    Assert.AreEqual(0, technique.IndexValueMap[key].Count());
+                    Assert.AreEqual(0, technique.CellValueMap[key].Count());
                 }
             }
         }
 
         private IEnumerable<int> SetupShadow()
         {
-            var testTechnique = new TestTechnique(0);
+            var testTechnique = new Technique();
+            testTechnique.Values.Add(_value);
+            testTechnique.Complexity = int.MaxValue;
             var columns = new List<int> { 2, 7 };
 
             foreach (var cell in _rowA.Cells.Concat(_rowB.Cells).Where(c => !columns.Contains(Column(c))))
             {
-                cell.EliminatePossibleValue(_value, testTechnique);
+                cell.ApplyTechnique(testTechnique);
             }
 
             return columns;

@@ -1,36 +1,63 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Sudokungfu.SudokuSolver.Techniques
 {
+    using Advanced;
     using Sets;
     using SudokuSolver;
 
     /// <summary>
-    /// Static class for accessing the list of advanced techniques
+    /// Class for applying advanced techniques to the Sudoku.
     /// </summary>
-    public static class AdvancedTechniqueManager
+    public class AdvancedTechniqueManager
     {
-        private static List<Action<IEnumerable<Cell>, IEnumerable<Set>>> _techniques;
+        private List<AdvancedTechniqueFactoryBase> _techniques;
+        private int _currentIndex;
 
-        static AdvancedTechniqueManager()
+        /// <summary>
+        /// Creates a new <see cref="AdvancedTechniqueManager"/>.
+        /// </summary>
+        /// <param name="cells">Cells in the Sudoku.</param>
+        /// <param name="sets">Sets in the Sudoku.</param>
+        public AdvancedTechniqueManager(IEnumerable<Cell> cells, IEnumerable<Set> sets)
         {
-            RegisterTechniques();
+            _techniques = new List<AdvancedTechniqueFactoryBase>();
+            _techniques.Add(new TwoSpotOverlapFactory(cells, sets));
+            _techniques.Add(new ThreeSpotOverlapFactory(cells, sets));
+            _techniques.Add(new TwoSpotClosureFactory(cells, sets));
+            _techniques.Add(new ThreeSpotClosureFactory(cells, sets));
+            _techniques.Add(new PossibleSpotShadowFactory(cells, sets));
+            _currentIndex = 0;
         }
 
-        private static void RegisterTechniques()
+        /// <summary>
+        /// Whether another advanced technique can be applied.
+        /// </summary>
+        public bool HasNext()
         {
-            _techniques = new List<Action<IEnumerable<Cell>, IEnumerable<Set>>>();
-
-            // Register advanced techniques in order of complexity
-            _techniques.Add(PossibleSpotOverlapTechnique.Apply);
-            _techniques.Add(TwoSpotClosureTechnique.Apply);
-            _techniques.Add(ThreeSpotClosureTechnique.Apply);
+            return _currentIndex < _techniques.Count;
         }
 
-        public static void ApplyAdvancedTechniques(IEnumerable<Cell> cells, IEnumerable<Set> sets)
+        /// <summary>
+        /// Applies the next advanced technique.
+        /// </summary>
+        public void ApplyNext()
         {
-            _techniques.ForEach(t => t(cells, sets));
+            var endIndex = _currentIndex + 1;
+            for (; _currentIndex < endIndex;)
+            {
+                var hasNewTechs = _techniques[_currentIndex].Apply();
+                if (hasNewTechs && _currentIndex > 0)
+                {
+                    _currentIndex = 0;
+                }
+                else
+                {
+                    _currentIndex++;
+                }
+            }
+
+            _currentIndex = endIndex;
         }
     }
 }

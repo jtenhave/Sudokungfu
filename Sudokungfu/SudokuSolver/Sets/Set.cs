@@ -5,21 +5,19 @@ namespace Sudokungfu.SudokuSolver.Sets
 {
     using Extensions;
     using Model;
+    using Techniques;
 
     /// <summary>
     /// Class that represents a set of nine values in a Sudoku.
     /// </summary>
     public abstract class Set
     {
+        protected int _index;
+
         /// <summary>
         /// Cells in this set.
         /// </summary>
         public IEnumerable<Cell> Cells { get; private set; }
-
-        /// <summary>
-        /// The index of the set.
-        /// </summary>
-        protected int Index { get; private set; }
 
         /// <summary>
         /// Spots where all the unfound values in the set can go.
@@ -36,27 +34,21 @@ namespace Sudokungfu.SudokuSolver.Sets
         }
 
         /// <summary>
-        /// Indexes of cells in this set.
-        /// </summary>
-        public IEnumerable<int> Indexes
-        {
-            get
-            {
-                return Cells.Select(c => c.Index);
-            }
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Set"/>
+        /// Creates a new <see cref="Set"/>.
         /// </summary>
         /// <param name="grid">The Sudoku grid to create the set from.</param>
         /// <param name="index">The index of the set.</param>
         public Set(IEnumerable<Cell> grid, int index)
         {
-            Index = index;
+            _index = index;
             Cells = grid.Where(IsCellInSet).ToList();
             Cells.ForEach(c => c.Sets.Add(this));
         }
+
+        /// <summary>
+        /// Type of the set.
+        /// </summary>
+        public abstract string Type { get; }
 
         /// <summary>
         /// Returns true if a cell is in this set.
@@ -79,36 +71,37 @@ namespace Sudokungfu.SudokuSolver.Sets
         /// <param name="value">Value to calculate techniques for.</param>
         public IEnumerable<ISudokuModel> FindMinTechniques(IEnumerable<Cell> cells, int value)
         {
-            var finalTechniques = new List<ISudokuModel>();
+            var finalTechniques = new List<Technique>();
 
             var techniques = Cells
                 .Except(cells)
-                .SelectMany(c => c.EliminationTechniques[value])
+                .Where(c => c.Techniques.ContainsKey(value))
+                .SelectMany(c => c.Techniques[value])
                 .ToList();
 
-            var uncoveredIndexes = this.Indexes
-                .Except(cells.Indexes())
-                .Except(finalTechniques.SelectMany(t => t.AffectedIndexes));
+            var uncoveredCells = Cells
+                .Except(cells)
+                .Except(finalTechniques.SelectMany(t => t.AffectedCells));
 
             var sortedTechniques = techniques
-                .Where(t => t.AffectedIndexes.Intersect(uncoveredIndexes).Any())
+                .Where(t => t.AffectedCells.Intersect(uncoveredCells).Any())
                 .OrderBy(t => t.Complexity)
                 .ThenByDescending(t => t
-                    .AffectedIndexes
-                    .Intersect(uncoveredIndexes)
+                    .AffectedCells
+                    .Intersect(uncoveredCells)
                     .Except(techniques
                         .Except(t)
                         .SelectMany(u => u
-                            .AffectedIndexes
-                            .Intersect(uncoveredIndexes)))
+                            .AffectedCells
+                            .Intersect(uncoveredCells)))
                     .Count())
                 .ThenByDescending(t => t
-                    .AffectedIndexes
-                    .Intersect(uncoveredIndexes)
+                    .AffectedCells
+                    .Intersect(uncoveredCells)
                     .Count());
 
             // Apply techniques until all indexes have been covered.
-            while (uncoveredIndexes.Any() && sortedTechniques.Any())
+            while (uncoveredCells.Any() && sortedTechniques.Any())
             {
                 finalTechniques.Add(sortedTechniques.First());
             }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -17,14 +16,12 @@ namespace Sudokungfu.ViewModel
     /// </summary>
     public class SudokungfuViewModel : INotifyPropertyChanged
     {
-        private const int FONT_SIZE_DEFAULT = 36;
-
+        private string _description = "";
         private int _shownValues;
         private int _givenValues;
         private bool _isSolving;
-        private List<ISudokuModel> _sudoku;
+        private List<FoundValue> _sudoku;
         private Stack<ISudokuModel> _clickedModels;
-        private Dictionary<int, ISudokuModel> _clickableModels;
 
         private Func<bool> _clearConfirm;
         private Action _error;
@@ -60,9 +57,6 @@ namespace Sudokungfu.ViewModel
                 {
                     _isSolving = value;
                     OnPropertyChanged(nameof(IsSolving));
-
-                    _enterCommand.CanExecuteValue = !value;
-                    _clearCommand.CanExecuteValue = !value;
                 }
             }
         }
@@ -145,6 +139,26 @@ namespace Sudokungfu.ViewModel
         }
 
         /// <summary>
+        /// Gets the description for the current detail being displayed.
+        /// </summary>
+        public string Description
+        {
+            get
+            {
+                return _description;
+            }
+
+            set
+            {
+                if (_description != value)
+                {
+                    _description = value;
+                    OnPropertyChanged(nameof(Description));
+                }
+            }
+        }
+
+        /// <summary>
         /// Creates a <see cref="SudokungfuViewModel"/>.
         /// </summary>
         /// <param name="clearConfirm">Action to confirm a clear.</param>
@@ -154,7 +168,6 @@ namespace Sudokungfu.ViewModel
         {
             _shownValues = Constants.CELL_COUNT;
             _clickedModels = new Stack<ISudokuModel>();
-            _clickableModels = new Dictionary<int, ISudokuModel>();
             _isSolving = false;
 
             _clearConfirm = clearConfirm;
@@ -164,14 +177,19 @@ namespace Sudokungfu.ViewModel
             // Initialize the cell view models.
             for (int i = 0; i < Constants.CELL_COUNT; i++)
             {
-                Cells.Add(new CellViewModel(i, ClickAction));
+                var cell = new CellViewModel(i);
+                Cells.Add(cell);
+                cell.CellClicked += (sender, args) =>
+                {
+                    CellClicked(args.ClickedModel);
+                };
             }
             
             _clearCommand = DelegateCommand.Create(ClearAction);
             _enterCommand = DelegateCommand.CreateAsync(EnterAction);
             _nextCommand = DelegateCommand.Create(NextAction, false);
             _prevCommand = DelegateCommand.Create(PreviousAction, false);
-            _solveCommand = DelegateCommand.Create(() => ShowValues(Constants.CELL_COUNT), false);
+            _solveCommand = DelegateCommand.Create(SolveAction , false);
             _closeCommand = DelegateCommand.Create(CloseAction, false);
             _backCommand = DelegateCommand.Create(BackAction, false);
         }
@@ -187,7 +205,7 @@ namespace Sudokungfu.ViewModel
                 _enterCommand.CanExecuteValue = true;
                 _nextCommand.CanExecuteValue = _prevCommand.CanExecuteValue = _solveCommand.CanExecuteValue = false;
 
-                RefreshCellViewModels();
+                DrawDefault();
             }
         }
 
@@ -197,11 +215,26 @@ namespace Sudokungfu.ViewModel
         private async Task EnterAction()
         {
             IsSolving = true;
-            List<ISudokuModel> sudoku = null;
+            _enterCommand.CanExecuteValue = false;
+            _clearCommand.CanExecuteValue = false;
 
             try
             {
-                sudoku = await Solver.Solve(Cells.Select(c => c.ValueAsInt));
+                var sudoku = await Solver.Solve(Cells.Select(c => c.ValueAsInt));
+                if (sudoku == null)
+                {
+                    _invalid();
+                    _enterCommand.CanExecuteValue = true;
+                    return;
+                }
+
+                _nextCommand.CanExecuteValue = true;
+                _solveCommand.CanExecuteValue = true;
+
+                _sudoku = sudoku;
+                _givenValues = _shownValues = _sudoku.Count(v => !v.Details.Any());
+
+                DrawSudoku();
             }
             catch (Exception)
             {
@@ -211,21 +244,8 @@ namespace Sudokungfu.ViewModel
             finally
             {
                 IsSolving = false;
+                _clearCommand.CanExecuteValue = true;
             }
-
-            if (sudoku == null)
-            {
-                _invalid();
-                return;
-            }
-
-            _enterCommand.CanExecuteValue = false;
-
-            _sudoku = sudoku;
-            _givenValues = _sudoku.Count(v => v.Details.Count() == 0);
-            _shownValues = 0;
-
-            ShowValues(_givenValues);
         }
 
         /// <summary>
@@ -237,7 +257,8 @@ namespace Sudokungfu.ViewModel
             {
                 _nextCommand.CanExecuteValue = _solveCommand.CanExecuteValue = ++_shownValues < Constants.CELL_COUNT;
                 _prevCommand.CanExecuteValue = _shownValues > _givenValues;
-                RefreshCellViewModels();
+
+                DrawValue(_sudoku[_shownValues - 1]);
             }
         }
 
@@ -251,22 +272,18 @@ namespace Sudokungfu.ViewModel
                 _prevCommand.CanExecuteValue = --_shownValues > _givenValues;
                 _nextCommand.CanExecuteValue = _solveCommand.CanExecuteValue = true;
 
-                RefreshCellViewModels();
+                DrawEmpty(_sudoku[_shownValues]);
             }
         }
 
         /// <summary>
-        /// Action to perform when the cell click command is invoked.
+        /// Action to perform when solve command is invoked.
         /// </summary>
-        /// <param name="index">Index of the clicked cell.</param>
-        private void ClickAction(int index)
+        private void SolveAction()
         {
-            if (_clickableModels.ContainsKey(index))
+            while (_shownValues < Constants.CELL_COUNT)
             {
-                _clickedModels.Push(_clickableModels[index]);
-                _closeCommand.CanExecuteValue = true;
-                _backCommand.CanExecuteValue = true;
-                RefreshCellViewModels();
+                NextAction();
             }
         }
 
@@ -275,10 +292,16 @@ namespace Sudokungfu.ViewModel
         /// </summary>
         private void CloseAction()
         {
-            _closeCommand.CanExecuteValue = false;
-            _backCommand.CanExecuteValue = false;
-            _clickedModels.Clear();
-            RefreshCellViewModels();
+            _nextCommand.CanExecuteValue = _solveCommand.CanExecuteValue = _shownValues < Constants.CELL_COUNT;
+            _prevCommand.CanExecuteValue = _shownValues > _givenValues;
+
+             _closeCommand.CanExecuteValue = false;
+             _backCommand.CanExecuteValue = false;
+             _clickedModels.Clear();
+
+            Description = "";
+
+            DrawSudoku();
         }
 
         /// <summary>
@@ -288,122 +311,130 @@ namespace Sudokungfu.ViewModel
         {
             _clickedModels.Pop();
             _backCommand.CanExecuteValue = _clickedModels.Any();
-            RefreshCellViewModels();
-        }
-
-        private void ShowValues(int count)
-        {
-            while (_shownValues < count)
-            {
-                NextAction();
-            }
-        }
-
-        private void RefreshCellViewModels()
-        {
-            _clickableModels.Clear();
-
-            if (_sudoku == null)
-            {
-                foreach(var cell in Cells)
-                {
-                    cell.SetDefaultCellProperties();
-                }
-
-                return;
-            }
-
             if (_clickedModels.Any())
             {
-                var model = _clickedModels.Peek();
-                foreach (var cell in Cells)
-                {
-                    var detailModels = model.Details.Where(d => d.IndexValueMap.ContainsKey(cell.Index));
-                    var detailModel = detailModels.FirstOrDefault(d => d.IndexValueMap[cell.Index].Any());
-
-                    if (model.IndexValueMap.ContainsKey(cell.Index))
-                    {
-                        if (model.IndexValueMap[cell.Index].Any())
-                        {
-                            cell.SetCellValues(model.IndexValueMap[cell.Index]);
-                            cell.Background = Brushes.LightGreen;
-                        }
-                        else if (detailModel != null)
-                        {
-                            cell.SetCellValues(detailModel.IndexValueMap[cell.Index]);
-
-                            if (detailModel.ClickableModel.Details.Any())
-                            {
-                                _clickableModels.Add(cell.Index, detailModel.ClickableModel);
-                                cell.Background = Brushes.Salmon;
-                            }
-                            else
-                            {
-                                cell.Background = Brushes.DarkSalmon;
-                            }
-                        }
-                        else
-                        {
-                            cell.Value = string.Empty;
-                            cell.Background = Brushes.Salmon;
-                        }
-                    }
-                    else if (detailModel != null)
-                    {
-                        cell.SetCellValues(detailModel.IndexValueMap[cell.Index]);
-
-                        if (detailModel.ClickableModel.Details.Any())
-                        {
-                            _clickableModels.Add(cell.Index, detailModel.ClickableModel);
-                            cell.Background = Brushes.LightSalmon;
-                        }
-                        else
-                        {
-                            cell.Background = Brushes.DarkSalmon;
-                        }
-                    }
-
-                    else if (detailModels.Any())
-                    {
-                        cell.Value = string.Empty;
-                        cell.Background = Brushes.LightSalmon;
-                    }
-                    else
-                    {
-                        cell.Value = string.Empty;
-                        cell.Background = Brushes.DarkGray;
-                    }
-                }
+                DrawDetails(_clickedModels.Peek());
             }
             else
             {
-                foreach (var cell in Cells)
-                {
-                    var cellModel = _sudoku.First(m => m.IndexValueMap.ContainsKey(cell.Index) && m.IndexValueMap[cell.Index].Any());
-                    if (_sudoku.IndexOf(cellModel) >= _shownValues)
-                    {
-                        cell.Background = Brushes.White;
-                        cell.Value = string.Empty;
-                    }
-                    else
-                    {
-                        cell.SetCellValues(cellModel.IndexValueMap[cell.Index]);
-                        cell.FontStyle = FontStyles.Normal;
-                        cell.Background = !cellModel.Details.Any() ? Brushes.LightGray : Brushes.White;
+                CloseAction();
+            }
+        }
 
-                        if (cellModel.ClickableModel != null)
-                        {
-                            _clickableModels.Add(cell.Index, cellModel.ClickableModel);
-                        }
-                    }
+        private void CellClicked(ISudokuModel model)
+        {
+            _nextCommand.CanExecuteValue = false;
+            _prevCommand.CanExecuteValue = false;
+            _solveCommand.CanExecuteValue = false;
+
+
+            _clickedModels.Push(model);
+            _closeCommand.CanExecuteValue = true;
+            _backCommand.CanExecuteValue = true;
+
+            DrawDetails(_clickedModels.Peek());
+        }
+
+        private void DrawDefault(Brush brush = null)
+        {
+            foreach (var cell in Cells)
+            {
+                cell.SetDefaultCellProperties();
+                if (brush != null)
+                {
+                    cell.Background = brush;
                 }
             }
         }
 
-        /// <summary>
-        /// Notifies listeners of the PropertyChanged event that a property value has changed.
-        /// </summary>
-        /// <param name="propertyName">The name of the property that changed.</param>
+        private void DrawSudoku()
+        {
+            DrawDefault();
+            for (int i = 0; i < _shownValues; i++)
+            {
+                DrawValue(_sudoku[i]);
+            }
+        }
+
+        private void DrawValue(FoundValue foundValue)
+        {
+            var cellModel = Cells.Find(c => c.Index == foundValue.Cell.Index);
+            cellModel.FoundValue = foundValue;
+        }
+
+        private void DrawEmpty(FoundValue foundValue)
+        {
+            var cellModel = Cells.Find(c => c.FoundValue == foundValue);
+            cellModel.SetDefaultCellProperties();
+        }
+
+        private void DrawDetails(ISudokuModel model)
+        {
+            DrawDefault(Brushes.DarkGray);
+
+            var affectedIndexes = model.Details.SelectMany(d => d.IndexValueMap.Keys.Concat(d.AffectedIndexes).Distinct());
+            foreach (var index in affectedIndexes)
+            {
+                Cells.Find(c => c.Index == index).Background = Brushes.LightSalmon;
+            }
+
+            var setIndexes = model.IndexValueMap.Keys;
+            foreach (var index in setIndexes)
+            {
+                Cells.Find(c => c.Index == index).Background = Brushes.Salmon;
+            }
+
+            foreach (var technique in model.Details)
+            {
+                var techniqueValueIndexes = technique.IndexValueMap.Keys.Where(key => technique.IndexValueMap[key].Any());
+                foreach (var index in techniqueValueIndexes)
+                {
+                    var values = technique.IndexValueMap[index];
+                    var cell = Cells.Find(c => c.Index == index);
+                    cell.FontSize = GetFontSize(values.Count(), techniqueValueIndexes.Count() > 1);
+                    cell.Value = string.Join("", values);
+                    if (technique.ClickableModel.Details.Any())
+                    {
+                        cell.ClickableModel = technique.ClickableModel;
+                    }
+                    else
+                    {
+                        cell.Background = Brushes.DarkSalmon;
+                    }
+                }
+            }
+
+            var valueIndexes = model.IndexValueMap.Keys.Where(key => model.IndexValueMap[key].Any());
+            foreach (var index in valueIndexes)
+            {
+                var values = model.IndexValueMap[index];
+                var cell = Cells.Find(c => c.Index == index);
+                cell.FontSize = GetFontSize(values.Count(), valueIndexes.Count() > 1);
+                cell.Value = string.Join("", values);
+                cell.Background = Brushes.LightGreen;              
+            }
+
+            Description = model.Description;
+        }
+
+        private int GetFontSize(int valueCount, bool hasMultipleCells)
+        {
+            if (valueCount == 1 && hasMultipleCells)
+            {
+                return CellViewModel.TWO_VALUE_SIZE_DEFAULT;
+            }
+
+            switch (valueCount)
+            {
+                case 2:
+                    return CellViewModel.TWO_VALUE_SIZE_DEFAULT;
+                case 3:
+                    return CellViewModel.THREE_VALUE_SIZE_DEFAULT;
+                default:
+                    return CellViewModel.ONE_VALUE_SIZE_DEFAULT;
+            }
+        }
+
         private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

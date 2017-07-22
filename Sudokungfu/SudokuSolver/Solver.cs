@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Sudokungfu.SudokuSolver
 {
-    using FoundValues;
+    using Extensions;
     using Model;
     using Sets;
     using Techniques;
@@ -15,13 +14,9 @@ namespace Sudokungfu.SudokuSolver
     /// </summary>
     public class Solver
     {
-        private const int ONE_VALUE_FONT_SIZE = 36;
-        private const int TWO_VALUE_FONT_SIZE = 26;
-        private const int THREE_VALUE_FONT_SIZE = 16;
-
         private List<Cell> _cells;
         private List<Set> _sets;
-        private List<ISudokuModel> _foundValues;
+        private List<FoundValue> _foundValues;
 
         /// <summary>
         /// Create a new <see cref="Solver"/>
@@ -30,7 +25,7 @@ namespace Sudokungfu.SudokuSolver
         {
             _cells = new List<Cell>();
             _sets = new List<Set>();
-            _foundValues = new List<ISudokuModel>();
+            _foundValues = new List<FoundValue>();
 
             for (int i = 0; i < Constants.CELL_COUNT; i++)
             {
@@ -50,7 +45,7 @@ namespace Sudokungfu.SudokuSolver
         /// </summary>
         /// <param name="values">The intial values in the Sudoku.</param>
         /// <returns>The result.</returns>
-        public static async Task<List<ISudokuModel>> Solve(IEnumerable<int> values)
+        public static async Task<List<FoundValue>> Solve(IEnumerable<int> values)
         {
             return await Task.Run(() =>
             {
@@ -64,32 +59,43 @@ namespace Sudokungfu.SudokuSolver
         /// </summary>
         /// <param name="values">The intial values in the Sudoku.</param>
         /// <returns>The result.</returns>
-        private List<ISudokuModel> SolveInternal(IEnumerable<int> values)
+        private List<FoundValue> SolveInternal(IEnumerable<int> values)
         {
             // Insert the intial values.
             foreach (var cell in _cells)
             {
                 if (values.ElementAt(cell.Index) != 0)
                 {
-                    var foundValue = new GivenValue(cell.Index, values.ElementAt(cell.Index));
+                    var foundValue = CreateGivenValue(cell, values.ElementAt(cell.Index));
                     InsertValue(foundValue);
                 }
             }
 
+            _cells.ForEach(c => c.ResetAppliedTechniques());
+
             // The main loop for finding values in the Sudoku.
             while (_foundValues.Count < Constants.CELL_COUNT)
             {
-                AdvancedTechniqueManager.ApplyAdvancedTechniques(_cells, _sets);
-
-                var foundValue = FindValue();
-                if (foundValue == null)
+                var manager = new AdvancedTechniqueManager(_cells, _sets);
+                while (true)
                 {
-                    return null;
+                    var foundValue = FindValue();
+                    if (foundValue != null)
+                    {
+                        InsertValue(foundValue);
+                        _cells.ForEach(c => c.ResetAppliedTechniques());
+                        break;
+                    }
+                    else if (!manager.HasNext())
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        manager.ApplyNext();
+                    }
                 }
-                else
-                {
-                    InsertValue(foundValue);
-                }
+                
             }
 
             return _foundValues;
@@ -99,17 +105,17 @@ namespace Sudokungfu.SudokuSolver
         /// Check all sets to see if a value has been found.
         /// </summary>
         /// <returns>The found value.</returns>
-        private FoundValueBase FindValue()
+        private FoundValue FindValue()
         {
-            IEnumerable<FoundValueBase> foundValuesFromSets = _sets
+            IEnumerable<FoundValue> foundValuesFromSets = _sets
                    .SelectMany(s => s
                        .PossibleSpots
                        .Where(v => v.Value.Count() == 1)
-                       .Select(v => new FoundInSetValue(v.Value.First(), v.Key, s)));
+                       .Select(v => CreateFoundInSetValue(v.Value.First(), v.Key, s)));
 
-            IEnumerable<FoundValueBase> foundOnlyPossibleValues = _cells
+            IEnumerable<FoundValue> foundOnlyPossibleValues = _cells
                 .Where(c => c.PossibleValues.Count() == 1)
-                .Select(c => new OnlyPossibleValue(c, c.PossibleValues.First()));
+                .Select(c => CreateOnlyPossibleValue(c, c.PossibleValues.First()));
 
             var foundValues = foundValuesFromSets
                 .Concat(foundOnlyPossibleValues)
@@ -123,10 +129,49 @@ namespace Sudokungfu.SudokuSolver
         /// Inserts a value into a cell.
         /// </summary>
         /// <param name="value">Found value to insert into the Sudoku</param>
-        private void InsertValue(FoundValueBase value)
+        private void InsertValue(FoundValue value)
         {
-            _cells[value.Index].InsertValue(value);
+            value.Cell.InsertValue(value);
             _foundValues.Add(value);
+        }
+
+        private FoundValue CreateGivenValue(Cell cell, int value)
+        {
+            var foundValue = new FoundValue(cell, value);
+            foundValue.CellValueMap.Add(cell, value.ToEnumerable());
+            return foundValue;
+        }
+
+        private FoundValue CreateFoundInSetValue(Cell cell, int value, Set set)
+        {
+            var foundValue = new FoundValue(cell, value);
+            var techniques = set.FindMinTechniques(cell.ToEnumerable(), value);
+            foundValue.Techniques.AddRange(techniques);
+
+            foreach (var c in set.Cells)
+            {
+                foundValue.CellValueMap[c] = Enumerable.Empty<int>();
+            }
+
+            foundValue.CellValueMap[cell] = value.ToEnumerable();
+            foundValue.Description = $"Value found in {set.Type}.";
+
+            return foundValue;
+        }
+
+        private FoundValue CreateOnlyPossibleValue(Cell cell, int value)
+        {
+            var foundValue = new FoundValue(cell, value);
+
+            foundValue.Techniques.AddRange(Constants.ALL_VALUES.Except(value)
+                .Where(v => cell.Techniques.ContainsKey(v))
+                .Select(v => cell.Techniques[v].First()));
+
+            foundValue.CellValueMap[cell] = value.ToEnumerable();
+            foundValue.Complexity = foundValue.Complexity + 1;
+            foundValue.Description = "Only possible value for this cell.";
+
+            return foundValue;
         }
     }
 }

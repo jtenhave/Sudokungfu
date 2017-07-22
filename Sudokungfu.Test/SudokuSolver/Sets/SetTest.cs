@@ -5,9 +5,9 @@ using System.Linq;
 namespace Sudokungfu.Test.SudokuSolver.Sets
 {
     using Sudokungfu.Extensions;
-    using Sudokungfu.Model;
     using Sudokungfu.SudokuSolver;
     using Sudokungfu.SudokuSolver.Sets;
+    using Sudokungfu.SudokuSolver.Techniques;
 
     /// <summary>
     /// Test class for <see cref="Set"/>.
@@ -31,7 +31,7 @@ namespace Sudokungfu.Test.SudokuSolver.Sets
             var expectedValue = 6;
             var expectedIndexes = new List<int>() { 2, 5, 6, 8 };
 
-            EliminateValues(expectedValue, new TestModel(), 0, 1, 3, 4, 7);
+            EliminateValues(expectedValue, new Technique(), 0, 1, 3, 4, 7);
 
             AssertSetEqual(expectedIndexes, _row.PossibleSpots[expectedValue].Indexes());
         }
@@ -40,17 +40,17 @@ namespace Sudokungfu.Test.SudokuSolver.Sets
         public void TestFindMinTechniquesComplexityFilter()
         {
             var expectedValue = 6;
-            var expectedTechniqueA = new TestModel()
+            var expectedTechniqueA = new Technique()
             {
-                Complexity = 0,
-                AffectedIndexes = new int[] { 0, 1 }
+                Complexity = 0
             };
+            expectedTechniqueA.AffectedCells.AddRange(new Cell[] { _cells[0], _cells[1] });
 
-            var expectedTechniqueB = new TestModel()
+            var expectedTechniqueB = new Technique()
             {
-                Complexity = 1,
-                AffectedIndexes = new int[] { 0, 1 }
+                Complexity = 1
             };
+            expectedTechniqueB.AffectedCells.AddRange(new Cell[] { _cells[0], _cells[1] });
 
             EliminateValues(expectedValue, expectedTechniqueA, 0);
             EliminateValues(expectedValue, expectedTechniqueB, 1);
@@ -63,17 +63,17 @@ namespace Sudokungfu.Test.SudokuSolver.Sets
         public void TestFindMinTechniquesUniqueIndexFilter()
         {
             var expectedValue = 6;
-            var expectedTechniqueA = new TestModel()
+            var expectedTechniqueA = new Technique()
             {
-                Complexity = 0,
-                AffectedIndexes = new int[] { 0, 1 }
+                Complexity = 0
             };
+            expectedTechniqueA.AffectedCells.AddRange(new Cell[] { _cells[0], _cells[1] });
 
-            var expectedTechniqueB = new TestModel()
+            var expectedTechniqueB = new Technique()
             {
-                Complexity = 0,
-                AffectedIndexes = new int[] { 0, 1, 2 }
+                Complexity = 0
             };
+            expectedTechniqueB.AffectedCells.AddRange(new Cell[] { _cells[0], _cells[1], _cells[2] });
 
             EliminateValues(expectedValue, expectedTechniqueA, 0);
             EliminateValues(expectedValue, expectedTechniqueB, 1);
@@ -86,23 +86,23 @@ namespace Sudokungfu.Test.SudokuSolver.Sets
         public void TestFindMinTechniquesIndexCountFilter()
         {
             var expectedValue = 6;
-            var expectedTechniqueA = new TestModel()
+            var expectedTechniqueA = new Technique()
             {
-                Complexity = 0,
-                AffectedIndexes = new int[] { 0, 1 }
+                Complexity = 0
             };
+            expectedTechniqueA.AffectedCells.AddRange(new Cell[] { _cells[0], _cells[1] });
 
-            var expectedTechniqueB = new TestModel()
+            var expectedTechniqueB = new Technique()
             {
-                Complexity = 0,
-                AffectedIndexes = new int[] { 0, 1, 2 }
+                Complexity = 0
             };
+            expectedTechniqueB.AffectedCells.AddRange(new Cell[] { _cells[0], _cells[1], _cells[2] });
 
-            var expectedTechniqueC = new TestModel()
+            var expectedTechniqueC = new Technique()
             {
-                Complexity = 0,
-                AffectedIndexes = new int[] { 2 }
+                Complexity = 0
             };
+            expectedTechniqueC.AffectedCells.AddRange(new Cell[] { _cells[2] });
 
             EliminateValues(expectedValue, expectedTechniqueA, 0);
             EliminateValues(expectedValue, expectedTechniqueB, 1);
@@ -116,24 +116,25 @@ namespace Sudokungfu.Test.SudokuSolver.Sets
         public void TestFindMinTechniquesCoversAllIndexes()
         {
             var expectedValue = 6;
-            var expectedTechniqueA = new TestModel()
+            var expectedTechniqueA = new Technique()
             {
-                Complexity = 0,
-                AffectedIndexes = new int[] { 0, 1 }
+                Complexity = 0
             };
+            expectedTechniqueA.AffectedCells.AddRange(new Cell[] { _cells[0], _cells[1] });
 
-            var expectedTechniqueB = new TestModel()
+            var expectedTechniqueB = new Technique()
             {
-                Complexity = 1,
-                AffectedIndexes = new int[] { 0, 2, 3, 4, 5 }
+                Complexity = 1
             };
+            expectedTechniqueB.AffectedCells.AddRange(new Cell[] { _cells[0], _cells[2], _cells[3], _cells[4], _cells[5] });
 
-            var expectedTechniqueC = new TestModel()
+            var expectedTechniqueC = new Technique()
             {
-                Complexity = 2,
-                AffectedIndexes = new int[] { 1, 6, 7, 8 }
+                Complexity = 2
             };
-            var expectedTechniques = new TestModel[] { expectedTechniqueA, expectedTechniqueB, expectedTechniqueC };
+            expectedTechniqueC.AffectedCells.AddRange(new Cell[] { _cells[1], _cells[6], _cells[7], _cells[8] });
+
+            var expectedTechniques = new Technique[] { expectedTechniqueA, expectedTechniqueB, expectedTechniqueC };
 
             EliminateValues(expectedValue, expectedTechniqueA, 0);
             EliminateValues(expectedValue, expectedTechniqueB, 1);
@@ -147,17 +148,17 @@ namespace Sudokungfu.Test.SudokuSolver.Sets
         public void TestFindMinTechniquesIgnoresIndexesInProvidedCells()
         {
             var expectedValue = 6;
-            var expectedTechniqueA = new TestModel()
+            var expectedTechniqueA = new Technique()
             {
-                Complexity = 0,
-                AffectedIndexes = new int[] { 0 }
+                Complexity = 0
             };
+            expectedTechniqueA.AffectedCells.Add(_cells[0]);
 
-            var expectedTechniqueB = new TestModel()
+            var expectedTechniqueB = new Technique()
             {
-                Complexity = 1,
-                AffectedIndexes = new int[] { 0, 1, 2, 4 }
+                Complexity = 1
             };
+            expectedTechniqueB.AffectedCells.AddRange(new Cell[] { _cells[0], _cells[1], _cells[2], _cells[4] });
 
             EliminateValues(expectedValue, expectedTechniqueA, 0);
             EliminateValues(expectedValue, expectedTechniqueB, 1);
@@ -166,12 +167,13 @@ namespace Sudokungfu.Test.SudokuSolver.Sets
             AssertSetEqual(expectedTechniqueB.ToEnumerable(), actualTechqniues);
         }
 
-        private void EliminateValues(int value, ISudokuModel technique, params int[] indexes)
+        private void EliminateValues(int value, Technique technique, params int[] indexes)
         {
             var cells = _cells.ToList();
+            technique.Values.Add(value);
             foreach (int index in indexes)
             {
-                cells[index].EliminatePossibleValue(value, technique);
+                cells[index].ApplyTechnique(technique);
             }
         }
     }

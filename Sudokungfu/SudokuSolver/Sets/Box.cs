@@ -36,7 +36,7 @@ namespace Sudokungfu.SudokuSolver.Sets
             {
                 if (_boxRow == 0)
                 {
-                    _boxRow = Index / Constants.BOX_SIZE;
+                    _boxRow = _index / Constants.BOX_SIZE;
                 }
 
                 return _boxRow;
@@ -52,10 +52,21 @@ namespace Sudokungfu.SudokuSolver.Sets
             {
                 if (_boxCol == 0)
                 {
-                    _boxCol = Index % Constants.BOX_SIZE;
+                    _boxCol = _index % Constants.BOX_SIZE;
                 }
 
                 return _boxCol;
+            }
+        }
+
+        /// <summary>
+        /// Type of the set.
+        /// </summary>
+        public override string Type
+        {
+            get
+            {
+                return "box";
             }
         }
 

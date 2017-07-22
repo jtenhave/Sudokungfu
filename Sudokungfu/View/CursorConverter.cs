@@ -11,10 +11,10 @@ namespace Sudokungfu.View
     public class CursorConverter : IValueConverter
     {
         /// <summary>
-        /// Converts a bool a WPF cursor.
+        /// Converts a bool to a WPF cursor.
         /// </summary>
-        /// <param name="value">Cell index.</param>
-        /// <returns>Cell border string.</returns>
+        /// <param name="value">Whether a Sudoku is being solved.</param>
+        /// <returns>Cursor to display.</returns>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var isSolving = value as bool?;

@@ -9,12 +9,13 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
     using Sudokungfu.SudokuSolver;
     using Sudokungfu.SudokuSolver.Sets;
     using Sudokungfu.SudokuSolver.Techniques;
+    using Sudokungfu.SudokuSolver.Techniques.Advanced;
 
     /// <summary>
-    /// Test class for <see cref="ThreeSpotClosureTechnique"/>.
+    /// Test class for <see cref="ThreeSpotClosureFactory"/>.
     /// </summary>
     [TestClass]
-    public class ThreeSpotClosureTechniqueTest : BaseTest
+    public class ThreeSpotClosureFactoryTest : BaseTest
     {
         private List<Cell> _cells;
         private Box _box;
@@ -38,7 +39,8 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             var closureCells = SetupTripleDoubleClosure().ToList();
 
-            ThreeSpotClosureTechnique.Apply(_cells, new Set[] { _box });
+            var factory = new ThreeSpotClosureFactory(_cells, new Set[] { _box });
+            factory.Apply();
 
             foreach (var cell in closureCells)
             {
@@ -58,7 +60,8 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             var closureCells = SetupSingleTripleClosure();
 
-            ThreeSpotClosureTechnique.Apply(_cells, new Set[] { _box });
+            var factory = new ThreeSpotClosureFactory(_cells, new Set[] { _box });
+            factory.Apply();
 
             foreach (var cell in closureCells)
             {
@@ -74,20 +77,21 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             var closureCells = SetupSingleTripleClosure();
 
-            ThreeSpotClosureTechnique.Apply(_cells, new Set[] { _box });
+            var factory = new ThreeSpotClosureFactory(_cells, new Set[] { _box });
+            factory.Apply();
 
             ISudokuModel technique = null;
             foreach (var cell in closureCells)
             {
                 foreach (var value in Constants.ALL_VALUES.Except(new int[] { _valueA, _valueB, _valueC }))
                 {
-                    Assert.IsTrue(cell.EliminationTechniques.ContainsKey(value));
-                    Assert.AreEqual(1, cell.EliminationTechniques[value].Count());
+                    Assert.IsTrue(cell.Techniques.ContainsKey(value));
+                    Assert.AreEqual(1, cell.Techniques[value].Count());
 
-                    var cellTechnique = cell.EliminationTechniques[value].First();
+                    var cellTechnique = cell.Techniques[value].First();
                     technique = technique ?? cellTechnique;
 
-                    Assert.IsTrue(cellTechnique is ThreeSpotClosureTechnique);
+                    Assert.AreEqual(ThreeSpotClosureFactory.COMPLEXITY, technique.Complexity);
                     Assert.AreSame(technique, cellTechnique);
                 }
             }
@@ -98,29 +102,31 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         {
             var closureCells = SetupSingleTripleClosure();
 
-            ThreeSpotClosureTechnique.Apply(_cells, new Set[] { _box });
+            var factory = new ThreeSpotClosureFactory(_cells, new Set[] { _box });
+            factory.Apply();
 
-            var technique = _cells[0].EliminationTechniques[7].First();
-            Assert.IsTrue(technique is ThreeSpotClosureTechnique);
+            var technique = _cells[0].Techniques[7].First();
+            Assert.AreEqual(ThreeSpotClosureFactory.COMPLEXITY, technique.Complexity);
 
             AssertSetEqual(closureCells.Indexes(), technique.AffectedIndexes);
         }
 
         [TestMethod]
-        public void TestTechniqueProperties_IndexValueMap_TripleDoubleClosure()
+        public void TestTechniqueProperties_CellValueMap_TripleDoubleClosure()
         {
             var closureCells = SetupTripleDoubleClosure();
 
-            ThreeSpotClosureTechnique.Apply(_cells, new Set[] { _box });
+            var factory = new ThreeSpotClosureFactory(_cells, new Set[] { _box });
+            factory.Apply();
 
-            var technique = _cells[0].EliminationTechniques[7].First();
-            Assert.IsTrue(technique is ThreeSpotClosureTechnique);
+            var technique = _cells[0].Techniques[7].First();
+            Assert.AreEqual(ThreeSpotClosureFactory.COMPLEXITY, technique.Complexity);
 
             var expectedValues1 = new int[] { _valueB, _valueC };
             var expectedValues2 = new int[] { _valueA, _valueC };
             var expectedValues3 = new int[] { _valueA, _valueB };
 
-            AssertSetEqual(_box.Indexes, technique.IndexValueMap.Keys);
+            AssertSetEqual(_box.Cells, technique.CellValueMap.Keys);
 
             AssertSetEqual(expectedValues1, technique.IndexValueMap[0]);
             AssertSetEqual(expectedValues2, technique.IndexValueMap[1]);
@@ -128,37 +134,40 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         }
 
         [TestMethod]
-        public void TestTechniqueProperties_IndexValueMap_SingleTripleClosure()
+        public void TestTechniqueProperties_CellValueMap_SingleTripleClosure()
         {
             var closureCells = SetupSingleTripleClosure();
 
-            ThreeSpotClosureTechnique.Apply(_cells, new Set[] { _box });
+            var factory = new ThreeSpotClosureFactory(_cells, new Set[] { _box });
+            factory.Apply();
 
-            var technique = _cells[0].EliminationTechniques[7].First();
-            Assert.IsTrue(technique is ThreeSpotClosureTechnique);
+            var technique = _cells[0].Techniques[7].First();
+            Assert.AreEqual(ThreeSpotClosureFactory.COMPLEXITY, technique.Complexity);
 
             var expectedValues = new int[] { _valueA, _valueB, _valueC };
-            AssertSetEqual(_box.Indexes, technique.IndexValueMap.Keys);
+            AssertSetEqual(_box.Cells, technique.CellValueMap.Keys);
 
-            AssertSetEqual(expectedValues, technique.IndexValueMap[0]);
-            AssertSetEqual(expectedValues, technique.IndexValueMap[1]);
-            AssertSetEqual(expectedValues, technique.IndexValueMap[2]);
+            AssertSetEqual(expectedValues, technique.CellValueMap[_cells[0]]);
+            AssertSetEqual(expectedValues, technique.CellValueMap[_cells[1]]);
+            AssertSetEqual(expectedValues, technique.CellValueMap[_cells[2]]);
         }
 
         private IEnumerable<Cell> SetupTripleDoubleClosure()
         {
-            var closureCells = new Cell[] { _cells[0], _cells[1], _cells[2] };
-            var testTechnique = new TestTechnique(0);
-            foreach (var cell in _box.Cells.Except(closureCells))
-            {
-                cell.EliminatePossibleValue(_valueA, testTechnique);
-                cell.EliminatePossibleValue(_valueB, testTechnique);
-                cell.EliminatePossibleValue(_valueC, testTechnique);
-            }
+            var closureCells = SetupSingleTripleClosure().ToList();
+            var testTechniqueA = new Technique();
+            var testTechniqueB = new Technique();
+            var testTechniqueC = new Technique();
+            testTechniqueA.Values.Add(_valueA);
+            testTechniqueB.Values.Add(_valueB);
+            testTechniqueC.Values.Add(_valueC);
+            testTechniqueA.Complexity = int.MaxValue;
+            testTechniqueB.Complexity = int.MaxValue;
+            testTechniqueC.Complexity = int.MaxValue;
 
-            _cells[0].EliminatePossibleValue(_valueA, testTechnique);
-            _cells[1].EliminatePossibleValue(_valueB, testTechnique);
-            _cells[2].EliminatePossibleValue(_valueC, testTechnique);
+            closureCells[0].ApplyTechnique(testTechniqueA);
+            closureCells[1].ApplyTechnique(testTechniqueB);
+            closureCells[2].ApplyTechnique(testTechniqueC);
 
             return closureCells;
         }
@@ -166,12 +175,14 @@ namespace Sudokungfu.Test.SudokuSolver.Techniques
         private IEnumerable<Cell> SetupSingleTripleClosure()
         {
             var closureCells = new Cell[] { _cells[0], _cells[1], _cells[2] };
-            var testTechnique = new TestTechnique(0);
+            var testTechnique = new Technique();
+            testTechnique.Values.Add(_valueA);
+            testTechnique.Values.Add(_valueB);
+            testTechnique.Values.Add(_valueC);
+            testTechnique.Complexity = int.MaxValue;
             foreach (var cell in _box.Cells.Except(closureCells))
             {
-                cell.EliminatePossibleValue(_valueA, testTechnique);
-                cell.EliminatePossibleValue(_valueB, testTechnique);
-                cell.EliminatePossibleValue(_valueC, testTechnique);
+                cell.ApplyTechnique(testTechnique);
             }
 
             return closureCells;

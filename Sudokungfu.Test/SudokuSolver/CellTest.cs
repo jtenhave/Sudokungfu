@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Sudokungfu.Test.SudokuSolver
@@ -8,6 +7,7 @@ namespace Sudokungfu.Test.SudokuSolver
     using Sudokungfu.Extensions;
     using Sudokungfu.SudokuSolver;
     using Sudokungfu.SudokuSolver.Sets;
+    using Sudokungfu.SudokuSolver.Techniques;
 
     /// <summary>
     /// Test class for <see cref="Cell"/>.
@@ -16,7 +16,7 @@ namespace Sudokungfu.Test.SudokuSolver
     public class CellTest : BaseTest
     {
         [TestMethod]
-        public void TestInitializePossibleValues()
+        public void TestInitialPossibleValues()
         {
             var expectedValues = Constants.ALL_VALUES;
 
@@ -26,152 +26,157 @@ namespace Sudokungfu.Test.SudokuSolver
         }
 
         [TestMethod]
-        public void TestInitializeEliminationTechniques()
-        {
-            var expectedValues = Constants.ALL_VALUES;
-
-            var cell = new Cell(45);
-
-            AssertSetEqual(expectedValues, cell.EliminationTechniques.Keys);
-            foreach (var value in expectedValues)
-            {
-                Assert.IsFalse(cell.EliminationTechniques[value].Any());
-            }
-        }
-
-        [TestMethod]
-        public void TestEliminatePossibleValue()
+        public void TestApplyTechnique()
         {
             var expectedValue = 3;
             var expectedPossibleValues = Constants.ALL_VALUES.Except(expectedValue);
-            var expectedTechnique = new TestModel();
+            var expectedTechnique = new Technique();
+            expectedTechnique.Values.Add(expectedValue);
 
             var cell = new Cell(0);
-            cell.EliminatePossibleValue(expectedValue, expectedTechnique);
+            cell.ApplyTechnique(expectedTechnique);
 
             Assert.IsTrue(expectedPossibleValues.SetEqual(cell.PossibleValues));
-            foreach (var value in expectedPossibleValues)
-            {
-                Assert.IsFalse(cell.EliminationTechniques[value].Any());
-            }
-
-            Assert.AreEqual(1, cell.EliminationTechniques[expectedValue].Count());
-            Assert.AreEqual(expectedTechnique, cell.EliminationTechniques[expectedValue].First());
-
+            Assert.IsTrue(cell.Techniques.ContainsKey(expectedValue));
+            Assert.AreEqual(expectedTechnique, cell.Techniques[expectedValue].FirstOrDefault());
         }
 
         [TestMethod]
-        public void TestHigherComplexityEliminationTechniqueIgnored()
+        public void TestAppliedTechniquesRemovesExistingHigherComplexity()
         {
             var expectedValue = 3;
-            var expectedTechniqueA = new TestModel()
-            {
-                Complexity = 0
-            };
-
-            var expectedTechniqueB = new TestModel()
+            var expectedTechniqueA = new Technique()
             {
                 Complexity = 1
             };
+            expectedTechniqueA.Values.Add(expectedValue);
 
-            var cell = new Cell(0);
-            cell.EliminatePossibleValue(expectedValue, expectedTechniqueA);
-            cell.EliminatePossibleValue(expectedValue, expectedTechniqueB);
-
-            Assert.AreEqual(1, cell.EliminationTechniques[expectedValue].Count());
-            Assert.AreEqual(expectedTechniqueA, cell.EliminationTechniques[expectedValue].First());
-        }
-
-        [TestMethod]
-        public void TestLowerComplexityEliminationTechniqueOverwrites()
-        {
-            var expectedValue = 3;
-            var expectedTechniqueA = new TestModel()
+            var expectedTechniqueB = new Technique()
             {
                 Complexity = 0
             };
+            expectedTechniqueB.Values.Add(expectedValue);
 
-            var expectedTechniqueB = new TestModel()
+            var cell = new Cell(0);
+            cell.ApplyTechnique(expectedTechniqueA);
+            Assert.IsTrue(cell.Techniques.ContainsKey(expectedValue));
+            Assert.AreEqual(1, cell.Techniques[expectedValue].Count());
+            Assert.AreEqual(expectedTechniqueA, cell.Techniques[expectedValue].First());
+
+            cell.ApplyTechnique(expectedTechniqueB);
+            Assert.AreEqual(1, cell.Techniques[expectedValue].Count());
+            Assert.AreEqual(expectedTechniqueB, cell.Techniques[expectedValue].First());
+        }
+
+        [TestMethod]
+        public void TestAppliedTechniquesIgnoresHigherComplexity()
+        {
+            var expectedValue = 3;
+            var expectedTechniqueA = new Technique()
             {
                 Complexity = 1
             };
+            expectedTechniqueA.Values.Add(expectedValue);
+
+            var expectedTechniqueB = new Technique()
+            {
+                Complexity = 0
+            };
+            expectedTechniqueB.Values.Add(expectedValue);
 
             var cell = new Cell(0);
-            cell.EliminatePossibleValue(expectedValue, expectedTechniqueB);
-            cell.EliminatePossibleValue(expectedValue, expectedTechniqueA);
-
-            Assert.AreEqual(1, cell.EliminationTechniques[expectedValue].Count());
-            Assert.AreEqual(expectedTechniqueA, cell.EliminationTechniques[expectedValue].First());
+            cell.ApplyTechnique(expectedTechniqueB);
+            cell.ApplyTechnique(expectedTechniqueA);
+            Assert.IsTrue(cell.Techniques.ContainsKey(expectedValue));
+            Assert.AreEqual(1, cell.Techniques[expectedValue].Count());
+            Assert.AreEqual(expectedTechniqueB, cell.Techniques[expectedValue].First());
         }
 
         [TestMethod]
-        public void TestEqualComplexityEliminationTechniqueIsAdded()
+        public void TestAppliedTechniquesAddsSamesComplexity()
         {
             var expectedValue = 3;
-            var expectedTechniqueA = new TestModel()
+            var expectedTechniqueA = new Technique()
             {
                 Complexity = 0
             };
+            expectedTechniqueA.Values.Add(expectedValue);
 
-            var expectedTechniqueB = new TestModel()
+            var expectedTechniqueB = new Technique()
             {
                 Complexity = 0
             };
+            expectedTechniqueB.Values.Add(expectedValue);
 
             var cell = new Cell(0);
-            cell.EliminatePossibleValue(expectedValue, expectedTechniqueA);
-            cell.EliminatePossibleValue(expectedValue, expectedTechniqueB);
-
-            Assert.AreEqual(2, cell.EliminationTechniques[expectedValue].Count());
-            Assert.AreEqual(expectedTechniqueA, cell.EliminationTechniques[expectedValue].First());
-            Assert.AreEqual(expectedTechniqueB, cell.EliminationTechniques[expectedValue].Last());
+            cell.ApplyTechnique(expectedTechniqueB);
+            cell.ApplyTechnique(expectedTechniqueA);
+            Assert.IsTrue(cell.Techniques.ContainsKey(expectedValue));
+            Assert.AreEqual(2, cell.Techniques[expectedValue].Count());
+            Assert.AreEqual(expectedTechniqueB, cell.Techniques[expectedValue].First());
+            Assert.AreEqual(expectedTechniqueA, cell.Techniques[expectedValue].Last());
         }
 
         [TestMethod]
-        public void TestEliminationTechniqueNotAddedAfterCellFilled()
+        public void TestResetAppliedTechniques()
         {
             var expectedValue = 3;
-            var expectedTechniqueA = new TestModel()
-            {
-                Complexity = 1
-            };
-
-            var expectedTechniqueB = new TestModel()
+            var expectedTechnique = new Technique()
             {
                 Complexity = 0
             };
-         
+            expectedTechnique.Values.Add(expectedValue);
+
             var cell = new Cell(0);
-            cell.EliminatePossibleValue(expectedValue, expectedTechniqueA);
-            cell.InsertValue(new TestFoundValue(0, expectedValue));
+            cell.ApplyTechnique(expectedTechnique);
 
-            cell.EliminatePossibleValue(expectedValue, expectedTechniqueB);
+            Assert.IsFalse(cell.PossibleValues.Contains(expectedValue));
+            Assert.IsTrue(cell.Techniques.ContainsKey(expectedValue));
 
-            Assert.AreEqual(1, cell.EliminationTechniques[expectedValue].Count());
-            Assert.AreEqual(expectedTechniqueA, cell.EliminationTechniques[expectedValue].First());
+            cell.ResetAppliedTechniques();
+
+            Assert.IsTrue(cell.PossibleValues.Contains(expectedValue));
+            Assert.IsFalse(cell.Techniques.ContainsKey(expectedValue));
         }
 
         [TestMethod]
-        public void TestInsertValueEliminatesAllOtherValues()
+        public void TestInsertResetsAppliedTechniques()
+        {
+            var expectedValue = 3;
+            var expectedTechnique = new Technique()
+            {
+                Complexity = 0
+            };
+            expectedTechnique.Values.Add(expectedValue);
+
+            var cell = new Cell(0);
+            cell.ApplyTechnique(expectedTechnique);
+            cell.InsertValue(new FoundValue(cell, 5));
+            
+            Assert.IsFalse(cell.Techniques[expectedValue].Contains(expectedTechnique));
+        }
+
+        [TestMethod]
+        public void TestInsertEliminatesAllOtherValues()
         {
             var expectedValue = 3;
             var expectedIndex = 23;
-            var expectedFoundValue = new TestFoundValue(expectedIndex, expectedValue);
-
             var cell = new Cell(expectedIndex);
+            var expectedFoundValue = new FoundValue(cell, expectedValue);
+
             cell.InsertValue(expectedFoundValue);
 
             ISudokuModel technique = null;
             foreach (var value in Constants.ALL_VALUES.Except(expectedValue))
             {
-                Assert.AreEqual(1, cell.EliminationTechniques[value].Count());
-                technique = technique ?? cell.EliminationTechniques[value].First();
-                Assert.AreSame(technique, cell.EliminationTechniques[value].First());
+                Assert.AreEqual(1, cell.Techniques[value].Count());
+                technique = technique ?? cell.Techniques[value].First();
+                Assert.AreSame(technique, cell.Techniques[value].First());
             } 
         }
 
         [TestMethod]
-        public void TestInsertValueEliminatesAllOtherValuesInMemberSets()
+        public void TestInsertEliminatesOtherValuesInMemberSets()
         {
             var expectedValue = 4;
             var expectedValues = Constants.ALL_VALUES.Except(expectedValue);
@@ -181,57 +186,122 @@ namespace Sudokungfu.Test.SudokuSolver
             var box = new Box(cells, 0);
 
             var expectedCell = cells.First();
-            expectedCell.InsertValue(new TestFoundValue(expectedCell.Index, expectedValue));
+            expectedCell.InsertValue(new FoundValue(expectedCell, expectedValue));
 
             ISudokuModel rowTechnique = null;
             foreach (var cell in row.Cells.Except(expectedCell).Reverse())
             {
+                cell.ResetAppliedTechniques();
+
                 Assert.IsTrue(expectedValues.SetEqual(cell.PossibleValues));
-                rowTechnique = rowTechnique ?? cell.EliminationTechniques[expectedValue].First();
-                Assert.IsTrue(cell.EliminationTechniques[expectedValue].Contains(rowTechnique));
+                rowTechnique = rowTechnique ?? cell.Techniques[expectedValue].First();
+                Assert.IsTrue(cell.Techniques[expectedValue].Contains(rowTechnique));
             }
 
             ISudokuModel colTechnique = null;
             foreach (var cell in col.Cells.Except(expectedCell).Reverse())
             {
+                cell.ResetAppliedTechniques();
+
                 Assert.IsTrue(expectedValues.SetEqual(cell.PossibleValues));
-                colTechnique = colTechnique ?? cell.EliminationTechniques[expectedValue].First();
-                Assert.IsTrue(cell.EliminationTechniques[expectedValue].Contains(colTechnique));
+                colTechnique = colTechnique ?? cell.Techniques[expectedValue].First();
+                Assert.IsTrue(cell.Techniques[expectedValue].Contains(colTechnique));
             }
 
             ISudokuModel boxTechnique = null;
             foreach (var cell in box.Cells.Except(expectedCell).Reverse())
             {
+                cell.ResetAppliedTechniques();
+
                 Assert.IsTrue(expectedValues.SetEqual(cell.PossibleValues));
-                boxTechnique = boxTechnique ?? cell.EliminationTechniques[expectedValue].First();
-                Assert.IsTrue(cell.EliminationTechniques[expectedValue].Contains(boxTechnique));
+                boxTechnique = boxTechnique ?? cell.Techniques[expectedValue].First();
+                Assert.IsTrue(cell.Techniques[expectedValue].Contains(boxTechnique));
             }
         }
 
         [TestMethod]
-        public void TestFindMinTechniquesEmpty()
+        public void TestOccupiedClickableModel()
         {
-            var cell = new Cell(0);
+            var expectedIndex = 0;
+            var cell = new Cell(expectedIndex);
+            var expectedClickableModel = new FoundValue(cell, 4);
+            cell.InsertValue(expectedClickableModel);
 
-            Assert.IsFalse(cell.FindMinTechniques(4).Any());
+            var technique = cell.Techniques[5].First();
+            Assert.AreSame(expectedClickableModel, technique.ClickableModel);
         }
 
         [TestMethod]
-        public void TestFindMinTechniques()
+        public void TestOccupiedIndexValueMap()
+        {
+            var expectedIndex = 34;
+            var expectedValue = 4;
+
+            var cell = new Cell(expectedIndex);
+            cell.InsertValue(new FoundValue(cell, expectedValue));
+
+            var technique = cell.Techniques[5].First();
+            Assert.AreEqual(1, technique.IndexValueMap.Count());
+            Assert.IsTrue(technique.IndexValueMap.ContainsKey(expectedIndex));
+            Assert.AreEqual(1, technique.IndexValueMap[expectedIndex].Count());
+            Assert.AreEqual(expectedValue, technique.IndexValueMap[expectedIndex].First());
+        }
+
+        [TestMethod]
+        public void TestOccupiedAffectedIndexes()
+        {
+            var expectedIndex = 34;
+
+            var cell = new Cell(expectedIndex);
+            cell.InsertValue(new FoundValue(cell, 4));
+
+            var technique = cell.Techniques[5].First();
+            Assert.AreEqual(1, technique.AffectedIndexes.Count());
+            Assert.IsTrue(technique.AffectedIndexes.Contains(expectedIndex));
+        }
+
+        [TestMethod]
+        public void TestSetClickableModel()
         {
             var expectedValue = 4;
-            var cell = new Cell(0);
-            var expectedTechniques = new List<TestModel>();
+            var cells = GetAllCells();
+            var box = new Box(cells, 0);
+            var cell = cells.First();
+            cell.Sets.Add(box);
 
-            foreach (var value in Constants.ALL_VALUES.Except(expectedValue))
+            var expectedClickableModel = new FoundValue(cell, expectedValue);
+            cell.InsertValue(expectedClickableModel);
+
+            var memberCell = cells.ElementAt(1);
+            memberCell.ResetAppliedTechniques();
+            var technique = memberCell.Techniques[expectedValue].First();
+
+            Assert.AreSame(expectedClickableModel, technique.ClickableModel);
+        }
+
+        [TestMethod]
+        public void TestSetCellValueMap()
+        {
+            var expectedValue = 4;
+            var cells = GetAllCells();
+            var box = new Box(cells, 0);
+            var cell = cells.First();
+            cell.Sets.Add(box);
+
+            var expectedClickableModel = new FoundValue(cell, expectedValue);
+            cell.InsertValue(expectedClickableModel);
+
+            var memberCell = cells.ElementAt(1);
+            memberCell.ResetAppliedTechniques();
+            var technique = memberCell.Techniques[expectedValue].First();
+
+            AssertSetEqual(box.Cells, technique.CellValueMap.Keys);
+            foreach (var key in technique.CellValueMap.Keys.Except(cell))
             {
-                var technique = new TestModel();
-                expectedTechniques.Add(technique);
-                cell.EliminatePossibleValue(value, technique);
+                Assert.AreEqual(0, technique.CellValueMap[key].Count());
             }
-
-
-            AssertSetEqual(expectedTechniques, cell.FindMinTechniques(expectedValue));
+            Assert.AreEqual(1, technique.CellValueMap[cell].Count());
+            Assert.AreEqual(expectedValue, technique.CellValueMap[cell].First());
         }
     }
 }
