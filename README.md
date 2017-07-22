@@ -7,19 +7,29 @@ Sudoku is addicting logic puzzle that requires you to fill out a 9 x 9 *cell* gr
 ### How does it work?
 Enter your unsolved Sudoku into Sudokungfu and hit *Enter*. 
 
+![alt text](https://github.com/jtenhave/Sudokungfu/blob/master/images/Solved.png "Solved")
+
 Once the Sudoku is solved, you can double click on any cell to see the details of how the value in that cell was found.
+
+![alt text](https://github.com/jtenhave/Sudokungfu/blob/master/images/Details.png "Details")
 
 ### Advanced Techniques
 The logic that comes into play when solving a difficult Suokdu can get quite complicated. The following advanced logic techniques are used by Sudokungfu to help solve difficult Sudokus.
 
 #### Two/Three Spot Overlap Technique
-If there is only two/three possible places for a value in set A, and those places overlap set B, then the value cannot go anywhere else in set B. 
+If there is only two/three possible places for a value in set A, and those places overlap set B, then the value cannot go anywhere else in set B. Example: 6 can only go in the cells where indicated for the box in the upper left corner. Therefore 6 cannot go anywhere else in the same row.
+
+![alt text](https://github.com/jtenhave/Sudokungfu/blob/master/images/Overlap.png "Overlap")
 
 #### Two/Three Spot Closure Technqiue
-Within a set, if n values can only go in the same n cells, then nothing else can go in the n cells except one of the n values.
+Within a set, if n values can only go in the same n cells, then nothing else can go in the n cells except one of the n values. Example: There are only two cells where 5 and 7 can go in the column below. Therefore nothing else can go in those cells.
+
+![alt text](https://github.com/jtenhave/Sudokungfu/blob/master/images/Closure.png "Closure")
 
 #### Possible Spot Shadow Technique
-If there is only two possible places for a value in set A and in set B AND the two possible places are in the same two rows or the same two columns, then the value can go nowhere else in the two rows or the two columns.
+If there are only two possible cells for a value in set A and in set B AND the two possible cells are in the same two rows or the same two columns, then the value cannot go anywhere else in the two rows or the two columns. Example: The possible cells where 7 can go in the two rows below line up column-wise. Therefore 7 cannot go anywhere else in either column.
+
+![alt text](https://github.com/jtenhave/Sudokungfu/blob/master/images/Shadow.png "Shadow")
 
 
 Created by Jeff ten Have 2017.
