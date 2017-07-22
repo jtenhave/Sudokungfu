@@ -34,7 +34,7 @@ namespace Sudokungfu.SudokuSolver.Techniques.Advanced
                     var value = possibleSpots.Key;
                     var cellsA = possibleSpots.Value;
 
-                    foreach (var shadowSet in _sets.Except(sourceSet))
+                    foreach (var shadowSet in _sets.Where(s => !s.Cells.Any(c => sourceSet.Cells.Contains(c))))
                     {
                         if (!shadowSet.PossibleSpots.ContainsKey(value))
                         {
@@ -56,22 +56,22 @@ namespace Sudokungfu.SudokuSolver.Techniques.Advanced
                             columns.Add(Column(cell));
                         }
 
-                        IEnumerable<Cell> affectedCells = null;
+                        var affectedCells = new List<Cell>();
                         if (rows.Distinct().Count() == 2)
                         {
-                            affectedCells = _cells.Where(c => rows.Contains(Row(c)))
+                            affectedCells.AddRange(_cells.Where(c => rows.Contains(Row(c)))
                                 .Except(sourceSet.Cells)
-                                .Except(shadowSet.Cells);
+                                .Except(shadowSet.Cells));
                         }
 
                         if (columns.Distinct().Count() == 2)
                         {
-                            affectedCells = _cells.Where(c => columns.Contains(Column(c)))
+                            affectedCells.AddRange(_cells.Where(c => columns.Contains(Column(c)))
                                 .Except(sourceSet.Cells)
-                                .Except(shadowSet.Cells);
+                                .Except(shadowSet.Cells));
                         }
 
-                        if (affectedCells != null && !techniques.Any(t => t.AffectedCells.SetEqual(affectedCells)))
+                        if (affectedCells.Any() && !techniques.Any(t => t.AffectedCells.SetEqual(affectedCells)))
                         {
                             var technique = new Technique();
                             technique.Techniques.AddRange(sourceSet.FindMinTechniques(cellsA, value));
