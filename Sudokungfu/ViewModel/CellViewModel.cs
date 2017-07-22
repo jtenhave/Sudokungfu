@@ -37,9 +37,9 @@ namespace Sudokungfu.ViewModel
     /// </remarks>
     public class CellViewModel : INotifyPropertyChanged
     {
-        private const int ONE_VALUE_SIZE_DEFAULT = 36;
-        private const int TWO_VALUE_SIZE_DEFAULT = 26;
-        private const int THREE_VALUE_SIZE_DEFAULT = 16;
+        public const int ONE_VALUE_SIZE_DEFAULT = 36;
+        public const int TWO_VALUE_SIZE_DEFAULT = 26;
+        public const int THREE_VALUE_SIZE_DEFAULT = 16;
 
         private string _value;
         private Brush _background;

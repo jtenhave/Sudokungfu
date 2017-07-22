@@ -29,6 +29,14 @@ namespace Sudokungfu.ViewModel
         /// </summary>
         public async void Execute(object parameter)
         {
+            await ExecuteAsync();
+        }
+
+        /// <summary>
+        /// Asynchronously executes the action associated with the command.
+        /// </summary>
+        public async Task ExecuteAsync()
+        {
             await _execute();
         }
 

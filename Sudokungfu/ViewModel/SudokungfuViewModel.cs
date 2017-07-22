@@ -16,13 +16,6 @@ namespace Sudokungfu.ViewModel
     /// </summary>
     public class SudokungfuViewModel : INotifyPropertyChanged
     {
-        private readonly Dictionary<int, int> FONT_SIZE_MAP = new Dictionary<int, int>()
-        {
-            { 1, 36 },
-            { 2, 26 },
-            { 3, 16 },
-        };
-
         private string _description = "";
         private int _shownValues;
         private int _givenValues;
@@ -64,9 +57,6 @@ namespace Sudokungfu.ViewModel
                 {
                     _isSolving = value;
                     OnPropertyChanged(nameof(IsSolving));
-
-                    _enterCommand.CanExecuteValue = !value;
-                    _clearCommand.CanExecuteValue = !value;
                 }
             }
         }
@@ -225,11 +215,26 @@ namespace Sudokungfu.ViewModel
         private async Task EnterAction()
         {
             IsSolving = true;
-            List<FoundValue> sudoku = null;
+            _enterCommand.CanExecuteValue = false;
+            _clearCommand.CanExecuteValue = false;
 
             try
             {
-                sudoku = await Solver.Solve(Cells.Select(c => c.ValueAsInt));
+                var sudoku = await Solver.Solve(Cells.Select(c => c.ValueAsInt));
+                if (sudoku == null)
+                {
+                    _invalid();
+                    _enterCommand.CanExecuteValue = true;
+                    return;
+                }
+
+                _nextCommand.CanExecuteValue = true;
+                _solveCommand.CanExecuteValue = true;
+
+                _sudoku = sudoku;
+                _givenValues = _shownValues = _sudoku.Count(v => !v.Details.Any());
+
+                DrawSudoku();
             }
             catch (Exception)
             {
@@ -239,22 +244,8 @@ namespace Sudokungfu.ViewModel
             finally
             {
                 IsSolving = false;
+                _clearCommand.CanExecuteValue = true;
             }
-
-            if (sudoku == null)
-            {
-                _invalid();
-                return;
-            }
-
-            _enterCommand.CanExecuteValue = false;
-            _nextCommand.CanExecuteValue = true;
-            _solveCommand.CanExecuteValue = true;
-
-            _sudoku = sudoku;
-            _givenValues = _shownValues = _sudoku.Count(v => !v.Details.Any());
-
-            DrawSudoku();
         }
 
         /// <summary>
@@ -430,10 +421,18 @@ namespace Sudokungfu.ViewModel
         {
             if (valueCount == 1 && hasMultipleCells)
             {
-                return FONT_SIZE_MAP[2];
+                return CellViewModel.TWO_VALUE_SIZE_DEFAULT;
             }
 
-            return FONT_SIZE_MAP[valueCount];
+            switch (valueCount)
+            {
+                case 2:
+                    return CellViewModel.TWO_VALUE_SIZE_DEFAULT;
+                case 3:
+                    return CellViewModel.THREE_VALUE_SIZE_DEFAULT;
+                default:
+                    return CellViewModel.ONE_VALUE_SIZE_DEFAULT;
+            }
         }
 
         private void OnPropertyChanged(string propertyName)
