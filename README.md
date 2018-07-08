@@ -1,5 +1,5 @@
 # Sudokungfu
-Solves Sudoku puzzles. Shows details of how each value was found.
+Solves Sudoku puzzles and outlines the techniques used to solve them.
 
 ### Background
 Sudoku is addicting logic puzzle that requires you to fill out a 9 x 9 *cell* grid with numbers. The grid is broken down into three types of *sets*: nine rows, nine columns, and nine 3 x 3 boxes. Each set must contain the values 1 - 9 exactly once. The official rules and some variants can be found here: https://en.wikipedia.org/wiki/Sudoku. The purpose of Sudokungfu is to solve Sudokus and expose the logic used to solve them in a human readable way.
